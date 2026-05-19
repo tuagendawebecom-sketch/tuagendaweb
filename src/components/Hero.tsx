@@ -1,6 +1,6 @@
 import { ArrowDown, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { hero, whatsappMessages } from "@/data/site";
+import { hero, trustSignals, whatsappMessages } from "@/data/site";
 import { createWhatsAppHref } from "@/lib/whatsapp";
 import { DemoMockup } from "./DemoMockup";
 import { WhatsAppButton } from "./WhatsAppButton";
@@ -25,6 +25,14 @@ export function Hero() {
             <Link className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-teal px-5 py-3 text-sm font-bold text-teal transition hover:bg-mint sm:w-auto" href="#web-completa">
               {hero.secondaryCta} <ArrowDown size={18} />
             </Link>
+          </div>
+          <div className="mt-7 grid gap-2 sm:grid-cols-2">
+            {trustSignals.map((signal) => (
+              <p className="flex items-start gap-2 rounded-2xl bg-paper/80 px-4 py-3 text-sm font-semibold leading-5 text-ink/68 shadow-soft" key={signal}>
+                <CheckCircle2 className="mt-0.5 shrink-0 text-action" size={17} />
+                {signal}
+              </p>
+            ))}
           </div>
         </div>
         <DemoMockup desktopSrc="/assets/hero/barberia-hero-desktop.png" mobileSrc="/assets/hero/barberia-hero-mobile.png" title="TuAgendaWeb" />

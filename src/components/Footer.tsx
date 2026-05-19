@@ -42,8 +42,8 @@ export function Footer() {
             <Link href={socialLinks.instagram}>Instagram</Link>
             <Link href={socialLinks.facebook}>Facebook</Link>
             <Link href={socialLinks.email}>{brandEmail}</Link>
+            <Link href="#consultar">Consultar</Link>
             <Link href="/login">Acceso clientes</Link>
-            <Link href="/superadmin">Super Admin</Link>
             <span>Tucumán, Argentina.</span>
           </div>
         </div>

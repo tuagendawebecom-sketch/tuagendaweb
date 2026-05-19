@@ -32,7 +32,9 @@ export const trackingEvents = {
   demoClick: "demo_click",
   pricingCtaClick: "pricing_cta_click",
   finalCtaClick: "final_cta_click",
-  emailFormSubmit: "email_form_submit"
+  emailFormSubmit: "email_form_submit",
+  leadFormOpen: "lead_form_open",
+  planCardClick: "plan_card_click"
 } as const;
 
 export const whatsappMessages = {
@@ -60,7 +62,8 @@ export const navigation = [
   { label: "Web Completa", href: "#web-completa" },
   { label: "Demos", href: "#demos" },
   { label: "Precios", href: "#precios" },
-  { label: "FAQ", href: "#faq" }
+  { label: "FAQ", href: "#faq" },
+  { label: "Consultar", href: "#consultar" }
 ];
 
 export const hero = {
@@ -73,6 +76,22 @@ export const hero = {
   price: "Agenda desde $15.000/mes",
   primaryCta: "Quiero una agenda online",
   secondaryCta: "Quiero una web completa"
+};
+
+export const trustSignals = [
+  "Dominio tuagendaweb.com.ar listo para campañas",
+  "Pensado para negocios de Tucumán y Argentina",
+  "WhatsApp sigue siendo tu canal de venta",
+  "Agenda online activa desde el celular"
+] as const;
+
+export const leadForm = {
+  eyebrow: "Consulta guiada",
+  title: "Contame qué negocio tenés y te digo cuál plan conviene.",
+  text: "Si preferís no escribir todo por WhatsApp, dejá tus datos y te respondo con una recomendación concreta para tu caso.",
+  submit: "Enviar consulta",
+  success: "Consulta enviada. Te voy a responder por WhatsApp o email.",
+  fallback: "Si el formulario no está disponible, escribime directo por WhatsApp."
 };
 
 export const plans = [

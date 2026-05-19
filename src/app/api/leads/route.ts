@@ -1,5 +1,15 @@
 import { NextResponse } from "next/server";
 import { createLandingLead } from "@/lib/firebase/business";
+import type { LeadInterestPlan } from "@/types/tenant";
+
+const allowedPlans = new Set<LeadInterestPlan>(["agenda_simple", "agenda_pro", "web_completa", "not_sure"]);
+
+function clean(value: unknown, maxLength: number) {
+  return String(value ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, maxLength);
+}
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -8,14 +18,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "missing_required_fields" }, { status: 400 });
   }
 
+  const interestedPlan = clean(body.interestedPlan, 32) as LeadInterestPlan;
+
+  if (!allowedPlans.has(interestedPlan)) {
+    return NextResponse.json({ ok: false, error: "invalid_plan" }, { status: 400 });
+  }
+
+  const name = clean(body.name, 80);
+  const phone = clean(body.phone, 40);
+  const businessName = clean(body.businessName, 100);
+  const businessType = clean(body.businessType, 80);
+
+  if (name.length < 2 || phone.length < 6 || businessName.length < 2 || businessType.length < 2) {
+    return NextResponse.json({ ok: false, error: "invalid_fields" }, { status: 400 });
+  }
+
   const result = await createLandingLead({
-    name: String(body.name),
-    phone: String(body.phone),
-    businessName: String(body.businessName),
-    businessType: String(body.businessType),
-    interestedPlan: body.interestedPlan,
-    message: body.message ? String(body.message) : undefined,
-    source: body.source ? String(body.source) : "landing"
+    name,
+    phone,
+    businessName,
+    businessType,
+    interestedPlan,
+    message: body.message ? clean(body.message, 600) : undefined,
+    source: body.source ? clean(body.source, 60) : "landing"
   });
 
   if (!result.ok) {

@@ -120,6 +120,9 @@ export function PlanSelector() {
               eventName={trackingEvents.pricingCtaClick}
               variant={plan.featured ? "primary" : "dark"}
             />
+            <Link className={`mt-3 text-center text-xs font-bold ${plan.featured ? "text-cream/70 hover:text-cream" : "text-ink/50 hover:text-teal"}`} href={plan.href}>
+              Ver detalles del plan
+            </Link>
           </motion.article>
         ))}
       </div>
@@ -130,10 +133,10 @@ export function PlanSelector() {
 export function AgendaSimpleSection() {
   return (
     <Section id="agenda-simple" eyebrow="Agenda Simple" title="Tu negocio puede tener su propio link de reservas." tone="mint">
-      <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-        <motion.div className="rounded-[1.5rem] border border-ink/10 bg-paper p-7 shadow-soft" {...reveal}>
+      <div className="grid min-w-0 gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <motion.div className="min-w-0 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft sm:p-7" {...reveal}>
           <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-action">Ejemplo de link</p>
-          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-cream p-4 font-display text-lg font-extrabold text-teal">
+          <div className="mt-4 flex min-w-0 flex-wrap items-center gap-3 break-all rounded-2xl bg-cream p-4 font-display text-base font-extrabold text-teal sm:text-lg">
             tuagendaweb.com.ar/agenda/victorias-estetica
             <Copy size={18} />
           </div>
@@ -142,11 +145,11 @@ export function AgendaSimpleSection() {
           </p>
           <WhatsAppButton className="mt-6 w-full sm:w-auto" href={createWhatsAppHref(whatsappMessages.agendaSimple)} label="Consultar Agenda Simple" location="agenda_simple" />
         </motion.div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
           {agendaSimpleFeatures.map((feature) => (
-            <div className="rounded-2xl border border-ink/10 bg-paper p-4" key={feature}>
+            <div className="min-w-0 rounded-2xl border border-ink/10 bg-paper p-4" key={feature}>
               <CheckCircle2 className="text-action" size={20} />
-              <p className="mt-3 font-semibold leading-6 text-ink/72">{feature}</p>
+              <p className="mt-3 break-words font-semibold leading-6 text-ink/72">{feature}</p>
             </div>
           ))}
         </div>
@@ -234,7 +237,8 @@ export function DemoCarousel() {
 export function Comparison() {
   return (
     <Section id="precios" eyebrow="Comparativa" title="Agenda Simple, Agenda Pro o Web Completa" tone="mint">
-      <div className="overflow-hidden rounded-[1.5rem] border border-ink/10 bg-paper shadow-soft">
+      <div className="overflow-x-auto rounded-[1.5rem] border border-ink/10 bg-paper shadow-soft">
+        <div className="min-w-[720px]">
         <div className="grid grid-cols-[1.2fr_repeat(3,1fr)] border-b border-ink/10 bg-teal px-4 py-4 text-sm font-extrabold text-cream">
           <span>Incluye</span>
           <span>Agenda Simple</span>
@@ -250,6 +254,7 @@ export function Comparison() {
             ))}
           </div>
         ))}
+        </div>
       </div>
     </Section>
   );

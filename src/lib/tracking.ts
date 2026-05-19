@@ -11,18 +11,20 @@ declare global {
 export function trackEvent(name: string, payload: EventPayload = {}) {
   if (typeof window === "undefined") return;
 
-  window.dataLayer?.push({ event: name, ...payload });
-  window.gtag?.("event", name, payload);
+  const cleanPayload = Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined)) as EventPayload;
+
+  window.dataLayer?.push({ event: name, ...cleanPayload });
+  window.gtag?.("event", name, cleanPayload);
 
   if (name === "whatsapp_click") {
-    window.fbq?.("track", "Lead", payload);
+    window.fbq?.("track", "Lead", cleanPayload);
   }
 
   if (name === "demo_click") {
-    window.fbq?.("trackCustom", "DemoClick", payload);
+    window.fbq?.("trackCustom", "DemoClick", cleanPayload);
   }
 
   if (name === "email_form_submit") {
-    window.fbq?.("track", "Contact", payload);
+    window.fbq?.("track", "Contact", cleanPayload);
   }
 }

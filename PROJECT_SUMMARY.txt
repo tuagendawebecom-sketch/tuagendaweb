@@ -300,3 +300,57 @@ TuAgendaWeb landing project summary
   npm run lint
   npm run build
   local route smoke test on /, /agenda/victorias-estetica, /agenda/victorias-estetica/reservar, /login, /panel and /superadmin.
+
+21. Campañas activas: mejoras visuales, backend y operación
+- Fecha: 2026-05-19.
+- Se mantuvo el posicionamiento comercial: Agenda Simple, Agenda Pro y Web Completa.
+- No se convirtió TuAgendaWeb en SaaS genérico y no se tocaron credenciales reales.
+
+Mejoras aplicadas:
+1. /login ahora usa Firebase Auth con email y contraseña.
+2. El login redirige por rol: superadmin a /superadmin y usuarios de negocio a /panel.
+3. /superadmin ahora verifica role superadmin en businessUsers/{uid}.
+4. /superadmin lista negocios desde Firestore.
+5. /superadmin permite crear negocios con nombre, slug, rubro, plan, dueño y WhatsApp.
+6. /superadmin crea un servicio inicial para que la agenda no arranque vacía.
+7. /superadmin permite activar, suspender o cancelar negocios.
+8. /superadmin permite copiar el link público de cada agenda.
+9. /superadmin muestra leads recientes y permite marcarlos como contactado o ganado.
+10. /panel lee el negocio asociado al usuario por businessUsers/{uid}.negocioId.
+11. La landing ahora tiene formulario de lead conectado a /api/leads.
+12. /api/leads valida plan, longitudes y campos mínimos antes de guardar.
+13. Tracking limpia payloads antes de enviar a dataLayer, gtag o Meta Pixel.
+14. CTAs externos a WhatsApp usan rel="noopener noreferrer".
+15. El hero suma señales de confianza pensadas para tráfico de campañas.
+16. La tabla comparativa es usable en mobile con scroll horizontal controlado.
+17. Se corrigió overflow mobile en el link largo de Agenda Simple.
+18. Se agregó normalización central de teléfonos.
+19. /api/reservas/consultar resuelve por slug y teléfono normalizado.
+20. /api/reservas/cancelar valida slug/teléfono y cancela por transacción si la reserva existe.
+21. La cancelación libera horariosOcupados si la reserva guarda horarioOcupadoId o bloqueoId.
+22. Metadata, robots.txt y sitemap.xml fueron actualizados para SEO.
+23. Se agregó JSON-LD con ofertas de Agenda Simple, Agenda Pro y Web Completa.
+24. Se agregó página 404 amable.
+25. Se agregó foco visible global y inputs de 16px para mejorar mobile.
+26. Se agregó npm run test:smoke para revisar rutas clave en mobile y desktop.
+
+Cómo entrar al Super Admin:
+1. Crear un usuario en Firebase Authentication con email/password.
+2. Copiar el UID del usuario.
+3. Crear en Firestore el documento businessUsers/{UID}.
+4. Campos mínimos:
+   role: "superadmin"
+   isActive: true
+5. Entrar a /login con ese email y contraseña.
+6. Si el rol está correcto, se redirige a /superadmin.
+
+Pendiente operativo:
+- La creación automática de usuarios dueños todavía no está activa.
+- La creación real de reservas completas sigue pendiente de migrar desde turnero-mvp.
+- Las reglas e índices de Firestore deben desplegarse en el Firebase nuevo cuando esté listo.
+
+Validación realizada:
+- npm run lint
+- npm run build
+- npm run test:smoke con production server local en localhost:3001
+- Rutas del smoke: /, /login, /panel, /superadmin, /agenda/victorias-estetica, /demos/barberia.

@@ -44,6 +44,17 @@ a {
   touch-action: manipulation;
 }
 
+:focus-visible {
+  outline: 3px solid rgba(231, 184, 90, 0.85);
+  outline-offset: 3px;
+}
+
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
 section[id] {
   scroll-margin-top: 6rem;
 }

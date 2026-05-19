@@ -1,6 +1,7 @@
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
+import { LeadCaptureForm } from "@/components/LeadCaptureForm";
 import {
   Benefits,
   AgendaSimpleSection,
@@ -35,6 +36,7 @@ export default function Home() {
         <IncludedFeatures />
         <Improvements />
         <FAQ />
+        <LeadCaptureForm />
         <FinalCTA />
       </main>
       <Footer />

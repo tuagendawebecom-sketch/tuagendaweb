@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LoginForm } from "@/components/LoginForm";
 
 export default function LoginPage() {
   return (
@@ -9,22 +10,10 @@ export default function LoginPage() {
         </Link>
         <h1 className="mt-8 font-display text-4xl font-extrabold text-teal">Acceso al panel</h1>
         <p className="mt-3 leading-7 text-ink/65">
-          Esta ruta queda preparada para Firebase Auth con email y contraseña. Cuando cargues las variables nuevas de Firebase, se conecta al panel del negocio según businessUsers por UID.
+          Ingresá con Firebase Auth. Si tu usuario tiene role `superadmin`, vas al panel de gestión; si pertenece a un negocio, vas al panel cliente.
         </p>
-        <form className="mt-7 grid gap-4">
-          <label className="grid gap-2 text-sm font-bold text-ink/70">
-            Email
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" placeholder="dueño@negocio.com" type="email" />
-          </label>
-          <label className="grid gap-2 text-sm font-bold text-ink/70">
-            Contraseña
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" placeholder="••••••••" type="password" />
-          </label>
-          <button className="rounded-2xl bg-teal px-4 py-3 text-sm font-bold text-cream opacity-70" disabled type="button">
-            Ingresar
-          </button>
-        </form>
-        <p className="mt-4 text-xs leading-5 text-ink/50">MVP preparado: falta activar Firebase Auth y el endpoint de sesión segura.</p>
+        <LoginForm />
+        <p className="mt-4 text-xs leading-5 text-ink/50">El primer superadmin se crea en Firebase Auth y se vincula en Firestore con businessUsers/UID.</p>
       </section>
     </main>
   );

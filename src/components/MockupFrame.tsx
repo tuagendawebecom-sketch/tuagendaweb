@@ -43,6 +43,7 @@ export function MockupFrame({ src, label, type, className = "", showPath = true 
         ref={imageRef}
         alt={label}
         className={`relative h-full w-full object-cover transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`}
+        decoding="async"
         height={isMobile ? 1280 : 900}
         loading="lazy"
         onError={() => setLoaded(false)}
