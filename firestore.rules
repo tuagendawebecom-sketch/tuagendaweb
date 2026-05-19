@@ -1,0 +1,52 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function businessUser() {
+      return signedIn() ? get(/databases/$(database)/documents/businessUsers/$(request.auth.uid)).data : null;
+    }
+
+    function isSuperAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/businessUsers/$(request.auth.uid))
+        && businessUser().role == "superadmin"
+        && businessUser().isActive == true;
+    }
+
+    function belongsToBusiness(negocioId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/businessUsers/$(request.auth.uid))
+        && businessUser().negocioId == negocioId
+        && businessUser().isActive == true;
+    }
+
+    match /negocios/{negocioId} {
+      allow read, write: if isSuperAdmin();
+      allow read: if belongsToBusiness(negocioId);
+      allow update: if belongsToBusiness(negocioId);
+
+      match /{subPath=**} {
+        allow read, write: if isSuperAdmin();
+        allow read, write: if belongsToBusiness(negocioId);
+      }
+    }
+
+    match /businessUsers/{uid} {
+      allow read: if isSuperAdmin() || (signedIn() && request.auth.uid == uid);
+      allow write: if isSuperAdmin();
+    }
+
+    match /leads/{leadId} {
+      allow read, write: if isSuperAdmin();
+      allow create: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

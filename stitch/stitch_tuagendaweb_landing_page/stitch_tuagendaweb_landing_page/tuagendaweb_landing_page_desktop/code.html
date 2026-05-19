@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TuAgendaWeb - Tu negocio con agenda propia</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container": "#f0edea",
+                      "tertiary-container": "#493300",
+                      "on-secondary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-background": "#1c1c1a",
+                      "on-error": "#ffffff",
+                      "outline": "#717977",
+                      "surface-bright": "#fcf9f5",
+                      "secondary-fixed-dim": "#78d7c3",
+                      "primary-fixed": "#c0ebe6",
+                      "error-container": "#ffdad6",
+                      "background": "#fcf9f5",
+                      "outline-variant": "#c0c8c6",
+                      "surface-dim": "#dcdad6",
+                      "on-primary-fixed-variant": "#254d4a",
+                      "on-tertiary": "#ffffff",
+                      "inverse-surface": "#31302e",
+                      "surface-variant": "#e5e2de",
+                      "surface-container-low": "#f6f3ef",
+                      "surface-tint": "#3d6562",
+                      "primary-container": "#123d3a",
+                      "secondary-fixed": "#94f4de",
+                      "tertiary-fixed": "#ffdea4",
+                      "inverse-on-surface": "#f3f0ed",
+                      "primary": "#002624",
+                      "on-surface": "#1c1c1a",
+                      "surface-container-highest": "#e5e2de",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#5d4200",
+                      "on-secondary-container": "#007262",
+                      "on-secondary-fixed": "#00201a",
+                      "secondary": "#006b5c",
+                      "primary-fixed-dim": "#a4cfca",
+                      "tertiary-fixed-dim": "#efbf61",
+                      "on-primary-container": "#7ea8a3",
+                      "surface-container-high": "#ebe8e4",
+                      "secondary-container": "#94f4de",
+                      "inverse-primary": "#a4cfca",
+                      "surface": "#fcf9f5",
+                      "tertiary": "#2e1f00",
+                      "on-tertiary-container": "#c5993e",
+                      "on-tertiary-fixed": "#261900",
+                      "error": "#ba1a1a",
+                      "on-secondary-fixed-variant": "#005045",
+                      "on-primary-fixed": "#00201e",
+                      "on-surface-variant": "#404847",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "2xl": "1.5rem",
+                      "3xl": "2rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-md": "16px",
+                      "stack-sm": "8px",
+                      "unit": "8px",
+                      "stack-lg": "24px",
+                      "section-gap": "64px",
+                      "gutter": "24px",
+                      "container-padding": "32px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: #fcf9f5;
+            color: #1c1c1a;
+        }
+        .soft-shadow {
+            box-shadow: 0 10px 30px -10px rgba(18, 61, 58, 0.15);
+        }
+        .organic-border {
+            border: 1px solid rgba(30, 30, 28, 0.08);
+        }
+    </style>
+</head>
+<body class="font-body-md antialiased text-on-background selection:bg-secondary selection:text-on-secondary">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+<div class="flex justify-between items-center px-container-padding py-4 max-w-7xl mx-auto">
+<div class="text-headline-md font-headline-lg text-primary dark:text-primary-fixed">
+                TuAgendaWeb
+            </div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-secondary dark:text-secondary-fixed font-bold border-b-2 border-secondary pb-1 font-label-md text-label-md hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#inicio">Inicio</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary font-label-md text-label-md hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#como-funciona">Cómo funciona</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary font-label-md text-label-md hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#demos">Demos</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary font-label-md text-label-md hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#precios">Precios</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary font-label-md text-label-md hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#faq">FAQ</a>
+</div>
+<button class="bg-[#1F8A78] text-white px-6 py-2 rounded-lg font-label-md text-label-md hover:bg-secondary/90 transition-all soft-shadow">
+                Solicitar Demo
+            </button>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="pt-32 pb-section-gap px-container-padding max-w-7xl mx-auto relative" id="inicio">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter items-center">
+<div class="flex flex-col gap-stack-lg z-10">
+<div class="inline-flex items-center px-4 py-2 rounded-full bg-tertiary-fixed-dim/20 text-on-tertiary-container w-fit font-label-md text-label-md">
+<span class="material-symbols-outlined mr-2" style="font-variation-settings: 'FILL' 1;">star</span>
+                    Premium Booking Experience
+                </div>
+<h1 class="font-display-lg text-display-lg text-primary-container">
+                    Tu negocio con agenda propia, sin vueltas.
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                    Desde ARS $100.000. Tu web personalizada con reserva online directa a tu WhatsApp. Organización total, diseño impecable.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 pt-4">
+<button class="bg-[#1F8A78] text-white px-8 py-4 rounded-xl font-headline-md text-body-lg flex items-center justify-center gap-2 soft-shadow hover:bg-secondary/90 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+                        Agendar Demo por WhatsApp
+                    </button>
+<button class="border border-[#123D3A] text-[#123D3A] px-8 py-4 rounded-xl font-headline-md text-body-lg hover:bg-surface-container transition-all">
+                        Ver Demos
+                    </button>
+</div>
+<div class="flex items-center gap-4 mt-8 pt-8 border-t organic-border">
+<div class="flex -space-x-4">
+<div class="w-10 h-10 rounded-full bg-[#DDEBE6] border-2 border-surface flex items-center justify-center text-primary-container font-bold text-xs">MA</div>
+<div class="w-10 h-10 rounded-full bg-[#E7B85A] border-2 border-surface flex items-center justify-center text-primary-container font-bold text-xs">JS</div>
+<div class="w-10 h-10 rounded-full bg-secondary-fixed border-2 border-surface flex items-center justify-center text-primary-container font-bold text-xs">RP</div>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">+50 negocios ya organizaron su tiempo</p>
+</div>
+</div>
+<div class="relative z-0">
+<!-- Decorative blob behind image -->
+<div class="absolute -inset-4 bg-[#DDEBE6] rounded-[3rem] -z-10 rotate-3 opacity-50 blur-xl"></div>
+<img alt="A beautiful, minimalist home office setup featuring a sleek modern computer monitor displaying a sophisticated, calm-colored scheduling dashboard. The interface on the screen uses soft teals, warm creams, and mustard gold accents. Soft, warm natural light filters into the room, illuminating a small potted plant and a ceramic coffee mug on the clean white desk." class="w-full h-auto rounded-[2rem] soft-shadow organic-border object-cover aspect-[4/3]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDGXSvHRHAqbwv_UkTn7n--is4qoIkdkYJR6n5qM3LMDDUiHw3SMbW4YLR9KI_tFhgL1u_v_pbAMJtVUy0nzWVfI2qxz7yCH-co5K_uHxHvZdwxOH8pQPOF4TMpI_aYZAKctTLncBseICxpZ0JgRqvkpq8s7_Q5qYNzsfRFibrFjWfHiLaMfuIOU5yr3_5vVbKVRKjeJKAFOoFybDuhpIOilUrDEGmtuy4sSPNnMuRLtul--uUrQjrZzF_4GT9Yy_onw_8R6dQzeHb"/>
+<!-- Floating Card -->
+<div class="absolute -bottom-6 -left-6 bg-surface p-4 rounded-xl soft-shadow organic-border flex items-center gap-4">
+<div class="w-12 h-12 bg-[#1F8A78] rounded-full flex items-center justify-center text-white">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Nueva Reserva</p>
+<p class="font-headline-md text-body-md font-bold text-primary-container">Corte de Pelo - 15:00 hs</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Value Props (Bento-ish) -->
+<section class="py-section-gap px-container-padding max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="bg-surface-container-lowest p-8 rounded-3xl soft-shadow organic-border flex flex-col gap-stack-md h-full hover:-translate-y-1 transition-transform">
+<div class="w-14 h-14 bg-[#DDEBE6] rounded-2xl flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">language</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary-container">Web Propia</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Un link único con tu marca, diseño profesional y todos tus servicios detallados para que tus clientes te encuentren fácilmente.</p>
+</div>
+<div class="bg-[#123D3A] p-8 rounded-3xl soft-shadow flex flex-col gap-stack-md h-full text-white hover:-translate-y-1 transition-transform">
+<div class="w-14 h-14 bg-surface/20 rounded-2xl flex items-center justify-center text-secondary-fixed">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-surface">Panel de Gestión</h3>
+<p class="font-body-md text-body-md text-surface-variant/80">Administra todas tus citas desde un panel intuitivo. Modifica horarios, bloquea días y mantén el control total de tu tiempo.</p>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-3xl soft-shadow organic-border flex flex-col gap-stack-md h-full hover:-translate-y-1 transition-transform">
+<div class="w-14 h-14 bg-[#E7B85A]/20 rounded-2xl flex items-center justify-center text-[#493300]">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">schedule</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary-container">Reservas 24/7</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Tus clientes pueden reservar en cualquier momento. Aumenta tus citas sin estar pendiente del teléfono todo el día.</p>
+</div>
+</div>
+</section>
+<!-- Problem / Solution -->
+<section class="py-section-gap px-container-padding bg-[#DDEBE6]/30">
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-gutter items-center">
+<div class="flex flex-col gap-stack-lg">
+<h2 class="font-display-lg text-display-lg text-primary-container">Chau al caos de WhatsApp.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Atender clientes por mensaje toma tiempo valioso y genera malentendidos. Es hora de profesionalizar tu servicio.</p>
+<div class="flex flex-col gap-4 mt-4">
+<div class="flex items-start gap-4 p-4 rounded-xl bg-surface-container-lowest organic-border">
+<div class="mt-1 text-[#ba1a1a]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">cancel</span>
+</div>
+<div>
+<p class="font-label-md text-label-md font-bold text-on-background">Mensajes perdidos y contestar a deshoras</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm mt-1">El cliente se cansa de esperar o te escribe un domingo a las 3 AM.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-4 rounded-xl bg-surface-container-lowest organic-border">
+<div class="mt-1 text-[#1F8A78]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<p class="font-label-md text-label-md font-bold text-on-background">Organización total en un solo lugar</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm mt-1">El cliente ve tus horarios libres y reserva solo. Vos recibís la alerta.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="relative h-[500px] w-full rounded-3xl overflow-hidden soft-shadow">
+<img class="w-full h-full object-cover" data-alt="A split-screen abstract composition showing 'chaos vs order'. On the left side, a cluttered, stressful mix of overlapping chat bubble icons in dull grays and muted reds. On the right side, a perfectly organized, calm layout of calendar blocks and checkmarks in soft seafoam teals (#1F8A78), elegant dark greens (#123D3A), and warm cream backgrounds (#F7F4EE). The lighting is bright and modern, creating a highly professional, boutique tech aesthetic." src=""/>
+</div>
+</div>
+</section>
+<!-- How it works -->
+<section class="py-section-gap px-container-padding max-w-7xl mx-auto" id="como-funciona">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<h2 class="font-headline-lg text-headline-lg text-primary-container mb-4">¿Cómo funciona?</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Tres simples pasos para automatizar tu agenda y ganar tranquilidad.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+<!-- Connecting line for desktop -->
+<div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-outline-variant/30 z-0"></div>
+<div class="flex flex-col items-center text-center gap-4 relative z-10">
+<div class="w-24 h-24 rounded-full bg-surface-container-lowest organic-border soft-shadow flex items-center justify-center text-2xl font-display-lg text-primary-container">
+                    1
+                </div>
+<h4 class="font-headline-md text-headline-md text-on-background">Cliente Reserva</h4>
+<p class="font-body-md text-body-md text-on-surface-variant px-4">Ingresan a tu link, eligen el servicio, el profesional y el horario disponible que prefieren.</p>
+</div>
+<div class="flex flex-col items-center text-center gap-4 relative z-10">
+<div class="w-24 h-24 rounded-full bg-[#DDEBE6] organic-border soft-shadow flex items-center justify-center text-2xl font-display-lg text-primary-container">
+                    2
+                </div>
+<h4 class="font-headline-md text-headline-md text-on-background">Recibís Notificación</h4>
+<p class="font-body-md text-body-md text-on-surface-variant px-4">Te llega un mensaje automático a tu WhatsApp con todos los detalles del turno confirmado.</p>
+</div>
+<div class="flex flex-col items-center text-center gap-4 relative z-10">
+<div class="w-24 h-24 rounded-full bg-[#123D3A] text-surface soft-shadow flex items-center justify-center text-2xl font-display-lg">
+                    3
+                </div>
+<h4 class="font-headline-md text-headline-md text-on-background">Gestionás tu Panel</h4>
+<p class="font-body-md text-body-md text-on-surface-variant px-4">Entrás a tu panel privado para ver tu agenda del día, semana o mes con total claridad.</p>
+</div>
+</div>
+</section>
+<!-- Demos (Bento layout) -->
+<section class="py-section-gap px-container-padding bg-surface-container-low" id="demos">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary-container mb-4">Diseñado para tu rubro</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">Adaptamos la experiencia visual y funcional a las necesidades específicas de tu negocio.</p>
+</div>
+<div class="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto snap-x">
+<button class="px-6 py-2 rounded-full bg-primary-container text-surface font-label-md text-label-md whitespace-nowrap snap-center">Barbería</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant organic-border font-label-md text-label-md whitespace-nowrap snap-center hover:bg-surface-variant transition-colors">Estética</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant organic-border font-label-md text-label-md whitespace-nowrap snap-center hover:bg-surface-variant transition-colors">Consultorio</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant organic-border font-label-md text-label-md whitespace-nowrap snap-center hover:bg-surface-variant transition-colors">Clases</button>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[2.5rem] p-8 md:p-12 soft-shadow organic-border">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+<div class="lg:col-span-5 flex flex-col gap-6">
+<div class="w-16 h-16 rounded-2xl bg-[#E7B85A] flex items-center justify-center text-primary-container mb-2">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">content_cut</span>
+</div>
+<h3 class="font-display-lg text-[40px] leading-tight text-primary-container">Demo: Barber Shop Premium</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Permite a tus clientes elegir a su barbero favorito, ver los estilos de corte disponibles y reservar en segundos.</p>
+<ul class="flex flex-col gap-3 mt-4">
+<li class="flex items-center gap-3 font-body-md text-body-md">
+<span class="material-symbols-outlined text-[#1F8A78]">check</span> Selección de staff
+                            </li>
+<li class="flex items-center gap-3 font-body-md text-body-md">
+<span class="material-symbols-outlined text-[#1F8A78]">check</span> Galería de servicios
+                            </li>
+<li class="flex items-center gap-3 font-body-md text-body-md">
+<span class="material-symbols-outlined text-[#1F8A78]">check</span> Recordatorios por WS
+                            </li>
+</ul>
+<button class="mt-4 bg-transparent border-2 border-[#123D3A] text-[#123D3A] px-6 py-3 rounded-xl font-label-md text-label-md w-fit hover:bg-surface-container transition-all">
+                            Ver Demo en vivo
+                        </button>
+</div>
+<div class="lg:col-span-7 h-[400px] md:h-[600px] bg-surface-container rounded-3xl overflow-hidden organic-border">
+<img class="w-full h-full object-cover object-top" data-alt="A close-up, high-quality digital mockup of a mobile phone displaying a beautifully designed barber shop booking application. The app interface uses a warm cream background (#F7F4EE) with dark teal text (#123D3A) and mustard gold buttons (#E7B85A). The screen shows available time slots for haircuts and a profile picture of a stylish barber. The phone is placed on a clean, light wood desk next to a sleek comb, bathed in soft, natural daylight." src=""/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- What's included -->
+<section class="py-section-gap px-container-padding max-w-7xl mx-auto">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<h2 class="font-headline-lg text-headline-lg text-primary-container mb-4">Todo lo que necesitás, en un solo lugar</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">No somos solo un calendario, construimos la cara digital de tu negocio.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Item -->
+<div class="p-6 rounded-2xl bg-surface-container-lowest organic-border hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-3xl text-[#1F8A78] mb-4" style="font-variation-settings: 'FILL' 1;">dns</span>
+<h4 class="font-label-md text-label-md font-bold mb-2">Dominio Personalizado</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">tunegocio.com (sujeto a disp.) o subdominio profesional.</p>
+</div>
+<!-- Item -->
+<div class="p-6 rounded-2xl bg-surface-container-lowest organic-border hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-3xl text-[#1F8A78] mb-4" style="font-variation-settings: 'FILL' 1;">web</span>
+<h4 class="font-label-md text-label-md font-bold mb-2">Landing Page</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Página web de inicio con tu marca, logo y colores.</p>
+</div>
+<!-- Item -->
+<div class="p-6 rounded-2xl bg-surface-container-lowest organic-border hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-3xl text-[#1F8A78] mb-4" style="font-variation-settings: 'FILL' 1;">admin_panel_settings</span>
+<h4 class="font-label-md text-label-md font-bold mb-2">Admin Privado</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Acceso seguro para gestionar turnos y configuraciones.</p>
+</div>
+<!-- Item -->
+<div class="p-6 rounded-2xl bg-surface-container-lowest organic-border hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-3xl text-[#1F8A78] mb-4" style="font-variation-settings: 'FILL' 1;">groups</span>
+<h4 class="font-label-md text-label-md font-bold mb-2">Gestión de Staff</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Agrega a tus empleados y sus horarios individuales.</p>
+</div>
+</div>
+</section>
+<!-- Pricing -->
+<section class="py-section-gap px-container-padding bg-[#123D3A] text-surface" id="precios">
+<div class="max-w-4xl mx-auto text-center">
+<h2 class="font-display-lg text-display-lg mb-6">Inversión transparente.</h2>
+<p class="font-body-lg text-body-lg text-surface-variant/80 mb-12 max-w-2xl mx-auto">Sin suscripciones mensuales ocultas ni comisiones por reserva. Un único pago para tener tu sistema funcionando.</p>
+<div class="bg-surface-container-lowest text-on-background rounded-[2rem] p-8 md:p-12 soft-shadow max-w-2xl mx-auto relative overflow-hidden">
+<!-- Ribbon -->
+<div class="absolute top-6 right-0 bg-[#E7B85A] text-[#493300] font-label-sm text-label-sm px-10 py-1 rotate-45 translate-x-8 translate-y-[-10px] font-bold">
+                    MÁS ELEGIDO
+                </div>
+<h3 class="font-headline-lg text-headline-lg text-primary-container mb-2">Plan Setup Inicial</h3>
+<div class="flex items-baseline justify-center gap-2 mb-6">
+<span class="font-body-lg text-body-lg font-bold text-on-surface-variant">ARS</span>
+<span class="font-display-lg text-[64px] text-primary-container leading-none">$100.000</span>
+</div>
+<div class="inline-block bg-[#DDEBE6] text-[#123D3A] px-4 py-1 rounded-full font-label-md text-label-md mb-8">
+                    Pago único, sin mantenimiento mensual*
+                </div>
+<ul class="flex flex-col gap-4 text-left max-w-sm mx-auto mb-10">
+<li class="flex items-center gap-3 font-body-md text-body-md">
+<span class="material-symbols-outlined text-[#1F8A78]">check_circle</span> Configuración completa
+                    </li>
+<li class="flex items-center gap-3 font-body-md text-body-md">
+<span class="material-symbols-outlined text-[#1F8A78]">check_circle</span> Diseño con tu marca
+                    </li>
+<li class="flex items-center gap-3 font-body-md text-body-md">
+<span class="material-symbols-outlined text-[#1F8A78]">check_circle</span> Capacitación de uso
+                    </li>
+<li class="flex items-center gap-3 font-body-md text-body-md text-on-surface-variant/60">
+<span class="material-symbols-outlined text-outline">info</span> *Solo abonás hosting anual ($20k aprox)
+                    </li>
+</ul>
+<button class="w-full bg-[#1F8A78] text-white px-8 py-4 rounded-xl font-headline-md text-body-lg soft-shadow hover:bg-secondary/90 transition-all">
+                    Quiero mi Agenda Web
+                </button>
+</div>
+</div>
+</section>
+<!-- Future Improvements -->
+<section class="py-section-gap px-container-padding max-w-7xl mx-auto">
+<div class="bg-[#DDEBE6]/50 rounded-[2rem] p-8 md:p-12 organic-border">
+<div class="flex flex-col md:flex-row items-center gap-12">
+<div class="flex-1">
+<div class="inline-flex items-center px-4 py-2 rounded-full bg-white text-primary-container w-fit font-label-sm text-label-sm mb-4 soft-shadow">
+<span class="material-symbols-outlined mr-2 text-[18px]">rocket_launch</span>
+                        Próximamente
+                    </div>
+<h2 class="font-headline-lg text-headline-lg text-primary-container mb-4">El sistema crece con vos</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-6">Estamos desarrollando nuevas funcionalidades que podrás sumar a tu plan inicial cuando estén listas.</p>
+<div class="space-y-4">
+<div class="flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-primary-container shrink-0 mt-1">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md font-bold">Cobros Online (Seña)</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Integración con MercadoPago para asegurar asistencia.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-primary-container shrink-0 mt-1">
+<span class="material-symbols-outlined text-[18px]">notifications_active</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md font-bold">Recordatorios Automáticos</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Mensajes de WhatsApp programados 24hs antes del turno.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-primary-container shrink-0 mt-1">
+<span class="material-symbols-outlined text-[18px]">bar_chart</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md font-bold">Reportes de Rendimiento</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Estadísticas de servicios más pedidos y clientes frecuentes.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="flex-1 w-full relative">
+<img class="w-full rounded-2xl organic-border soft-shadow" data-alt="A visually pleasing, abstract 3D illustration of growth and technology. A series of soft, rounded geometric blocks in seafoam green (#1F8A78) and mustard gold (#E7B85A) are arranged like a rising staircase or bar chart on a smooth cream (#F7F4EE) surface. Floating above the blocks are minimalist, glossy UI icons representing money, bells, and charts. The lighting is studio-quality, casting soft, diffused shadows that give the scene a premium, tactile, boutique feel." src=""/>
+</div>
+</div>
+</div>
+</section>
+<!-- FAQ -->
+<section class="py-section-gap px-container-padding max-w-3xl mx-auto" id="faq">
+<h2 class="font-headline-lg text-headline-lg text-center text-primary-container mb-12">Preguntas Frecuentes</h2>
+<div class="space-y-4">
+<!-- FAQ 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl organic-border cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex justify-between items-center">
+<h4 class="font-label-md text-label-md font-bold text-on-background">"Yo ya me manejo bien con WhatsApp, ¿para qué cambiar?"</h4>
+<span class="material-symbols-outlined text-outline">expand_more</span>
+</div>
+<p class="mt-4 font-body-md text-body-md text-on-surface-variant hidden">WhatsApp es genial para charlar, pero pésimo como agenda. Pierdes tiempo respondiendo "qué horarios te quedan", te olvidás de anotar turnos, o se te traspapelan mensajes. TuAgendaWeb te devuelve horas de tu vida y le da una imagen súper profesional a tu negocio.</p>
+</div>
+<!-- FAQ 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl organic-border cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex justify-between items-center">
+<h4 class="font-label-md text-label-md font-bold text-on-background">"Me parece un poco caro de golpe"</h4>
+<span class="material-symbols-outlined text-outline">expand_more</span>
+</div>
+<p class="mt-4 font-body-md text-body-md text-on-surface-variant">Pensalo como una inversión en un empleado que trabaja 24/7 atendiendo tu agenda, sin pedir francos ni aguinaldo. Además, al ser un PAGO ÚNICO, a los pocos meses ya se amortiza comparado con plataformas que te cobran suscripción mensual en dólares o comisiones por cada reserva.</p>
+</div>
+<!-- FAQ 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl organic-border cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex justify-between items-center">
+<h4 class="font-label-md text-label-md font-bold text-on-background">¿Cuánto tardan en entregarme la web?</h4>
+<span class="material-symbols-outlined text-outline">expand_more</span>
+</div>
+<p class="mt-4 font-body-md text-body-md text-on-surface-variant hidden">Una vez que nos envías la información de tus servicios, horarios y logo (el "onboarding"), en aproximadamente 7 a 10 días hábiles tenés tu sistema funcionando y listo para recibir clientes.</p>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-section-gap px-container-padding max-w-7xl mx-auto mb-12">
+<div class="bg-[#123D3A] rounded-[3rem] p-12 text-center text-surface relative overflow-hidden soft-shadow">
+<!-- Decorative circles -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-secondary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+<div class="absolute bottom-0 left-0 w-64 h-64 bg-[#E7B85A]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
+<div class="relative z-10 max-w-2xl mx-auto">
+<h2 class="font-display-lg text-[48px] leading-tight mb-6">¿Listo para profesionalizar tu tiempo?</h2>
+<p class="font-body-lg text-body-lg text-surface-variant/90 mb-10">Escribinos ahora por WhatsApp. Hacemos una demo corta y si te sirve, empezamos a armar tu web hoy mismo.</p>
+<button class="bg-[#1F8A78] text-white px-10 py-5 rounded-2xl font-headline-md text-[20px] flex items-center justify-center gap-3 soft-shadow hover:bg-secondary/90 hover:scale-105 transition-all mx-auto">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">chat</span>
+                    Escribinos por WhatsApp
+                </button>
+</div>
+</div>
+</section>
+<!-- Footer Component -->
+<footer class="w-full rounded-t-xl bg-surface-container-highest dark:bg-surface-container-lowest grid grid-cols-1 md:grid-cols-3 gap-gutter px-container-padding py-section-gap max-w-7xl mx-auto">
+<div class="flex flex-col gap-4">
+<div class="font-headline-md text-headline-md text-primary dark:text-primary-fixed">
+                TuAgendaWeb
+            </div>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70">
+                Tu negocio con agenda propia, sin vueltas. Diseño premium para profesionales exigentes.
+            </p>
+</div>
+<div class="flex flex-col gap-2 md:col-span-2 md:items-end justify-start">
+<div class="flex flex-wrap gap-6 md:justify-end">
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">Privacidad</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">Términos</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">Contacto</a>
+<a class="font-label-sm text-label-sm text-primary dark:text-primary-fixed font-semibold hover:text-secondary transition-all flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">chat</span> WhatsApp
+                </a>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 mt-8">
+                © 2024 TuAgendaWeb. Todos los derechos reservados.
+            </p>
+</div>
+</footer>
+<script>
+        // Simple accordion logic for FAQ to show it's somewhat functional structurally
+        document.querySelectorAll('#faq .bg-surface-container-lowest').forEach(item => {
+            item.addEventListener('click', () => {
+                const p = item.querySelector('p');
+                const icon = item.querySelector('.material-symbols-outlined');
+                if(p.classList.contains('hidden')) {
+                    p.classList.remove('hidden');
+                    icon.textContent = 'expand_less';
+                } else {
+                    p.classList.add('hidden');
+                    icon.textContent = 'expand_more';
+                }
+            });
+        });
+    </script>
+</body></html>

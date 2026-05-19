@@ -1,0 +1,302 @@
+TuAgendaWeb landing project summary
+
+1. What was created
+- A new Next.js App Router landing page for TuAgendaWeb.
+- Main route: /
+- Demo routes:
+  /demos/barberia
+  /demos/estetica
+  /demos/canchas
+  /demos/medicos
+  /demos/peluqueria
+  /demos/unas
+  /demos/tatuajes
+  /demos/masajes
+- Reusable demo template generated from one data structure.
+- Components for header, mobile menu, hero, sections, carousel, pricing, FAQ, footer, mockups, video placeholder, WhatsApp CTA and tracking.
+
+2. Why it was created this way
+- The architecture is static-friendly and deploy-ready for Vercel.
+- Commercial copy, demo data, WhatsApp messages, social links and tracking event names live in one editable file.
+- Missing screenshots do not block launch: mockup components show clear placeholders until assets are replaced.
+- TuAgendaWeb is positioned as a custom professional web solution, not as a generic SaaS.
+
+3. Where to edit copy
+- src/data/site.ts
+
+4. Where to replace images
+- public/assets/demos/
+- Use the exact file names listed in public/assets/demos/README_ASSETS.txt.
+- Brand image currently used: public/brand/identidad-tuagendaweb.png
+
+5. Where to add the Meta Pixel ID
+- Copy .env.example to .env.local.
+- Set NEXT_PUBLIC_META_PIXEL_ID.
+- Optional: NEXT_PUBLIC_GA_ID and NEXT_PUBLIC_GTM_ID.
+
+6. Where to edit WhatsApp number
+- src/data/site.ts
+- Change whatsappPhone.
+
+7. How to run locally
+- npm install
+- npm run dev -- --port 3001
+- Open http://localhost:3001
+
+8. How to build
+- npm run build
+
+9. How to deploy to Vercel
+- Push or import the project into Vercel.
+- Add the environment variables in Vercel Project Settings.
+- Deploy with the default Next.js build command: npm run build.
+
+10. Pending tasks before launching ads
+- Replace demo screenshot placeholders with real captures.
+- Review final legal/contact information if a formal business name or tax/legal text is needed.
+- Test Meta Pixel events in Events Manager after deploying the final domain.
+- Review final price/copy before publishing campaign.
+
+11. Responsive and hydration fixes applied on 2026-05-16
+- The reported hydration warning pointed at an extra html attribute: data-it-installed="true".
+- The codebase did not contain SSR-unsafe render logic such as Date.now(), Math.random(), new Date(), localStorage, document reads, or typeof window branches used during render.
+- data-it-installed is consistent with a browser extension injecting an attribute into the html element before React hydrates.
+- Added suppressHydrationWarning only on the html element in src/app/layout.tsx so extension-injected html attributes do not create a false-positive warning. No dynamic attributes are added to html or body from client code.
+- Browser-dependent tracking remains inside event handlers or Next Script execution after hydration.
+- If the warning appears again in a normal browser, test in incognito or with extensions disabled. If it disappears there, the cause is the extension, not the app.
+
+12. What changed visually
+- Reworked the mobile hero spacing, title sizing, CTA stacking and mockup layout.
+- Replaced fragile absolute-position mockup overlaps with a reusable DemoMockup component.
+- Improved MockupFrame placeholders so missing images never show a broken icon and keep stable desktop/mobile proportions.
+- Reworked the demo carousel so mobile shows one stable card per view, with the mockup, title, text and "Ver demo" button contained inside the card.
+- Improved mobile header readability and menu behavior. The brand reference image remains in public/brand/identidad-tuagendaweb.png, but the header now uses a clean TW monogram because the existing file is an identity sheet, not a square logo.
+- Added a skip link, scroll margins, overflow-x protection and touch-action improvements.
+
+13. How to replace demo images
+- Replace files inside public/assets/demos/ using the exact route names already documented in public/assets/demos/README_ASSETS.txt.
+- Recommended sizes:
+  cover: 1200x800 px.
+  desktop: 1440x900 px.
+  mobile: 720x1280 px.
+- Keep names unchanged, for example barberia-desktop.png and barberia-mobile.png.
+
+14. How to test before Meta Ads
+- npm run lint
+- npm run build
+- npm run start -- --port 3001
+- Open http://localhost:3001
+- Check /, /demos/barberia and /demos/estetica.
+- Check widths around 360, 390, 430, 768, 1024 and 1440 px.
+- Confirm hero CTAs, mobile menu, desktop Demos dropdown, carousel arrows, "Ver demo" buttons and WhatsApp links.
+- Optional automated check: node scripts/verify-ui.mjs while the app is running on http://localhost:3001.
+
+15. Optional demo screenshot capture
+- Start the app first:
+  npm run start -- --port 3001
+- Then run:
+  npm run capture:demos
+- The script visits every /demos/[slug] route and saves screenshots into public/assets/demos/.
+- Generated files:
+  [slug]-desktop.png at viewport 1440x1000.
+  [slug]-mobile.png at viewport 390x844.
+  [slug]-cover.png at viewport 1200x750.
+- Default base URL is http://localhost:3001.
+- To use another URL:
+  CAPTURE_BASE_URL=https://your-domain.com npm run capture:demos
+- These generated files replace the placeholders automatically because the app already reads the same paths.
+
+16. Video demo Remotion
+- Created a Remotion product demo video for TuAgendaWeb as a polished silent explainer for the landing page.
+- Main composition:
+  Composition ID: TuAgendaWebLandingDemo
+  Format: 16:9
+  Resolution: 1920x1080
+  FPS: 30
+  Duration: 35 seconds
+  Output: public/assets/videos/tuagendaweb-demo.mp4
+- Optional vertical composition:
+  Composition ID: TuAgendaWebVerticalAd
+  Format: 9:16
+  Resolution: 1080x1920
+  FPS: 30
+  Duration: 28 seconds
+  Output command saves to public/assets/videos/tuagendaweb-demo-vertical.mp4
+- Remotion files:
+  src/remotion/index.ts
+  src/remotion/Root.tsx
+  src/remotion/compositions/
+  src/remotion/components/
+  src/remotion/data/videoScript.ts
+- Edit video text, timing, category names, price bullets and brand colors in:
+  src/remotion/data/videoScript.ts
+- Open Remotion Studio:
+  npm run remotion:studio
+- Render the main landing video:
+  npm run remotion:render
+- Render the optional vertical ad:
+  npm run remotion:render:vertical
+- The main MP4 is embedded in the landing through:
+  src/components/VideoDemo.tsx
+- The landing reads:
+  public/assets/videos/tuagendaweb-demo.mp4
+- If the MP4 is missing, the VideoDemo component shows an elegant fallback with render instructions.
+- Current audio status:
+  No voiceover or music is required. The video is designed to work silently with readable on-screen Spanish text.
+  Optional audio placeholder path is documented at public/assets/audio/README_AUDIO.txt.
+- Pending video tasks:
+  Review final pacing in Remotion Studio before ads.
+  Add owned or royalty-free music only if needed.
+  Render the vertical version if planning Reels/Stories ads.
+
+17. Correcciones del video Remotion
+- The current video was improved from the Remotion source files, not by editing the MP4 directly.
+- Improvements applied:
+  Immediate opening hook with TuAgendaWeb brand badge from the first second.
+  Faster WhatsApp-style message bubbles so the problem is clear immediately.
+  Larger, higher-contrast Spanish text for landing-page embeds.
+  Smoother scene motion with subtle scale, slide and staggered card animations.
+  Clearer mobile booking flow: Elegí servicio, Elegí día y horario, Confirmá tu turno.
+  More satisfying confirmation state for "Turno confirmado".
+  Simpler admin panel scene focused on Turnos de hoy, Clientes, Servicios, Personal and Resumen del negocio.
+  More commercial rubro cards with specific labels for barbería, estética, canchas, médicos, peluquería and uñas.
+  Stronger premium pricing card with "Desde $100.000", "Pago único inicial" and animated checkmarks.
+  Longer, clearer final CTA with "Solicitar demo por WhatsApp".
+- Main files modified:
+  src/remotion/data/videoScript.ts
+  src/remotion/compositions/TuAgendaWebLandingDemo.tsx
+  src/remotion/compositions/TuAgendaWebVideoPoster.tsx
+  src/remotion/components/SceneContainer.tsx
+  src/remotion/components/WhatsAppBubbles.tsx
+  src/remotion/components/PhoneMockup.tsx
+  src/remotion/components/DashboardMockup.tsx
+  src/remotion/components/DemoCategoryCarousel.tsx
+  src/remotion/components/PricingCard.tsx
+  src/remotion/components/CTAEndCard.tsx
+  src/remotion/components/BrowserMockup.tsx
+- Edit video copy, scene durations, pricing bullets, category labels and brand colors in:
+  src/remotion/data/videoScript.ts
+- Open Remotion Studio:
+  npm run remotion:studio
+- Render the updated main video:
+  npm run remotion:render
+- Render the poster:
+  npm run remotion:poster
+- Final MP4:
+  public/assets/videos/tuagendaweb-demo.mp4
+- Poster image:
+  public/assets/videos/tuagendaweb-demo-poster.png
+- The landing video embed uses the MP4 and poster from:
+  src/components/VideoDemo.tsx
+- Validation completed:
+  npm run lint
+  npm run build
+  npm run remotion:render
+  npm run remotion:poster
+  Local embed check on http://localhost:3001
+
+18. Brand, domain and campaign configuration
+- Applied the final logo from:
+  C:\Users\Matias\Downloads\Logo TuAgendaWeb (3).png
+- Public logo path used by the landing:
+  public/brand/logo-tuagendaweb.png
+- Browser tab icons generated through Next app icons:
+  src/app/icon.png
+  src/app/apple-icon.png
+- Header and footer now use the TuAgendaWeb logo image.
+- Production domain configured in metadata:
+  https://www.tuagendaweb.com.ar
+- WhatsApp number configured:
+  +54 9 381 574 6066
+- Contact links configured:
+  Instagram: https://www.instagram.com/tuagendaweb/
+  Facebook: https://www.facebook.com/TuAgendaWeb.ecom
+  Email: tuagendaweb.ecom@gmail.com
+- TikTok was removed from the footer because it is not active yet.
+- Meta Pixel configured in:
+  .env.local
+  .env.example
+- Current Meta Pixel ID:
+  1502329234604193
+- Validation completed after applying brand/contact changes:
+  npm run lint
+  npm run build
+  Local check on http://localhost:3001 confirmed logo, Pixel ID, domain and email are present, and TikTok is not shown.
+
+19. Hero demo screenshots
+- The hero layout was restored to the previous approved TuAgendaWeb structure.
+- Only the mockup images inside the hero were changed.
+- Current hero mockup assets:
+  public/assets/hero/barberia-hero-desktop.png
+  public/assets/hero/barberia-hero-mobile.png
+- The MockupFrame component was adjusted so images that load before hydration are still detected correctly and do not remain stuck on the fallback placeholder.
+- Validation completed:
+  npm run lint
+  npm run build
+  Desktop and mobile hero screenshots checked locally on http://localhost:3001.
+
+20. Multi-negocio MVP preparation
+- The project remains `tuagendaweb-landing`; `turnero-mvp` was only read as reference through `AUDITORIA_TECNICA_TURNERO.md`.
+- The landing was repositioned around three offers:
+  Agenda Simple: desde $15.000 / mes.
+  Agenda Pro: desde $30.000 / mes.
+  Web Completa: $100.000 pago único.
+- New landing sections explain:
+  turnos online con o sin web propia;
+  the WhatsApp coordination problem;
+  plan cards;
+  Agenda Simple link model;
+  Web Completa premium model;
+  demos by rubro;
+  comparison table;
+  extras available, upcoming and quoted;
+  updated FAQ.
+- New multi-negocio routes:
+  /agenda/[slug]
+  /agenda/[slug]/reservar
+  /login
+  /panel
+  /superadmin
+- New API placeholders:
+  /api/leads
+  /api/reservas/consultar
+  /api/reservas/cancelar
+  /api/admin/firebase-token
+- Firebase dependencies were added:
+  firebase
+  firebase-admin
+- New architecture files:
+  src/types/tenant.ts
+  src/lib/slug.ts
+  src/lib/firebase/admin.ts
+  src/lib/firebase/client.ts
+  src/lib/firebase/business.ts
+  firestore.rules
+  firestore.indexes.json
+  firebase.json
+- New documentation:
+  AGENTS.md
+  FIREBASE_SETUP.md
+  VERCEL_CLOUDFLARE_SETUP.md
+  README_DEPLOY_TUAGENDAWEB.md
+- Environment configuration was updated:
+  .env.example now contains the expected Firebase, Admin, site, WhatsApp, email, payments and tracking variables without real secrets.
+  .env.local keeps local operational values for development.
+- Prepared but not active:
+  Firebase Auth real login.
+  Super Admin mutations.
+  Owner panel CRUD.
+  Transactional reservation creation.
+  Public reservation lookup/cancellation.
+  Mercado Pago or online payments.
+- Critical reservation logic to migrate from turnero-mvp later:
+  BookingFlow
+  createBookingReservation
+  horariosOcupados transaction model
+  cancelPublicReservationByPhone
+  telefonoNormalizado
+  services/staff/branches availability logic
+- Validation completed:
+  npm run lint
+  npm run build
+  local route smoke test on /, /agenda/victorias-estetica, /agenda/victorias-estetica/reservar, /login, /panel and /superadmin.

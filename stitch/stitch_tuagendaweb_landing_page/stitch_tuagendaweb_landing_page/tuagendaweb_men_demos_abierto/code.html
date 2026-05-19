@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TuAgendaWeb - Demos</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#f0edea",
+                        "tertiary-container": "#493300",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#1c1c1a",
+                        "on-error": "#ffffff",
+                        "outline": "#717977",
+                        "surface-bright": "#fcf9f5",
+                        "secondary-fixed-dim": "#78d7c3",
+                        "primary-fixed": "#c0ebe6",
+                        "error-container": "#ffdad6",
+                        "background": "#fcf9f5",
+                        "outline-variant": "#c0c8c6",
+                        "surface-dim": "#dcdad6",
+                        "on-primary-fixed-variant": "#254d4a",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#31302e",
+                        "surface-variant": "#e5e2de",
+                        "surface-container-low": "#f6f3ef",
+                        "surface-tint": "#3d6562",
+                        "primary-container": "#123d3a",
+                        "secondary-fixed": "#94f4de",
+                        "tertiary-fixed": "#ffdea4",
+                        "inverse-on-surface": "#f3f0ed",
+                        "primary": "#002624",
+                        "on-surface": "#1c1c1a",
+                        "surface-container-highest": "#e5e2de",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#5d4200",
+                        "on-secondary-container": "#007262",
+                        "on-secondary-fixed": "#00201a",
+                        "secondary": "#006b5c",
+                        "primary-fixed-dim": "#a4cfca",
+                        "tertiary-fixed-dim": "#efbf61",
+                        "on-primary-container": "#7ea8a3",
+                        "surface-container-high": "#ebe8e4",
+                        "secondary-container": "#94f4de",
+                        "inverse-primary": "#a4cfca",
+                        "surface": "#fcf9f5",
+                        "tertiary": "#2e1f00",
+                        "on-tertiary-container": "#c5993e",
+                        "on-tertiary-fixed": "#261900",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#005045",
+                        "on-primary-fixed": "#00201e",
+                        "on-surface-variant": "#404847",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "unit": "8px",
+                        "stack-lg": "24px",
+                        "section-gap": "64px",
+                        "gutter": "24px",
+                        "container-padding": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .custom-shadow {
+            box-shadow: 0 10px 30px -10px rgba(18, 61, 58, 0.15);
+        }
+        .dropdown-animation {
+            animation: slideDown 0.2s ease-out forwards;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+<nav class="flex justify-between items-center px-container-padding py-4 max-w-7xl mx-auto relative">
+<!-- Logo -->
+<a class="text-headline-md font-headline-lg text-primary dark:text-primary-fixed tracking-tight" href="#">
+                TuAgendaWeb
+            </a>
+<!-- Navigation Links (Desktop) -->
+<ul class="hidden md:flex items-center gap-stack-lg">
+<li>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">
+                        Inicio
+                    </a>
+</li>
+<li>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">
+                        Cómo funciona
+                    </a>
+</li>
+<!-- Active Nav Item with Open Dropdown -->
+<li class="relative">
+<a class="font-label-md text-label-md text-secondary dark:text-secondary-fixed font-bold border-b-2 border-secondary pb-1 flex items-center gap-1 active:scale-95 duration-150 transition-transform" href="#">
+                        Demos
+                        <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">expand_less</span>
+</a>
+<!-- Demos Dropdown Panel -->
+<div class="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[520px] bg-surface-bright rounded-xl custom-shadow border border-outline-variant/20 p-stack-lg z-50 dropdown-animation grid grid-cols-2 gap-stack-md">
+<div class="col-span-2 pb-2 mb-2 border-b border-outline-variant/20">
+<p class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">Explora por industria</p>
+</div>
+<!-- Dropdown Items -->
+<a class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container group transition-colors duration-200" href="#">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="content_cut">content_cut</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Barbería</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container group transition-colors duration-200" href="#">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="spa">spa</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Estética</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container group transition-colors duration-200" href="#">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="sports_soccer">sports_soccer</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Canchas</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container group transition-colors duration-200" href="#">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="stethoscope">stethoscope</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Médicos</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container group transition-colors duration-200" href="#">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="face_retouching_natural">face_retouching_natural</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Peluquería</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container group transition-colors duration-200" href="#">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="back_hand">back_hand</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Uñas</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container group transition-colors duration-200" href="#">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="ink_pen">ink_pen</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Tatuajes</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container group transition-colors duration-200" href="#">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="self_care">self_care</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Masajes</span>
+</a>
+</div>
+</li>
+<li>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">
+                        Precios
+                    </a>
+</li>
+<li>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">
+                        FAQ
+                    </a>
+</li>
+</ul>
+<!-- Trailing Action -->
+<button class="bg-[#1F8A78] hover:bg-secondary text-white font-label-md text-label-md px-6 py-3 rounded-lg transition-colors duration-200 custom-shadow active:scale-95">
+                Solicitar Demo
+            </button>
+</nav>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-32 pb-section-gap px-container-padding max-w-7xl mx-auto w-full">
+<!-- Hero Section (Subdued to highlight dropdown) -->
+<section class="flex flex-col md:flex-row items-center gap-gutter relative mt-8 opacity-40 transition-opacity pointer-events-none">
+<div class="w-full md:w-1/2 flex flex-col gap-stack-lg">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#DDEBE6] text-primary-container w-max">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span class="font-label-sm text-label-sm">Plataforma Boutique</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary">
+                    La experiencia de agendamiento que tu negocio merece.
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                    Diseñado para barberías, clínicas y spas que valoran una estética moderna y una gestión organizativa impecable.
+                </p>
+</div>
+<div class="w-full md:w-1/2 mt-12 md:mt-0">
+<div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-surface-container custom-shadow border border-outline-variant/10">
+<img alt="Modern elegant salon interior" class="object-cover w-full h-full" data-alt="A highly detailed photograph of a premium, modern salon interior. The space is bright and airy, illuminated by soft, natural sunlight streaming through large windows. The aesthetic is warm minimalism, featuring light oak wood textures, pristine white walls, and accents of soft seafoam green. High-end salon chairs are neatly arranged, conveying a sense of organized calm and personalized, high-end service." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhMXnP82y7NXqQPiI1oI-FO8UQLPFiaLkOyxx6BmDjj31BFoWeroBb2n5BxSPIyH2r_q2kMJmMGhRkwWptWlAB-KR4nlaZ10Ke6rSycArXUbKtP8VDo55V_sGv4yTOerBbyhJsf-ZY3AzQzMx0rVG9-0buQv-dqR2O5epjYruUmRZRwbJYpSG4dTO1z5xX228WgH2DPv3-OBf-DOpOGPX6bi2o8LcU5iXnQ8hpRNWZ4plBMxIRkqllaVdTR11VavHaT4rE54zsoaN_"/>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-surface-container-lowest w-full rounded-t-xl mt-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter px-container-padding py-section-gap max-w-7xl mx-auto">
+<!-- Brand & Copyright -->
+<div class="flex flex-col gap-stack-md">
+<span class="font-headline-md text-headline-md text-primary dark:text-primary-fixed">
+                    TuAgendaWeb
+                </span>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 mt-auto">
+                    © 2024 TuAgendaWeb. Todos los derechos reservados.
+                </p>
+</div>
+<!-- Empty column for layout balance -->
+<div class="hidden md:block"></div>
+<!-- Links -->
+<div class="flex flex-col md:items-end gap-stack-md">
+<h4 class="font-label-sm text-label-sm text-primary dark:text-primary-fixed uppercase tracking-wider mb-2">Legal &amp; Soporte</h4>
+<nav class="flex flex-col gap-stack-sm md:items-end">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">
+                        Privacidad
+                    </a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">
+                        Términos
+                    </a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">
+                        Contacto
+                    </a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all flex items-center gap-2" href="#">
+                        WhatsApp
+                        <span class="material-symbols-outlined text-[16px]">chat</span>
+</a>
+</nav>
+</div>
+</div>
+</footer>
+</body></html>

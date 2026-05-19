@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Demo para Nail Studio - TuAgendaWeb</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#c5993e",
+                        "inverse-surface": "#31302e",
+                        "primary-fixed-dim": "#a4cfca",
+                        "primary-container": "#123d3a",
+                        "on-secondary-fixed-variant": "#005045",
+                        "on-tertiary-fixed": "#261900",
+                        "surface-variant": "#e5e2de",
+                        "surface-tint": "#3d6562",
+                        "surface": "#fcf9f5",
+                        "on-tertiary-fixed-variant": "#5d4200",
+                        "surface-container-low": "#f6f3ef",
+                        "secondary-container": "#94f4de",
+                        "surface-dim": "#dcdad6",
+                        "inverse-on-surface": "#f3f0ed",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#a4cfca",
+                        "secondary-fixed": "#94f4de",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#002624",
+                        "surface-bright": "#fcf9f5",
+                        "on-secondary-fixed": "#00201a",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e5e2de",
+                        "outline": "#717977",
+                        "outline-variant": "#c0c8c6",
+                        "on-primary-container": "#7ea8a3",
+                        "primary-fixed": "#c0ebe6",
+                        "on-surface-variant": "#404847",
+                        "background": "#fcf9f5",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#ebe8e4",
+                        "on-primary-fixed-variant": "#254d4a",
+                        "tertiary-container": "#493300",
+                        "tertiary": "#2e1f00",
+                        "surface-container": "#f0edea",
+                        "on-surface": "#1c1c1a",
+                        "on-secondary-container": "#007262",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#00201e",
+                        "secondary-fixed-dim": "#78d7c3",
+                        "on-primary": "#ffffff",
+                        "secondary": "#006b5c",
+                        "tertiary-fixed-dim": "#efbf61",
+                        "tertiary-fixed": "#ffdea4",
+                        "on-background": "#1c1c1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "64px",
+                        "unit": "8px",
+                        "stack-sm": "8px",
+                        "container-padding": "32px",
+                        "stack-md": "16px",
+                        "stack-lg": "24px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom Shadows for "Ambient Softness" */
+        .soft-shadow {
+            box-shadow: 0 10px 30px -10px rgba(18, 61, 58, 0.08);
+        }
+        .soft-shadow-hover:hover {
+            box-shadow: 0 15px 35px -5px rgba(18, 61, 58, 0.12);
+        }
+        
+        /* Glassmorphism effects */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- Top Navigation (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm transition-all duration-300" id="main-nav">
+<div class="flex justify-between items-center px-container-padding py-4 max-w-7xl mx-auto">
+<!-- Brand -->
+<a class="flex items-center gap-2 group" href="#">
+<span class="material-symbols-outlined text-secondary text-3xl group-hover:scale-110 transition-transform">calendar_month</span>
+<span class="font-headline-lg text-headline-md text-primary tracking-tight">TuAgendaWeb</span>
+</a>
+<!-- Desktop Links -->
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-on-surface-variant hover:text-secondary transition-colors duration-200 font-label-md text-label-md" href="#">Inicio</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors duration-200 font-label-md text-label-md" href="#">Cómo funciona</a>
+<a class="text-secondary font-bold border-b-2 border-secondary pb-1 font-label-md text-label-md" href="#">Demos</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors duration-200 font-label-md text-label-md" href="#">Precios</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors duration-200 font-label-md text-label-md" href="#">FAQ</a>
+</div>
+<!-- CTA -->
+<div class="hidden md:flex items-center">
+<a class="bg-secondary text-on-secondary px-6 py-2.5 rounded-lg font-label-md text-label-md hover:bg-on-secondary-container hover:shadow-lg transition-all duration-200 active:scale-95" href="#cta-section">
+                    Solicitar Demo
+                </a>
+</div>
+<!-- Mobile Menu Toggle -->
+<button class="md:hidden text-on-surface p-2 hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow pt-[88px]">
+<!-- Hero Section with Mockup -->
+<section class="relative pt-section-gap pb-section-gap overflow-hidden bg-surface-container-low">
+<!-- Decorative Background Elements -->
+<div class="absolute top-0 right-0 -mr-32 -mt-32 w-96 h-96 bg-secondary-container rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+<div class="absolute top-0 right-0 -mr-32 -mt-32 w-96 h-96 bg-primary-fixed rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+<div class="absolute -bottom-32 -left-32 w-96 h-96 bg-tertiary-fixed rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+<div class="max-w-7xl mx-auto px-container-padding relative z-10">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter items-center">
+<!-- Text Content -->
+<div class="flex flex-col gap-stack-lg max-w-xl">
+<div class="inline-flex items-center gap-2 bg-primary-fixed/30 text-primary-container px-4 py-1.5 rounded-full w-fit border border-primary-fixed border-opacity-50">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Plantilla Premium</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary leading-tight">
+                            Demo para <span class="text-secondary italic">Nail Studio</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                            Organiza tu salón de uñas con una agenda web profesional, elegante y fácil de usar. Especialmente diseñada para gestionar citas, servicios y clientas frecuentes.
+                        </p>
+<div class="flex flex-col sm:flex-row gap-4 mt-4">
+<a class="bg-secondary text-on-secondary px-8 py-3.5 rounded-lg font-label-md text-label-md text-center hover:bg-on-secondary-container transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center gap-2" href="#cta-section">
+                                Quiero esta web
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+<a class="bg-transparent border-2 border-primary-container text-primary-container px-8 py-3.5 rounded-lg font-label-md text-label-md text-center hover:bg-surface-variant transition-all duration-200 flex items-center justify-center gap-2" href="#servicios">
+                                Ver características
+                            </a>
+</div>
+</div>
+<!-- Mockup Image -->
+<div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden soft-shadow group">
+<img alt="Mockup de agenda web para salón de uñas mostrando interfaz en desktop y móvil" class="w-full h-full object-cover rounded-2xl transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKN-OgzsKAfJel2P9pHwjPsCAmOwQ1nwvNc0mR5E0SAaLmkqtufwhB0vaHfiCI1PrBWm1RojMzWA3mDe1KCkyfv2VthhrqcXaB7qXKMy9oupGbhzkEGLwEg-fw42rXogjvi-bsiuyk_7W5-MX1nqwaQ7u2dZT8NnPolhXNRhjq4rJQTeTzdMxSCeZbK_EXQ-qU7zkNw92Ck_29ad7pUgwMXGV4YCgvk1k79S3SukchEyCieLhz21TEXAnP2a334Ra5QyLB5j2rsaKS"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Services Section (Bento Grid) -->
+<section class="py-section-gap bg-surface" id="servicios">
+<div class="max-w-7xl mx-auto px-container-padding">
+<div class="text-center max-w-2xl mx-auto mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-stack-md">Menú de Servicios</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Ejemplo de cómo se verán tus tratamientos y precios en la web.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Service 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-stack-lg soft-shadow border border-outline-variant/20 hover:-translate-y-1 transition-transform duration-300 flex flex-col h-full">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center mb-stack-md text-primary-container">
+<span class="material-symbols-outlined icon-fill">palette</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 flex-grow">Esmaltado Semipermanente</h3>
+<div class="mt-auto pt-stack-md border-t border-outline-variant/20 flex justify-between items-end">
+<span class="font-label-sm text-label-sm text-on-surface-variant">45 min</span>
+<span class="font-headline-md text-[20px] text-secondary font-bold">$15.0</span>
+</div>
+</div>
+<!-- Service 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-stack-lg soft-shadow border border-outline-variant/20 hover:-translate-y-1 transition-transform duration-300 flex flex-col h-full">
+<div class="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center mb-stack-md text-on-secondary-container">
+<span class="material-symbols-outlined icon-fill">pan_tool</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 flex-grow">Esculpidas en Gel</h3>
+<div class="mt-auto pt-stack-md border-t border-outline-variant/20 flex justify-between items-end">
+<span class="font-label-sm text-label-sm text-on-surface-variant">120 min</span>
+<span class="font-headline-md text-[20px] text-secondary font-bold">$35.0</span>
+</div>
+</div>
+<!-- Service 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-stack-lg soft-shadow border border-outline-variant/20 hover:-translate-y-1 transition-transform duration-300 flex flex-col h-full">
+<div class="w-12 h-12 bg-tertiary-fixed rounded-full flex items-center justify-center mb-stack-md text-on-tertiary-container">
+<span class="material-symbols-outlined icon-fill">brush</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 flex-grow">Nail Art Diseño</h3>
+<div class="mt-auto pt-stack-md border-t border-outline-variant/20 flex justify-between items-end">
+<span class="font-label-sm text-label-sm text-on-surface-variant">30 min</span>
+<span class="font-headline-md text-[20px] text-secondary font-bold">$10.0</span>
+</div>
+</div>
+<!-- Service 4 -->
+<div class="bg-surface-container-lowest rounded-xl p-stack-lg soft-shadow border border-outline-variant/20 hover:-translate-y-1 transition-transform duration-300 flex flex-col h-full">
+<div class="w-12 h-12 bg-error-container rounded-full flex items-center justify-center mb-stack-md text-on-error-container">
+<span class="material-symbols-outlined icon-fill">spa</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 flex-grow">Pedicuría Completa</h3>
+<div class="mt-auto pt-stack-md border-t border-outline-variant/20 flex justify-between items-end">
+<span class="font-label-sm text-label-sm text-on-surface-variant">60 min</span>
+<span class="font-headline-md text-[20px] text-secondary font-bold">$20.0</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Benefits Section (Asymmetric Layout) -->
+<section class="py-section-gap bg-surface-container-low">
+<div class="max-w-7xl mx-auto px-container-padding">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
+<!-- Images/Visuals -->
+<div class="lg:col-span-5 relative h-[500px] w-full rounded-2xl overflow-hidden soft-shadow">
+<div class="absolute inset-0 bg-secondary-container/20 mix-blend-overlay z-10"></div>
+<img alt="Vista detallada de herramientas de manicura y esmaltes sobre una mesa de salón iluminada con luz natural suave" class="w-full h-full object-cover" data-alt="A close-up, high-quality image of professional manicure tools, brushes, and colorful nail polish bottles arranged neatly on a sleek, light-colored salon table. The scene is bathed in soft, natural daylight, creating a warm, inviting, and premium modern aesthetic. The color palette features soft pastels, crisp whites, and subtle metallic accents, perfectly matching a boutique wellness brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWCFoM42ljdu_qSv4Aq2oaP-fYMJY6r5S_-Apla2qZLK8ES_attvYC11v-_WF9AuNzS2LEz1HbDDeyII_2qSvRI-HHoEehVKl49esGREW29HuGMl1bUNJVdqLlh5uun9LdOB6vV42bFFtV9t-jVfEQNwFNE4aHGdHMGuiOCjto6SunKGKLf4RCiPgCXicqE-rlOA6IHYMdfike1wazywWkBFeek69MRiZaXyyPdTlG4is93dHF4qzsIin9Sa9nKoaFxlzikcjX3Y_t"/>
+<!-- Floating Badge -->
+<div class="absolute bottom-8 right-8 bg-surface-container-lowest p-4 rounded-xl soft-shadow z-20 flex items-center gap-3 glass-card">
+<div class="bg-primary-fixed p-2 rounded-full text-primary-container">
+<span class="material-symbols-outlined">favorite</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Clientas Felices</p>
+<p class="font-headline-md text-[18px] text-primary">+500 al mes</p>
+</div>
+</div>
+</div>
+<!-- Text / List -->
+<div class="lg:col-span-6 lg:col-start-7 flex flex-col gap-stack-lg">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary mb-stack-sm">Todo lo que tu salón necesita</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Herramientas pensadas específicamente para profesionales de la belleza, diseñadas para simplificar tu día a día.</p>
+</div>
+<div class="flex flex-col gap-stack-md">
+<div class="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant/10 flex gap-4 items-start soft-shadow-hover transition-shadow">
+<div class="bg-secondary/10 p-3 rounded-lg text-secondary mt-1">
+<span class="material-symbols-outlined">photo_library</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px] text-on-surface mb-1">Galería de diseños integrada</h4>
+<p class="font-body-md text-[14px] text-on-surface-variant">Muestra tu portafolio de nail art directamente en la agenda para inspirar a tus clientas.</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant/10 flex gap-4 items-start soft-shadow-hover transition-shadow">
+<div class="bg-secondary/10 p-3 rounded-lg text-secondary mt-1">
+<span class="material-symbols-outlined">group</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px] text-on-surface mb-1">Gestión de clientas frecuentes</h4>
+<p class="font-body-md text-[14px] text-on-surface-variant">Historial de tratamientos, preferencias de color y recordatorios automáticos.</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant/10 flex gap-4 items-start soft-shadow-hover transition-shadow">
+<div class="bg-secondary/10 p-3 rounded-lg text-secondary mt-1">
+<span class="material-symbols-outlined">share</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px] text-on-surface mb-1">Turnos desde redes sociales</h4>
+<p class="font-body-md text-[14px] text-on-surface-variant">Un link único para tu bio de Instagram o TikTok. Reservas 24/7 sin responder mensajes.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-section-gap bg-primary-container text-surface relative overflow-hidden" id="cta-section">
+<!-- Decorative circles -->
+<div class="absolute top-0 right-0 w-[400px] h-[400px] bg-secondary opacity-20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+<div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary-fixed opacity-10 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
+<div class="max-w-4xl mx-auto px-container-padding text-center relative z-10">
+<h2 class="font-display-lg text-display-lg text-surface-container-lowest mb-stack-md">¿Lista para modernizar tu salón?</h2>
+<p class="font-body-lg text-body-lg text-surface-variant mb-stack-lg max-w-2xl mx-auto">
+                    Aplica este diseño a tu agenda web hoy mismo y comienza a recibir reservas de manera profesional.
+                </p>
+<form class="max-w-md mx-auto bg-surface p-stack-lg rounded-2xl soft-shadow text-left">
+<div class="mb-stack-md">
+<label class="block font-label-md text-label-md text-on-surface mb-2" for="name">Nombre de tu salón</label>
+<input class="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-4 py-3 text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors" id="name" placeholder="Ej: Studio Nails &amp; Beauty" type="text"/>
+</div>
+<div class="mb-stack-lg">
+<label class="block font-label-md text-label-md text-on-surface mb-2" for="email">Correo electrónico</label>
+<input class="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-4 py-3 text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors" id="email" placeholder="tu@email.com" type="email"/>
+</div>
+<button class="w-full bg-secondary text-on-secondary px-6 py-4 rounded-lg font-label-md text-[16px] hover:bg-on-secondary-container transition-all duration-200 shadow-md active:scale-95 font-bold" type="button">
+                        Quiero una web así para mi salón de uñas
+                    </button>
+<p class="text-center font-label-sm text-[11px] text-on-surface-variant mt-3">Prueba gratuita de 14 días. Sin tarjeta de crédito.</p>
+</form>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="bg-surface-container-highest dark:bg-surface-container-lowest w-full rounded-t-xl py-section-gap transition-all duration-500 ease-in-out opacity-100" style="animation: fadeIn 1s ease-in-out;">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter px-container-padding max-w-7xl mx-auto">
+<!-- Brand Column -->
+<div class="flex flex-col gap-stack-sm">
+<a class="font-headline-md text-headline-md text-primary dark:text-primary-fixed flex items-center gap-2" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+                    TuAgendaWeb
+                </a>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 mt-2">
+                    © 2024 TuAgendaWeb. Todos los derechos reservados.
+                </p>
+</div>
+<!-- Links Column -->
+<div class="flex flex-col gap-stack-sm">
+<h4 class="font-label-sm text-label-sm text-primary dark:text-primary-fixed font-semibold mb-2">Legal</h4>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">Privacidad</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">Términos</a>
+</div>
+<!-- Contact Column -->
+<div class="flex flex-col gap-stack-sm">
+<h4 class="font-label-sm text-label-sm text-primary dark:text-primary-fixed font-semibold mb-2">Soporte</h4>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-sm">mail</span>
+                    Contacto
+                </a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-sm">chat</span>
+                    WhatsApp
+                </a>
+</div>
+</div>
+</footer>
+</body></html>

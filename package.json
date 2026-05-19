@@ -1,0 +1,42 @@
+{
+  "name": "tuagendaweb-landing",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint src",
+    "capture:demos": "node scripts/capture-demos.mjs",
+    "remotion:studio": "remotion studio src/remotion/index.ts",
+    "remotion:render": "remotion render src/remotion/index.ts TuAgendaWebLandingDemo public/assets/videos/tuagendaweb-demo.mp4",
+    "remotion:render:vertical": "remotion render src/remotion/index.ts TuAgendaWebVerticalAd public/assets/videos/tuagendaweb-demo-vertical.mp4",
+    "remotion:poster": "remotion still src/remotion/index.ts TuAgendaWebVideoPoster public/assets/videos/tuagendaweb-demo-poster.png --frame=0"
+  },
+  "dependencies": {
+    "@next/third-parties": "latest",
+    "@remotion/cli": "^4.0.462",
+    "autoprefixer": "latest",
+    "clsx": "latest",
+    "embla-carousel-react": "latest",
+    "firebase": "^12.13.0",
+    "firebase-admin": "^13.10.0",
+    "framer-motion": "latest",
+    "lucide-react": "latest",
+    "next": "latest",
+    "postcss": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "remotion": "^4.0.462",
+    "tailwindcss": "^3.4.17"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "playwright": "latest",
+    "typescript": "latest"
+  }
+}

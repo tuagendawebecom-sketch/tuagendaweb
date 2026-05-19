@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Demo para Estudio de Tatuajes</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#c5993e",
+                        "inverse-surface": "#31302e",
+                        "primary-fixed-dim": "#a4cfca",
+                        "primary-container": "#123d3a",
+                        "on-secondary-fixed-variant": "#005045",
+                        "on-tertiary-fixed": "#261900",
+                        "surface-variant": "#e5e2de",
+                        "surface-tint": "#3d6562",
+                        "surface": "#fcf9f5",
+                        "on-tertiary-fixed-variant": "#5d4200",
+                        "surface-container-low": "#f6f3ef",
+                        "secondary-container": "#94f4de",
+                        "surface-dim": "#dcdad6",
+                        "inverse-on-surface": "#f3f0ed",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#a4cfca",
+                        "secondary-fixed": "#94f4de",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#002624",
+                        "surface-bright": "#fcf9f5",
+                        "on-secondary-fixed": "#00201a",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e5e2de",
+                        "outline": "#717977",
+                        "outline-variant": "#c0c8c6",
+                        "on-primary-container": "#7ea8a3",
+                        "primary-fixed": "#c0ebe6",
+                        "on-surface-variant": "#404847",
+                        "background": "#fcf9f5",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#ebe8e4",
+                        "on-primary-fixed-variant": "#254d4a",
+                        "tertiary-container": "#493300",
+                        "tertiary": "#2e1f00",
+                        "surface-container": "#f0edea",
+                        "on-surface": "#1c1c1a",
+                        "on-secondary-container": "#007262",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#00201e",
+                        "secondary-fixed-dim": "#78d7c3",
+                        "on-primary": "#ffffff",
+                        "secondary": "#006b5c",
+                        "tertiary-fixed-dim": "#efbf61",
+                        "tertiary-fixed": "#ffdea4",
+                        "on-background": "#1c1c1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "64px",
+                        "unit": "8px",
+                        "stack-sm": "8px",
+                        "container-padding": "32px",
+                        "stack-md": "16px",
+                        "stack-lg": "24px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- TopNavBar -->
+<nav aria-label="Main Navigation" class="bg-surface/80 backdrop-blur-md fixed top-0 w-full z-50 border-b border-outline-variant/30 shadow-sm">
+<div class="flex justify-between items-center px-container-padding py-4 max-w-7xl mx-auto">
+<a class="text-headline-md font-headline-lg text-primary flex items-center gap-2" href="#">
+<span class="material-symbols-outlined fill-icon text-secondary">calendar_today</span>
+                TuAgendaWeb
+            </a>
+<div class="hidden md:flex items-center gap-gutter">
+<a class="text-on-surface-variant hover:text-secondary transition-colors duration-200 font-label-md text-label-md" href="#">Inicio</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors duration-200 font-label-md text-label-md" href="#">Cómo funciona</a>
+<a class="text-secondary font-bold border-b-2 border-secondary pb-1 font-label-md text-label-md active:scale-95 duration-150" href="#">Demos</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors duration-200 font-label-md text-label-md" href="#">Precios</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors duration-200 font-label-md text-label-md" href="#">FAQ</a>
+</div>
+<a class="hidden md:inline-flex bg-primary text-on-primary font-label-md text-label-md px-6 py-3 rounded-lg hover:bg-on-primary-fixed-variant transition-colors active:scale-95 duration-150 shadow-[0_4px_14px_0_rgba(0,38,36,0.39)]" href="#">Solicitar Demo</a>
+<button aria-label="Open menu" class="md:hidden text-on-surface p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-[90px] pb-section-gap">
+<!-- Hero Section (Bento Grid Style) -->
+<section class="max-w-7xl mx-auto px-container-padding pt-section-gap pb-section-gap">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
+<div class="lg:col-span-5 flex flex-col gap-stack-lg">
+<div class="inline-flex items-center gap-2 bg-secondary-container/30 text-on-secondary-container px-4 py-2 rounded-full w-max border border-secondary-container">
+<span class="material-symbols-outlined text-[18px]">brush</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Industria Creativa</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary">Demo para<br/><span class="text-secondary">Estudio de Tatuajes</span></h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                        Diseñada específicamente para artistas del tatuaje. Muestra portafolios, gestiona citas con señas y mantén tu agenda organizada en un solo lugar con un estilo único.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-stack-md pt-stack-sm">
+<a class="inline-flex justify-center items-center gap-2 bg-primary text-on-primary font-label-md text-label-md px-8 py-4 rounded-xl hover:bg-on-primary-fixed-variant transition-colors shadow-[0_8px_30px_rgb(0,38,36,0.12)]" href="#demo">
+                            Quiero una web así para mi estudio
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</a>
+</div>
+</div>
+<div class="lg:col-span-7 relative mt-12 lg:mt-0">
+<div class="absolute inset-0 bg-primary-fixed-dim/20 rounded-[2rem] transform rotate-3 scale-105 -z-10"></div>
+<div class="bg-surface rounded-2xl p-2 shadow-[0_20px_50px_rgba(18,61,58,0.1)] border border-outline-variant/20 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-primary z-10"></div>
+<img alt="Mockup of Tattoo Studio booking software interface" class="w-full h-auto rounded-xl object-cover transition-transform duration-700 group-hover:scale-[1.02]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAy9OqUNwcnyT_OBqgKUgWJjXfdp_kaFe2DyItUbQ1MujjguIJ-oeDNockujnLCdZ3mtvqFrgE-CzAc19ymDG0ubk7PFJhG4XnygXo8X9frvy_1ZztAak55lSxJ051VT_g5rrXs0zAIfMJjQenRBJUcDL4uKGuJ-xRoLgQhVSoaSk0yL09JM2sptpxRBTLGi5-ilPyiCGrV4z6Oh-1jjm50nPKb6xzaOnfvGR8s_Ys1JEk8J5_cA81K1O9u-F1hpMnhnPoW2S1wZodi"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Services Section (Glassmorphism Cards) -->
+<section class="bg-surface-container-low py-section-gap border-y border-outline-variant/10 relative overflow-hidden">
+<!-- Decorative background blur -->
+<div class="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary-container/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+<div class="max-w-7xl mx-auto px-container-padding relative z-10">
+<div class="text-center mb-16 flex flex-col items-center gap-stack-sm">
+<span class="font-label-md text-label-md text-secondary uppercase tracking-widest">Catálogo</span>
+<h2 class="font-headline-lg text-headline-lg text-primary">Servicios de Ejemplo</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-2">Así verían tus clientes los servicios que ofreces, con precios claros y opciones de reserva directa.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Service Card 1 -->
+<div class="bg-surface/80 backdrop-blur-md rounded-xl p-stack-lg border border-outline-variant/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(18,61,58,0.12)] transition-all duration-300 flex flex-col h-full group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-primary">ink_pen</span>
+</div>
+<div class="w-12 h-12 bg-primary-fixed rounded-lg flex items-center justify-center mb-stack-md text-on-primary-fixed">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-1">Tattoo Small</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow mb-stack-lg">Diseños minimalistas, línea fina o tradicional hasta 5cm.</p>
+<div class="flex items-end justify-between mt-auto">
+<span class="font-headline-md text-headline-md text-secondary">$40.0</span>
+<button aria-label="Book Tattoo Small" class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-secondary hover:text-on-secondary transition-colors">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+<!-- Service Card 2 -->
+<div class="bg-surface/80 backdrop-blur-md rounded-xl p-stack-lg border border-outline-variant/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(18,61,58,0.12)] transition-all duration-300 flex flex-col h-full group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-primary">timer</span>
+</div>
+<div class="w-12 h-12 bg-primary-fixed rounded-lg flex items-center justify-center mb-stack-md text-on-primary-fixed">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-1">Sesión de 3hs</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow mb-stack-lg">Ideal para piezas medianas o avance de proyectos grandes.</p>
+<div class="flex items-end justify-between mt-auto">
+<span class="font-headline-md text-headline-md text-secondary">$120.0</span>
+<button aria-label="Book 3 hour session" class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-secondary hover:text-on-secondary transition-colors">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+<!-- Service Card 3 -->
+<div class="bg-surface/80 backdrop-blur-md rounded-xl p-stack-lg border border-outline-variant/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(18,61,58,0.12)] transition-all duration-300 flex flex-col h-full group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-primary">design_services</span>
+</div>
+<div class="w-12 h-12 bg-primary-fixed rounded-lg flex items-center justify-center mb-stack-md text-on-primary-fixed">
+<span class="material-symbols-outlined">draw</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-1">Consulta de Diseño</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow mb-stack-lg">Reunión previa para definir ideas, ubicación y presupuesto.</p>
+<div class="flex items-end justify-between mt-auto">
+<span class="font-headline-md text-headline-md text-secondary">$15.0</span>
+<button aria-label="Book Design Consultation" class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-secondary hover:text-on-secondary transition-colors">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+<!-- Service Card 4 -->
+<div class="bg-surface/80 backdrop-blur-md rounded-xl p-stack-lg border border-outline-variant/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(18,61,58,0.12)] transition-all duration-300 flex flex-col h-full group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-primary">flare</span>
+</div>
+<div class="w-12 h-12 bg-primary-fixed rounded-lg flex items-center justify-center mb-stack-md text-on-primary-fixed">
+<span class="material-symbols-outlined">emergency</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-1">Piercing</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow mb-stack-lg">Perforación básica incluye joyería de titanio grado implante.</p>
+<div class="flex items-end justify-between mt-auto">
+<span class="font-headline-md text-headline-md text-secondary">$25.0</span>
+<button aria-label="Book Piercing" class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-secondary hover:text-on-secondary transition-colors">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Benefits Section (Asymmetric Layout) -->
+<section class="max-w-7xl mx-auto px-container-padding py-section-gap">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-section-gap items-center">
+<div class="order-2 lg:order-1 relative">
+<!-- Image Placeholder with prompt -->
+<div class="aspect-[4/5] rounded-2xl overflow-hidden relative shadow-[0_20px_50px_rgba(18,61,58,0.15)] bg-surface-dim" data-alt="A clean, well-lit modern tattoo studio. An artist is focused on drawing a stencil at a sleek wooden desk. Soft, warm natural light pours in from a large window. The environment feels professional, hygienic, yet welcoming and artistic, reflecting the boutique concierge service aesthetic of the brand. Colors are neutral with subtle teal accents.">
+<!-- Fallback gradient if image doesn't load/generate perfectly -->
+<div class="absolute inset-0 bg-gradient-to-tr from-surface-container-highest to-surface opacity-50 mix-blend-overlay"></div>
+</div>
+<!-- Floating Card -->
+<div class="absolute -bottom-8 -right-8 bg-surface p-stack-lg rounded-xl shadow-[0_10px_30px_rgba(18,61,58,0.1)] border border-outline-variant/20 max-w-[280px] hidden md:block">
+<div class="flex items-center gap-4 mb-2">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined fill-icon">check_circle</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-primary">Seña Confirmada</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Hace 2 minutos</p>
+</div>
+</div>
+</div>
+</div>
+<div class="order-1 lg:order-2 flex flex-col gap-stack-lg">
+<h2 class="font-headline-lg text-headline-lg text-primary">Todo pensado para el <span class="text-secondary">artista del tatuaje</span></h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-4">Elimina el caos de los mensajes directos y las cancelaciones de último momento. Tu agenda trabajará por ti 24/7.</p>
+<ul class="flex flex-col gap-stack-md">
+<li class="flex gap-4 p-4 rounded-xl bg-surface hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant/20">
+<div class="w-12 h-12 shrink-0 bg-primary-fixed rounded-full flex items-center justify-center text-on-primary-fixed">
+<span class="material-symbols-outlined">collections</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md text-primary text-[20px] mb-1">Portafolio de artistas por perfil</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Cada tatuador tiene su propia página con galería de trabajos y servicios específicos, permitiendo a los clientes elegir su estilo preferido.</p>
+</div>
+</li>
+<li class="flex gap-4 p-4 rounded-xl bg-surface hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant/20">
+<div class="w-12 h-12 shrink-0 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md text-primary text-[20px] mb-1">Señas online para asegurar el turno</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Reduce el ausentismo. Cobra un porcentaje por adelantado mediante integración segura de pagos al momento de la reserva.</p>
+</div>
+</li>
+<li class="flex gap-4 p-4 rounded-xl bg-surface hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant/20">
+<div class="w-12 h-12 shrink-0 bg-tertiary-fixed rounded-full flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined">calendar_month</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md text-primary text-[20px] mb-1">Agenda clara para el artista</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Panel de control intuitivo. Visualiza tus citas, descansos y disponibilidad mensual con un vistazo rápido y organizado.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer aria-label="Footer" class="bg-surface-container-highest w-full rounded-t-xl">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter px-container-padding py-section-gap max-w-7xl mx-auto border-t border-outline-variant/10">
+<div class="flex flex-col gap-stack-md">
+<a class="font-headline-md text-headline-md text-primary flex items-center gap-2" href="#">
+<span class="material-symbols-outlined fill-icon text-secondary">calendar_today</span>
+                    TuAgendaWeb
+                </a>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs">Software de reservas premium para profesionales que valoran su tiempo y la experiencia de sus clientes.</p>
+</div>
+<div class="flex flex-col gap-stack-sm md:col-start-3 md:justify-self-end">
+<h4 class="font-label-md text-label-md text-primary uppercase tracking-wider mb-2">Legal &amp; Contacto</h4>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-all" href="#">Privacidad</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-all" href="#">Términos</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-all" href="#">Contacto</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-all flex items-center gap-2" href="#">
+                    WhatsApp <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</a>
+</div>
+<div class="col-span-1 md:col-span-3 mt-stack-lg pt-stack-lg border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-stack-md">
+<p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 TuAgendaWeb. Todos los derechos reservados.</p>
+<div class="flex gap-4">
+<button aria-label="Social Link" class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">public</span>
+</button>
+<button aria-label="Social Link" class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

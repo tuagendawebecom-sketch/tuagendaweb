@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Demo para Consultorio Médico - TuAgendaWeb</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-container": "#c5993e",
+                      "inverse-surface": "#31302e",
+                      "primary-fixed-dim": "#a4cfca",
+                      "primary-container": "#123d3a",
+                      "on-secondary-fixed-variant": "#005045",
+                      "on-tertiary-fixed": "#261900",
+                      "surface-variant": "#e5e2de",
+                      "surface-tint": "#3d6562",
+                      "surface": "#fcf9f5",
+                      "on-tertiary-fixed-variant": "#5d4200",
+                      "surface-container-low": "#f6f3ef",
+                      "secondary-container": "#94f4de",
+                      "surface-dim": "#dcdad6",
+                      "inverse-on-surface": "#f3f0ed",
+                      "surface-container-lowest": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#a4cfca",
+                      "secondary-fixed": "#94f4de",
+                      "on-tertiary": "#ffffff",
+                      "primary": "#002624",
+                      "surface-bright": "#fcf9f5",
+                      "on-secondary-fixed": "#00201a",
+                      "error": "#ba1a1a",
+                      "surface-container-highest": "#e5e2de",
+                      "outline": "#717977",
+                      "outline-variant": "#c0c8c6",
+                      "on-primary-container": "#7ea8a3",
+                      "primary-fixed": "#c0ebe6",
+                      "on-surface-variant": "#404847",
+                      "background": "#fcf9f5",
+                      "error-container": "#ffdad6",
+                      "surface-container-high": "#ebe8e4",
+                      "on-primary-fixed-variant": "#254d4a",
+                      "tertiary-container": "#493300",
+                      "tertiary": "#2e1f00",
+                      "surface-container": "#f0edea",
+                      "on-surface": "#1c1c1a",
+                      "on-secondary-container": "#007262",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed": "#00201e",
+                      "secondary-fixed-dim": "#78d7c3",
+                      "on-primary": "#ffffff",
+                      "secondary": "#006b5c",
+                      "tertiary-fixed-dim": "#efbf61",
+                      "tertiary-fixed": "#ffdea4",
+                      "on-background": "#1c1c1a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "64px",
+                      "unit": "8px",
+                      "stack-sm": "8px",
+                      "container-padding": "32px",
+                      "stack-md": "16px",
+                      "stack-lg": "24px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface/80 dark:bg-surface/80 backdrop-blur-md fixed top-0 w-full z-50 border-b border-outline-variant/30 shadow-sm">
+<div class="flex justify-between items-center px-container-padding py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<a class="font-headline-md text-headline-md text-primary dark:text-primary-fixed" href="#">TuAgendaWeb</a>
+</div>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 font-label-md text-label-md" href="#">Inicio</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 font-label-md text-label-md" href="#">Cómo funciona</a>
+<a class="text-secondary dark:text-secondary-fixed font-bold border-b-2 border-secondary pb-1 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 font-label-md text-label-md" href="#">Demos</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 font-label-md text-label-md" href="#">Precios</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 font-label-md text-label-md" href="#">FAQ</a>
+</nav>
+<div class="flex items-center">
+<a class="bg-secondary text-on-secondary px-6 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity" href="#">Solicitar Demo</a>
+</div>
+</div>
+</header>
+<main class="flex-grow pt-24 pb-section-gap">
+<!-- Hero Section -->
+<section class="max-w-7xl mx-auto px-container-padding py-section-gap">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<div class="space-y-stack-lg">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+                        Especialistas en Salud
+                    </span>
+<h1 class="font-display-lg text-display-lg text-primary">Demo para Consultorio Médico</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+                        Moderniza la gestión de tu consultorio con una plataforma intuitiva. Reduce inasistencias y mejora la experiencia de tus pacientes.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4 pt-4">
+<a class="bg-primary-container text-on-primary px-8 py-4 rounded-lg font-label-md text-label-md text-center hover:opacity-90 transition-opacity" href="#contacto">Quiero una web así para mi consultorio</a>
+</div>
+</div>
+<div class="relative rounded-2xl overflow-hidden shadow-[0_10px_30px_-10px_rgba(18,61,58,0.15)]">
+<img alt="Mockup of medical platform" class="w-full h-auto object-cover rounded-2xl" src="https://lh3.googleusercontent.com/aida/ADBb0ug-CuuA7bG58mMmcpehhEdl2NkvhUQX4NSoUYd9eB7sdZyxclrP-cS4p6aNlCB9wG0VINQFLZLOWO_BXwT8nHRy8626AeEfKVtLQ55JEgzJmB8dQ2A7ykjRwdEHbxPoNPWLOPUToSULnMgIBJWyfucKZr1CwXiArD_GFmGud3koaNkzmR5zsKYPldHcBwVkdwZ8XQ90fHwSLaYh1mCQlErNnFP0HedausU5paEpB8wcOjS3fmytyAAhvc1x"/>
+</div>
+</div>
+</section>
+<!-- Services Section -->
+<section class="bg-surface-container-low py-section-gap mt-section-gap">
+<div class="max-w-7xl mx-auto px-container-padding">
+<div class="text-center mb-12">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-4">Servicios Configurados</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mx-auto">
+                        Ejemplo de cómo se verían los servicios que ofreces, con precios claros y opciones de reserva directa.
+                    </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Service Card 1 -->
+<div class="bg-surface rounded-xl p-stack-lg border border-outline-variant/20 hover:border-secondary-container transition-colors">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center mb-4 text-on-primary-container">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">stethoscope</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Consulta General</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Evaluación médica inicial y diagnóstico primario.</p>
+<div class="flex items-center justify-between mt-auto pt-4 border-t border-outline-variant/20">
+<span class="font-headline-md text-headline-md text-secondary">$35.0</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">30 min</span>
+</div>
+</div>
+<!-- Service Card 2 -->
+<div class="bg-surface rounded-xl p-stack-lg border border-outline-variant/20 hover:border-secondary-container transition-colors">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center mb-4 text-on-primary-container">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Especialista</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Atención detallada para condiciones específicas.</p>
+<div class="flex items-center justify-between mt-auto pt-4 border-t border-outline-variant/20">
+<span class="font-headline-md text-headline-md text-secondary">$50.0</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">45 min</span>
+</div>
+</div>
+<!-- Service Card 3 -->
+<div class="bg-surface rounded-xl p-stack-lg border border-outline-variant/20 hover:border-secondary-container transition-colors">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center mb-4 text-on-primary-container">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">monitor_heart</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Control de Rutina</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Chequeo periódico de salud y prevención.</p>
+<div class="flex items-center justify-between mt-auto pt-4 border-t border-outline-variant/20">
+<span class="font-headline-md text-headline-md text-secondary">$25.0</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">20 min</span>
+</div>
+</div>
+<!-- Service Card 4 -->
+<div class="bg-surface rounded-xl p-stack-lg border border-outline-variant/20 hover:border-secondary-container transition-colors">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center mb-4 text-on-primary-container">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">video_camera_front</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Telemedicina</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Consulta médica virtual a través de videollamada.</p>
+<div class="flex items-center justify-between mt-auto pt-4 border-t border-outline-variant/20">
+<span class="font-headline-md text-headline-md text-secondary">$30.0</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">30 min</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Benefits Section -->
+<section class="max-w-7xl mx-auto px-container-padding py-section-gap">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div class="order-2 lg:order-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="bg-primary-fixed-dim rounded-2xl p-6 aspect-square flex flex-col justify-between">
+<span class="material-symbols-outlined text-primary-container text-4xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+<h4 class="font-headline-md text-headline-md text-primary-container mt-4">Reducción de ausentismo</h4>
+</div>
+<div class="bg-surface-container-high rounded-2xl p-6 aspect-square flex flex-col justify-between mt-0 sm:mt-8">
+<span class="material-symbols-outlined text-primary text-4xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">description</span>
+<h4 class="font-headline-md text-headline-md text-primary mt-4">Historia clínica básica</h4>
+</div>
+<div class="bg-secondary-container rounded-2xl p-6 aspect-square flex flex-col justify-between">
+<span class="material-symbols-outlined text-on-secondary-container text-4xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<h4 class="font-headline-md text-headline-md text-on-secondary-container mt-4">Portal de turnos</h4>
+</div>
+<div class="bg-surface-variant rounded-2xl p-6 aspect-square flex flex-col justify-between mt-0 sm:mt-8">
+<span class="material-symbols-outlined text-on-surface-variant text-4xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">admin_panel_settings</span>
+<h4 class="font-headline-md text-headline-md text-on-surface-variant mt-4">Gestión segura</h4>
+</div>
+</div>
+<div class="order-1 lg:order-2 space-y-stack-lg">
+<h2 class="font-headline-lg text-headline-lg text-primary">Beneficios Clave para tu Práctica</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Esta demo está diseñada para mostrar cómo nuestra plataforma puede optimizar el flujo de trabajo diario en un entorno médico, permitiéndote enfocarte en lo que más importa: tus pacientes.
+                    </p>
+<ul class="space-y-4 pt-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-1">check_circle</span>
+<div>
+<strong class="font-label-md text-label-md text-primary block">Reducción de ausentismo con recordatorios</strong>
+<span class="font-body-md text-body-md text-on-surface-variant">Sistema automatizado de alertas vía email y SMS.</span>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-1">check_circle</span>
+<div>
+<strong class="font-label-md text-label-md text-primary block">Historia clínica básica</strong>
+<span class="font-body-md text-body-md text-on-surface-variant">Acceso rápido a notas y antecedentes en cada cita.</span>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-1">check_circle</span>
+<div>
+<strong class="font-label-md text-label-md text-primary block">Portal de turnos para pacientes</strong>
+<span class="font-body-md text-body-md text-on-surface-variant">Autogestión de reservas 24/7 de forma sencilla.</span>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-surface-container-lowest w-full rounded-t-xl bg-surface-container-highest">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter px-container-padding py-section-gap max-w-7xl mx-auto">
+<div class="space-y-4">
+<a class="font-headline-md text-headline-md text-primary dark:text-primary-fixed text-primary dark:text-primary-fixed" href="#">TuAgendaWeb</a>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm mt-2">Simplificando la gestión de reservas para profesionales.</p>
+</div>
+<div class="space-y-4">
+<h4 class="font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wider mb-2">Enlaces Legales</h4>
+<div class="flex flex-col space-y-2">
+<a class="text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all font-body-md text-body-md" href="#">Privacidad</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all font-body-md text-body-md" href="#">Términos</a>
+</div>
+</div>
+<div class="space-y-4">
+<h4 class="font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wider mb-2">Soporte</h4>
+<div class="flex flex-col space-y-2">
+<a class="text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all font-body-md text-body-md" href="#">Contacto</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all font-body-md text-body-md" href="#">WhatsApp</a>
+</div>
+</div>
+<div class="col-span-1 md:col-span-3 pt-8 mt-8 border-t border-outline-variant/20 text-center">
+<p class="font-label-sm text-label-sm text-on-surface-variant/70">© 2024 TuAgendaWeb. Todos los derechos reservados.</p>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Demo para Centro de Masajes - TuAgendaWeb</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-container": "#c5993e",
+                      "inverse-surface": "#31302e",
+                      "primary-fixed-dim": "#a4cfca",
+                      "primary-container": "#123d3a",
+                      "on-secondary-fixed-variant": "#005045",
+                      "on-tertiary-fixed": "#261900",
+                      "surface-variant": "#e5e2de",
+                      "surface-tint": "#3d6562",
+                      "surface": "#fcf9f5",
+                      "on-tertiary-fixed-variant": "#5d4200",
+                      "surface-container-low": "#f6f3ef",
+                      "secondary-container": "#94f4de",
+                      "surface-dim": "#dcdad6",
+                      "inverse-on-surface": "#f3f0ed",
+                      "surface-container-lowest": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#a4cfca",
+                      "secondary-fixed": "#94f4de",
+                      "on-tertiary": "#ffffff",
+                      "primary": "#002624",
+                      "surface-bright": "#fcf9f5",
+                      "on-secondary-fixed": "#00201a",
+                      "error": "#ba1a1a",
+                      "surface-container-highest": "#e5e2de",
+                      "outline": "#717977",
+                      "outline-variant": "#c0c8c6",
+                      "on-primary-container": "#7ea8a3",
+                      "primary-fixed": "#c0ebe6",
+                      "on-surface-variant": "#404847",
+                      "background": "#fcf9f5",
+                      "error-container": "#ffdad6",
+                      "surface-container-high": "#ebe8e4",
+                      "on-primary-fixed-variant": "#254d4a",
+                      "tertiary-container": "#493300",
+                      "tertiary": "#2e1f00",
+                      "surface-container": "#f0edea",
+                      "on-surface": "#1c1c1a",
+                      "on-secondary-container": "#007262",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed": "#00201e",
+                      "secondary-fixed-dim": "#78d7c3",
+                      "on-primary": "#ffffff",
+                      "secondary": "#006b5c",
+                      "tertiary-fixed-dim": "#efbf61",
+                      "tertiary-fixed": "#ffdea4",
+                      "on-background": "#1c1c1a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "64px",
+                      "unit": "8px",
+                      "stack-sm": "8px",
+                      "container-padding": "32px",
+                      "stack-md": "16px",
+                      "stack-lg": "24px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased pt-20">
+<!-- TopNavBar -->
+<nav class="bg-surface/80 dark:bg-surface/80 backdrop-blur-md fixed top-0 w-full z-50 border-b border-outline-variant/30 shadow-sm transition-all duration-300">
+<div class="flex justify-between items-center px-container-padding py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed text-3xl">spa</span>
+<span class="text-headline-md font-headline-md text-primary dark:text-primary-fixed font-bold tracking-tight">TuAgendaWeb</span>
+</div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary font-label-md text-label-md transition-colors duration-200" href="#">Inicio</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary font-label-md text-label-md transition-colors duration-200" href="#">Cómo funciona</a>
+<a class="text-secondary dark:text-secondary-fixed font-bold border-b-2 border-secondary pb-1 font-label-md text-label-md transition-colors duration-200" href="#">Demos</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary font-label-md text-label-md transition-colors duration-200" href="#">Precios</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-secondary font-label-md text-label-md transition-colors duration-200" href="#">FAQ</a>
+</div>
+<div class="flex items-center">
+<button class="bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary px-6 py-2.5 rounded-lg font-label-md text-label-md transition-colors duration-200 shadow-sm hover:shadow-md flex items-center gap-2">
+<span>Solicitar Demo</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="w-full">
+<!-- Hero Section -->
+<section class="w-full px-container-padding py-section-gap max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-24 relative overflow-hidden">
+<div class="w-full lg:w-1/2 flex flex-col z-10 space-y-stack-lg">
+<div class="inline-flex items-center gap-2 bg-surface-container-highest px-4 py-1.5 rounded-full w-fit">
+<span class="material-symbols-outlined text-secondary text-sm">spa</span>
+<span class="text-label-sm font-label-sm text-secondary font-semibold tracking-wide uppercase">Centro de Bienestar</span>
+</div>
+<h1 class="text-display-lg font-display-lg text-primary leading-tight">
+                    Demo para <br/><span class="text-secondary">Centro de Masajes</span>
+</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-xl">
+                    Descubre cómo nuestra plataforma puede transformar la gestión de tu centro de masajes. Ofrece a tus clientes una experiencia de reserva relajante desde el primer click, mientras optimizas tus espacios y terapeutas.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 pt-4">
+<button class="bg-[#1F8A78] text-white hover:bg-secondary px-8 py-4 rounded-lg font-label-md text-label-md transition-all duration-200 shadow-[0_10px_30px_-10px_rgba(31,138,120,0.3)] hover:shadow-[0_15px_35px_-10px_rgba(31,138,120,0.4)] hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                        Quiero una web así
+                        <span class="material-symbols-outlined">arrow_right_alt</span>
+</button>
+<button class="bg-transparent border border-primary-container text-primary-container hover:bg-surface-container px-8 py-4 rounded-lg font-label-md text-label-md transition-colors duration-200 flex items-center justify-center gap-2">
+                        Ver todas las demos
+                    </button>
+</div>
+<div class="flex items-center gap-6 pt-8 mt-4 border-t border-outline-variant/30">
+<div class="flex -space-x-3">
+<img alt="Client 1" class="w-10 h-10 rounded-full border-2 border-surface object-cover" data-alt="Close up portrait of a relaxed woman in a spa setting, soft natural lighting, high key serene mood, modern minimal aesthetic with subtle teal tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuoYj2vDwtY4RlcQTDl8MrsOqKQHfLMKWrLafUGpKPufj3Vi6RqdLKIbNC9f7n4wTfxmhTXq03QZuc0eJyt0k1W8BRsoYy_moPoiKh_ZWUwCAfFWaXDyc9oX58Bl1Y6hckVv1MDL7OwqOOdUu0k_KRYO0uz4bhK736v4L-scggA8hY3jXHmKuUH38J3TkVTRdu0I5oFU0jQ132Y6zxRoltk5z9h1J0AAekNHgDQtYnRZCPMbpGnI3ghzoZb7WN8q1JrS7b-BsECshX"/>
+<img alt="Client 2" class="w-10 h-10 rounded-full border-2 border-surface object-cover" data-alt="Close up portrait of a calm man, soft side lighting, professional yet warm mood, clean background, modern minimal aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZwBd9XW98oBs8pJTpY6xOQy-CJWqqrd-3i2ViHNzMLasWQS0IpyOPOsMA1cOfiyUMecXja0vT16JfnOvlvoCVXB5weX3UE8GlHlLf8WJT6jo1CghIQ-hx-1aS2bZHR0Uu09PT4uRtvKp3bobA0sZ44442PC03emeVFrR2tzM6bGyCJJlAn1vSNZloeHKE_f6pKg4vlfc7rNfZpnS7GDs5kreQJxPJ80FoGWZs9Y7C2aV_0Xgqek-4-aQV0mI3xm9ldaGisiRXOg18"/>
+<img alt="Client 3" class="w-10 h-10 rounded-full border-2 border-surface object-cover" data-alt="Close up portrait of a smiling woman, bright natural light, warm and inviting mood, organic minimalist background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8j9e4Jpk8IpLo5oAmkiWKYYI6_a3HpSt_BpUshBzuuitJ7Op-eOFI_CclplipNpl2TCb8J8NIV-McFFpfBovGR6igVI7RnDFPiHPJ8HYZ9DdWRgS-W-iOx3YYRrLlqY8LmIubq2gHMpdMNozR7wxZP63w5sr7ATUBTGR9KRPFdAS6qiyXbwsLPTWJJSoBlql9_hY1m4hzlqgXFAr8JHv5je2_h_Fdw5juZ7P48ZpSlkqiJDxV4sFGzRZlkIa4UDrfTQpgLpxMAdjU"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center text-on-tertiary-container">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Recomendado por +50 centros</span>
+</div>
+</div>
+</div>
+<div class="w-full lg:w-1/2 relative z-10 flex justify-center lg:justify-end">
+<div class="relative w-full max-w-2xl aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_20px_50px_-20px_rgba(18,61,58,0.2)] border border-outline-variant/20 bg-surface-container-lowest">
+<img alt="Mockup Dashboard Masajes" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMsoTcriRn08ZsB6LuI6unicTs1Q6incJTfrkxSMyoEp-hVfQjnkOA_B7NqXICIw9qmol0NYIaGQgZMjqapu9qbpweatb5IVrBcMUD6puNAkFo1CRg0_2x35SywimxE9jDSG84HWieIAp-pf157ewb6Mj7HCIsKo67xJ4p9RSJi0akFy3dbXaC1L98Pqhx0Yd1GuQQvtv5MxLrNFhRG4cpqeaTo6gGIKh24U9EqmBbq8yUXs2F1f8jRJUNDYSof0xa0dHTAxozdPfg"/>
+<!-- Decorative elements -->
+<div class="absolute -top-6 -right-6 w-24 h-24 bg-primary-fixed rounded-full blur-2xl opacity-50 mix-blend-multiply"></div>
+<div class="absolute -bottom-8 -left-8 w-32 h-32 bg-secondary-container rounded-full blur-3xl opacity-40 mix-blend-multiply"></div>
+</div>
+</div>
+<!-- Background ambient blobs -->
+<div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-bl from-surface-container-low to-transparent -z-10 rounded-l-[100px] opacity-60"></div>
+</section>
+<!-- Beneficios Bento Grid -->
+<section class="w-full bg-surface-container-low py-section-gap">
+<div class="px-container-padding max-w-7xl mx-auto">
+<div class="mb-12 max-w-2xl">
+<h2 class="text-headline-lg font-headline-lg text-primary mb-4">Experiencia Zen Integral</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Soluciones pensadas específicamente para la dinámica de un centro de bienestar, aportando calma tanto a tus clientes como a tu gestión diaria.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Feature 1: Large -->
+<div class="md:col-span-2 bg-surface-container-lowest p-8 rounded-xl border border-[rgba(30,30,28,0.08)] flex flex-col sm:flex-row gap-8 items-center transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(18,61,58,0.1)] group">
+<div class="w-full sm:w-1/2 space-y-4">
+<div class="w-12 h-12 bg-primary-fixed-dim/30 rounded-lg flex items-center justify-center text-primary-container mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-2xl">meeting_room</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface">Gestión de salas y disponibilidad</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Coordina terapeutas y cabinas de masaje sin conflictos. Nuestro sistema cruza agendas automáticamente para evitar overbooking.</p>
+</div>
+<div class="w-full sm:w-1/2 bg-surface-container p-6 rounded-lg relative overflow-hidden h-48 flex items-center justify-center">
+<div class="absolute inset-0 opacity-20 bg-[radial-gradient(#717977_1px,transparent_1px)] [background-size:16px_16px]"></div>
+<div class="bg-surface-container-lowest p-4 rounded shadow-sm border border-outline-variant/20 z-10 w-full max-w-xs space-y-3">
+<div class="flex justify-between items-center border-b border-surface-variant pb-2">
+<span class="text-label-sm font-label-sm font-semibold text-primary">Sala Zen - 10:00 AM</span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-[#E7B85A] text-on-tertiary-fixed text-xs flex items-center justify-center font-bold">LM</div>
+<div>
+<div class="text-label-md font-label-md text-on-surface">Laura M.</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant">Terapeuta</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Feature 2: Small -->
+<div class="bg-[#DDEBE6] p-8 rounded-xl border border-[rgba(30,30,28,0.08)] flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(18,61,58,0.15)] group relative overflow-hidden">
+<div class="z-10 space-y-4">
+<div class="w-12 h-12 bg-surface-container-lowest/60 rounded-lg flex items-center justify-center text-primary-container mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-2xl">self_improvement</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface">Ambiente zen desde la reserva</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Una interfaz de reserva intuitiva y relajante que anticipa la experiencia que vivirán en tu centro.</p>
+</div>
+<span class="material-symbols-outlined absolute -bottom-10 -right-10 text-9xl text-primary-container/5 transform -rotate-12 group-hover:rotate-0 transition-transform duration-700">spa</span>
+</div>
+<!-- Feature 3: Small -->
+<div class="bg-surface-container-lowest p-8 rounded-xl border border-[rgba(30,30,28,0.08)] flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(18,61,58,0.1)] group">
+<div class="space-y-4">
+<div class="w-12 h-12 bg-[#E7B85A]/20 rounded-lg flex items-center justify-center text-on-tertiary-container mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-2xl">event_repeat</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface">Automatización de consultas recurrentes</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Fomenta la lealtad con recordatorios automáticos y facilidades para reprogramar sesiones periódicas de bienestar.</p>
+</div>
+</div>
+<!-- Feature 4: Medium/Wide -->
+<div class="md:col-span-2 bg-primary-container p-8 rounded-xl border border-[rgba(30,30,28,0.08)] flex flex-col sm:flex-row items-center justify-between transition-transform duration-300 hover:-translate-y-1 shadow-[0_10px_30px_-10px_rgba(18,61,58,0.2)]">
+<div class="space-y-4 max-w-md">
+<h3 class="text-headline-md font-headline-md text-surface-container-lowest">Lleva tu centro al siguiente nivel</h3>
+<p class="text-body-md font-body-md text-primary-fixed-dim">Digitaliza tu agenda sin perder la calidez humana. Configura tus servicios en minutos.</p>
+</div>
+<button class="mt-6 sm:mt-0 bg-[#F7F4EE] text-primary-container hover:bg-surface-container-lowest px-6 py-3 rounded-lg font-label-md text-label-md transition-colors duration-200 flex items-center gap-2 font-semibold">
+                            Comenzar ahora
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Servicios Menu Section (Glassmorphism inspired) -->
+<section class="w-full px-container-padding py-section-gap max-w-7xl mx-auto relative">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-[#DDEBE6] rounded-full blur-[100px] opacity-30 -z-10"></div>
+<div class="text-center mb-16 space-y-4">
+<span class="text-label-sm font-label-sm text-secondary font-semibold tracking-widest uppercase">Catálogo Ejemplo</span>
+<h2 class="text-headline-lg font-headline-lg text-primary">Nuestros Servicios</h2>
+<p class="text-body-md font-body-md text-on-surface-variant max-w-2xl mx-auto">Así es como tus clientes verán tu menú de servicios. Limpio, claro y enfocado en la experiencia.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-lg max-w-4xl mx-auto">
+<!-- Service Item 1 -->
+<div class="bg-surface-container-lowest/80 backdrop-blur-md p-6 rounded-xl border border-outline-variant/30 flex items-center justify-between hover:bg-surface-container-lowest transition-colors shadow-sm hover:shadow-[0_10px_30px_-10px_rgba(18,61,58,0.1)] group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 bg-surface-container rounded-full flex items-center justify-center text-secondary group-hover:bg-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined text-2xl">accessibility_new</span>
+</div>
+<div>
+<h4 class="text-body-lg font-body-lg font-semibold text-on-surface">Masaje Descontracturante</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 60 min
+                            </p>
+</div>
+</div>
+<div class="text-right">
+<div class="text-headline-md font-headline-md text-primary">$35.0</div>
+<button class="text-label-sm font-label-sm text-secondary hover:underline mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Reservar</button>
+</div>
+</div>
+<!-- Service Item 2 -->
+<div class="bg-surface-container-lowest/80 backdrop-blur-md p-6 rounded-xl border border-outline-variant/30 flex items-center justify-between hover:bg-surface-container-lowest transition-colors shadow-sm hover:shadow-[0_10px_30px_-10px_rgba(18,61,58,0.1)] group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 bg-surface-container rounded-full flex items-center justify-center text-secondary group-hover:bg-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined text-2xl">lens</span>
+</div>
+<div>
+<h4 class="text-body-lg font-body-lg font-semibold text-on-surface">Piedras Calientes</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 90 min
+                            </p>
+</div>
+</div>
+<div class="text-right">
+<div class="text-headline-md font-headline-md text-primary">$45.0</div>
+<button class="text-label-sm font-label-sm text-secondary hover:underline mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Reservar</button>
+</div>
+</div>
+<!-- Service Item 3 -->
+<div class="bg-surface-container-lowest/80 backdrop-blur-md p-6 rounded-xl border border-outline-variant/30 flex items-center justify-between hover:bg-surface-container-lowest transition-colors shadow-sm hover:shadow-[0_10px_30px_-10px_rgba(18,61,58,0.1)] group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 bg-surface-container rounded-full flex items-center justify-center text-secondary group-hover:bg-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined text-2xl">footprint</span>
+</div>
+<div>
+<h4 class="text-body-lg font-body-lg font-semibold text-on-surface">Reflexología</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 45 min
+                            </p>
+</div>
+</div>
+<div class="text-right">
+<div class="text-headline-md font-headline-md text-primary">$28.0</div>
+<button class="text-label-sm font-label-sm text-secondary hover:underline mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Reservar</button>
+</div>
+</div>
+<!-- Service Item 4 -->
+<div class="bg-surface-container-lowest/80 backdrop-blur-md p-6 rounded-xl border border-outline-variant/30 flex items-center justify-between hover:bg-surface-container-lowest transition-colors shadow-sm hover:shadow-[0_10px_30px_-10px_rgba(18,61,58,0.1)] group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 bg-surface-container rounded-full flex items-center justify-center text-secondary group-hover:bg-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined text-2xl">water_drop</span>
+</div>
+<div>
+<h4 class="text-body-lg font-body-lg font-semibold text-on-surface">Drenaje Linfático</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 60 min
+                            </p>
+</div>
+</div>
+<div class="text-right">
+<div class="text-headline-md font-headline-md text-primary">$40.0</div>
+<button class="text-label-sm font-label-sm text-secondary hover:underline mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Reservar</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="w-full px-container-padding py-section-gap max-w-5xl mx-auto text-center">
+<div class="bg-[#F7F4EE] rounded-2xl p-12 md:p-20 border border-outline-variant/20 shadow-sm relative overflow-hidden">
+<!-- Soft background pattern -->
+<div class="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiLz48cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjMDAwIi8+PC9zdmc+')]"></div>
+<div class="relative z-10 space-y-8">
+<div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm text-primary mb-6">
+<span class="material-symbols-outlined text-3xl">favorite</span>
+</div>
+<h2 class="text-headline-lg font-headline-lg text-primary max-w-2xl mx-auto">Transforma la manera en que gestionas tu centro de bienestar hoy mismo.</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-xl mx-auto">Únete a cientos de terapeutas que ya han simplificado su día a día con TuAgendaWeb.</p>
+<button class="bg-[#1F8A78] text-white hover:bg-secondary px-10 py-5 rounded-lg font-label-md text-label-md transition-all duration-200 shadow-[0_10px_30px_-10px_rgba(31,138,120,0.3)] hover:shadow-[0_15px_35px_-10px_rgba(31,138,120,0.4)] hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 text-lg">
+                        Quiero una web así para mi centro de masajes
+                        <span class="material-symbols-outlined">rocket_launch</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-surface-container-lowest w-full rounded-t-xl mt-12 transition-colors duration-300">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter px-container-padding py-section-gap max-w-7xl mx-auto">
+<div class="flex flex-col space-y-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed text-2xl">spa</span>
+<span class="font-headline-md text-headline-md text-primary dark:text-primary-fixed font-bold tracking-tight">TuAgendaWeb</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/80 max-w-xs">
+                    Software de gestión de reservas diseñado para negocios enfocados en el bienestar.
+                </p>
+</div>
+<div class="flex flex-col space-y-4">
+<h4 class="font-label-sm text-label-sm font-semibold text-primary dark:text-primary-fixed uppercase tracking-wider">Legal</h4>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">Privacidad</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">Términos</a>
+</div>
+<div class="flex flex-col space-y-4">
+<h4 class="font-label-sm text-label-sm font-semibold text-primary dark:text-primary-fixed uppercase tracking-wider">Soporte</h4>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all" href="#">Contacto</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 hover:text-secondary transition-all flex items-center gap-2" href="#">
+                    WhatsApp
+                    <span class="material-symbols-outlined text-sm">open_in_new</span>
+</a>
+</div>
+</div>
+<div class="border-t border-outline-variant/20 px-container-padding py-6 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant/70 text-sm">
+                © 2024 TuAgendaWeb. Todos los derechos reservados.
+            </p>
+<div class="flex gap-4">
+<!-- Social placeholders -->
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant hover:bg-primary-fixed hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm">share</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>
