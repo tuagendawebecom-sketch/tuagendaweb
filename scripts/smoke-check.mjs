@@ -32,6 +32,13 @@ for (const viewport of viewports) {
     if (hasHorizontalOverflow) {
       issues.push(`${viewport.name} ${route} has horizontal overflow`);
     }
+
+    if (route === "/") {
+      const ctas = await page.locator('a[href*="wa.me"]').count();
+      if (ctas < 3) {
+        issues.push(`${viewport.name} home has too few WhatsApp CTAs`);
+      }
+    }
   }
 
   await page.close();

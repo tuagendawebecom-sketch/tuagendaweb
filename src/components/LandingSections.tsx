@@ -16,7 +16,9 @@ import {
   plans,
   problemSolution,
   quickExplanation,
+  reassuranceItems,
   trackingEvents,
+  urgencyStrip,
   webCompletaFeatures,
   whatsappMessages
 } from "@/data/site";
@@ -47,6 +49,37 @@ export function QuickExplanation() {
             <item.icon className={item.featured ? "text-gold" : "text-action"} size={34} />
             <h2 className="mt-6 font-display text-2xl font-extrabold">{item.title}</h2>
             <p className={`mt-3 leading-7 ${item.featured ? "text-cream/75" : "text-ink/65"}`}>{item.text}</p>
+          </motion.article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+export function CampaignReadinessStrip() {
+  return (
+    <section className="px-4 pb-8 sm:px-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-action">{urgencyStrip.title}</p>
+          <p className="mt-2 max-w-3xl leading-7 text-ink/68">{urgencyStrip.text}</p>
+        </div>
+        <Link className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream transition hover:bg-action" href="#planes">
+          {urgencyStrip.cta}
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+export function ReassuranceSection() {
+  return (
+    <Section eyebrow="Sin complicarla" title="La idea es ordenar reservas, no cambiar tu forma de vender">
+      <div className="grid gap-4 lg:grid-cols-3">
+        {reassuranceItems.map((item) => (
+          <motion.article className="rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft" key={item} {...reveal}>
+            <CheckCircle2 className="text-action" size={26} />
+            <p className="mt-4 font-semibold leading-7 text-ink/70">{item}</p>
           </motion.article>
         ))}
       </div>
@@ -120,7 +153,11 @@ export function PlanSelector() {
               eventName={trackingEvents.pricingCtaClick}
               variant={plan.featured ? "primary" : "dark"}
             />
-            <Link className={`mt-3 text-center text-xs font-bold ${plan.featured ? "text-cream/70 hover:text-cream" : "text-ink/50 hover:text-teal"}`} href={plan.href}>
+            <Link
+              className={`mt-3 text-center text-xs font-bold ${plan.featured ? "text-cream/70 hover:text-cream" : "text-ink/50 hover:text-teal"}`}
+              href={plan.href}
+              onClick={() => trackEvent(trackingEvents.planCardClick, { plan: plan.id, href: plan.href })}
+            >
               Ver detalles del plan
             </Link>
           </motion.article>
@@ -239,21 +276,21 @@ export function Comparison() {
     <Section id="precios" eyebrow="Comparativa" title="Agenda Simple, Agenda Pro o Web Completa" tone="mint">
       <div className="overflow-x-auto rounded-[1.5rem] border border-ink/10 bg-paper shadow-soft">
         <div className="min-w-[720px]">
-        <div className="grid grid-cols-[1.2fr_repeat(3,1fr)] border-b border-ink/10 bg-teal px-4 py-4 text-sm font-extrabold text-cream">
-          <span>Incluye</span>
-          <span>Agenda Simple</span>
-          <span>Agenda Pro</span>
-          <span>Web Completa</span>
-        </div>
-        {comparisonRows.map((row) => (
-          <div className="grid grid-cols-[1.2fr_repeat(3,1fr)] gap-2 border-b border-ink/10 px-4 py-4 text-sm last:border-b-0" key={row[0]}>
-            {row.map((cell, index) => (
-              <span className={index === 0 ? "font-bold text-teal" : "text-ink/68"} key={cell}>
-                {cell}
-              </span>
-            ))}
+          <div className="grid grid-cols-[1.2fr_repeat(3,1fr)] border-b border-ink/10 bg-teal px-4 py-4 text-sm font-extrabold text-cream">
+            <span>Incluye</span>
+            <span>Agenda Simple</span>
+            <span>Agenda Pro</span>
+            <span>Web Completa</span>
           </div>
-        ))}
+          {comparisonRows.map((row) => (
+            <div className="grid grid-cols-[1.2fr_repeat(3,1fr)] gap-2 border-b border-ink/10 px-4 py-4 text-sm last:border-b-0" key={row[0]}>
+              {row.map((cell, index) => (
+                <span className={index === 0 ? "font-bold text-teal" : "text-ink/68"} key={cell}>
+                  {cell}
+                </span>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
     </Section>

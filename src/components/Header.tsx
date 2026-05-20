@@ -3,13 +3,28 @@
 import { ChevronDown, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { brandAssets, demoCategories, navigation, whatsappMessages } from "@/data/site";
 import { createWhatsAppHref } from "@/lib/whatsapp";
 import { WhatsAppButton } from "./WhatsAppButton";
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const mobileMenuId = useId();
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = open ? "hidden" : "";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-ink/10 bg-cream/90 backdrop-blur-xl">
@@ -54,8 +69,9 @@ export function Header() {
         </div>
 
         <button
+          aria-controls={mobileMenuId}
           aria-expanded={open}
-          aria-label="Abrir menú"
+          aria-label={open ? "Cerrar menú" : "Abrir menú"}
           className="shrink-0 rounded-xl border border-ink/10 p-3 text-teal lg:hidden"
           onClick={() => setOpen((value) => !value)}
           type="button"
@@ -65,7 +81,7 @@ export function Header() {
       </div>
 
       {open ? (
-        <div className="max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-ink/10 bg-paper px-4 py-5 lg:hidden">
+        <div className="max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-ink/10 bg-paper px-4 py-5 lg:hidden" id={mobileMenuId}>
           <nav aria-label="Mobile" className="mx-auto grid max-w-7xl gap-2">
             {navigation.map((item) => (
               <Link className="rounded-xl px-3 py-3 text-sm font-bold text-ink/75 hover:bg-mint" href={item.href} key={item.href} onClick={() => setOpen(false)}>

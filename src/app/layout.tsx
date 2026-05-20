@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 import { TrackingProvider } from "@/components/TrackingProvider";
-import { brandAssets, siteUrl } from "@/data/site";
+import { brandAssets, faq, siteUrl } from "@/data/site";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -94,6 +94,18 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       { "@type": "Offer", name: "Web Completa", price: "100000", priceCurrency: "ARS" }
     ]
   };
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer
+      }
+    }))
+  };
 
   return (
     <html className={`${jakarta.variable} ${inter.variable}`} lang="es-AR" suppressHydrationWarning>
@@ -103,6 +115,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         </a>
         <TrackingProvider />
         <script dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} type="application/ld+json" />
+        <script dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }} type="application/ld+json" />
         {children}
       </body>
     </html>

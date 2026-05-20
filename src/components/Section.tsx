@@ -14,7 +14,7 @@ export function Section({ id, eyebrow, title, text, children, tone = "default" }
     tone === "dark" ? "bg-teal text-cream" : tone === "mint" ? "bg-mint/55 text-ink" : "bg-transparent text-ink";
 
   return (
-    <section className={`px-4 py-16 sm:px-6 lg:py-24 ${toneClass}`} id={id}>
+    <section className={`px-4 py-14 sm:px-6 sm:py-16 lg:py-24 ${toneClass}`} id={id}>
       <div className="mx-auto max-w-7xl">
         {title ? (
           <div className="mb-10 max-w-3xl">

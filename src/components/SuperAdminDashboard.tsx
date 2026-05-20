@@ -21,6 +21,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { getClientAuth, getClientDb, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { isValidSlug, normalizeSlug } from "@/lib/slug";
+import { normalizePhone } from "@/lib/phone";
 import { siteUrl } from "@/data/site";
 import type { BillingStatus, BusinessPlan, BusinessStatus } from "@/types/tenant";
 
@@ -178,7 +179,7 @@ export function SuperAdminDashboard() {
         ownerNombre: String(formData.get("ownerNombre") ?? "").trim(),
         ownerEmail: String(formData.get("ownerEmail") ?? "").trim(),
         ownerTelefono: String(formData.get("ownerTelefono") ?? "").trim(),
-        whatsapp: String(formData.get("whatsapp") ?? "").replace(/\D/g, ""),
+        whatsapp: normalizePhone(String(formData.get("whatsapp") ?? "")),
         instagram: String(formData.get("instagram") ?? "").trim(),
         logoUrl: String(formData.get("logoUrl") ?? "").trim(),
         customDomain: String(formData.get("customDomain") ?? "").trim(),
@@ -227,17 +228,29 @@ export function SuperAdminDashboard() {
 
   async function updateBusinessStatus(business: AdminBusiness, estado: BusinessStatus) {
     if (!db) return;
-    await updateDoc(doc(db, "negocios", business.id), {
-      estado,
-      activo: estado !== "suspended" && estado !== "cancelled",
-      billingStatus: estado === "active" || estado === "trial" ? "manual_active" : estado === "past_due" ? "manual_past_due" : "manual_suspended",
-      updatedAt: serverTimestamp()
-    });
+    setError("");
+    try {
+      await updateDoc(doc(db, "negocios", business.id), {
+        estado,
+        activo: estado !== "suspended" && estado !== "cancelled",
+        billingStatus: estado === "active" || estado === "trial" ? "manual_active" : estado === "past_due" ? "manual_past_due" : "manual_suspended",
+        updatedAt: serverTimestamp()
+      });
+      setMessage(`${business.nombre}: estado actualizado a ${statusLabels[estado]}.`);
+    } catch {
+      setError("No se pudo actualizar el estado del negocio.");
+    }
   }
 
   async function updateLeadStatus(leadId: string, status: string) {
     if (!db) return;
-    await updateDoc(doc(db, "leads", leadId), { status, updatedAt: serverTimestamp() });
+    setError("");
+    try {
+      await updateDoc(doc(db, "leads", leadId), { status, updatedAt: serverTimestamp() });
+      setMessage("Lead actualizado.");
+    } catch {
+      setError("No se pudo actualizar el lead.");
+    }
   }
 
   const filteredBusinesses = businesses.filter((business) => {
@@ -390,8 +403,10 @@ export function SuperAdminDashboard() {
           <PlusCircle size={18} />
           {saving ? "Creando..." : "Crear negocio"}
         </button>
-        {message ? <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal lg:col-span-4">{message}</p> : null}
-        {error ? <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700 lg:col-span-4">{error}</p> : null}
+        <div aria-live="polite" className="lg:col-span-4">
+          {message ? <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">{message}</p> : null}
+          {error ? <p className="mt-3 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</p> : null}
+        </div>
       </form>
 
       <section className="grid gap-4">
@@ -470,7 +485,7 @@ export function SuperAdminDashboard() {
               <p className="mt-2 text-sm text-ink/62">{lead.businessType} · {lead.interestedPlan}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {lead.phone ? (
-                  <Link className="inline-flex items-center gap-2 rounded-xl bg-teal px-3 py-2 text-xs font-bold text-cream" href={`https://wa.me/${String(lead.phone).replace(/\D/g, "")}`} rel="noopener noreferrer" target="_blank">
+                  <Link className="inline-flex items-center gap-2 rounded-xl bg-teal px-3 py-2 text-xs font-bold text-cream" href={`https://wa.me/${normalizePhone(String(lead.phone))}`} rel="noopener noreferrer" target="_blank">
                     <MessageCircle size={14} /> WhatsApp
                   </Link>
                 ) : null}

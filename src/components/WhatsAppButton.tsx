@@ -23,6 +23,7 @@ export function WhatsAppButton({
   variant = "primary",
   className = ""
 }: WhatsAppButtonProps) {
+  const disabled = href === "#";
   const variantClass =
     variant === "dark"
       ? "bg-teal text-cream hover:bg-ink"
@@ -33,7 +34,8 @@ export function WhatsAppButton({
   return (
     <Link
       aria-label={label}
-      className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold shadow-lift transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/25 ${variantClass} ${className}`}
+      aria-disabled={disabled}
+      className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold shadow-lift transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/25 ${disabled ? "pointer-events-none opacity-60" : ""} ${variantClass} ${className}`}
       href={href}
       onClick={() => trackEvent(eventName, { location, category, href })}
       rel="noopener noreferrer"

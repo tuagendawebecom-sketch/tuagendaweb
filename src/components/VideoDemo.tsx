@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { trackingEvents } from "@/data/site";
+import { trackEvent } from "@/lib/tracking";
 
 export function VideoDemo() {
   const [unavailable, setUnavailable] = useState(false);
@@ -25,6 +27,7 @@ export function VideoDemo() {
         controls
         muted
         onError={() => setUnavailable(true)}
+        onPlay={() => trackEvent(trackingEvents.videoPlay, { location: "benefits_video" })}
         playsInline
         poster="/assets/videos/tuagendaweb-demo-poster.png"
         preload="metadata"

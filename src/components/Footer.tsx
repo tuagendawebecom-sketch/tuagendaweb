@@ -39,8 +39,8 @@ export function Footer() {
         <div>
           <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.14em] text-gold">Contacto</p>
           <div className="grid gap-2 text-sm text-cream/75">
-            <Link href={socialLinks.instagram}>Instagram</Link>
-            <Link href={socialLinks.facebook}>Facebook</Link>
+            <Link href={socialLinks.instagram} rel="noopener noreferrer" target="_blank">Instagram</Link>
+            <Link href={socialLinks.facebook} rel="noopener noreferrer" target="_blank">Facebook</Link>
             <Link href={socialLinks.email}>{brandEmail}</Link>
             <Link href="#consultar">Consultar</Link>
             <Link href="/login">Acceso clientes</Link>

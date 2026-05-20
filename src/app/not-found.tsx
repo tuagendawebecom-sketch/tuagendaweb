@@ -12,6 +12,9 @@ export default function NotFound() {
         <Link className="mt-6 inline-flex rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" href="/">
           Volver a TuAgendaWeb
         </Link>
+        <Link className="mt-3 block text-sm font-bold text-action" href="/#consultar">
+          Consultar por mi negocio
+        </Link>
       </section>
     </main>
   );

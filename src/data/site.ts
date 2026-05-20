@@ -34,7 +34,10 @@ export const trackingEvents = {
   finalCtaClick: "final_cta_click",
   emailFormSubmit: "email_form_submit",
   leadFormOpen: "lead_form_open",
-  planCardClick: "plan_card_click"
+  planCardClick: "plan_card_click",
+  scrollDepth: "scroll_depth",
+  videoPlay: "video_play",
+  mobileStickyCtaClick: "mobile_sticky_cta_click"
 } as const;
 
 export const whatsappMessages = {
@@ -84,6 +87,18 @@ export const trustSignals = [
   "WhatsApp sigue siendo tu canal de venta",
   "Agenda online activa desde el celular"
 ] as const;
+
+export const reassuranceItems = [
+  "No hace falta dejar WhatsApp: el link ordena la reserva y la conversación sigue ahí.",
+  "La reserva está pensada para celular, con pasos simples y textos claros.",
+  "Podés empezar con agenda y pasar a web completa cuando tenga sentido para tu negocio."
+] as const;
+
+export const urgencyStrip = {
+  title: "¿Estás enviando tráfico desde Meta Ads?",
+  text: "La página ya deja WhatsApp, formulario, demos y precios visibles para que la consulta no se enfríe.",
+  cta: "Revisar planes"
+};
 
 export const leadForm = {
   eyebrow: "Consulta guiada",

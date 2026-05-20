@@ -33,14 +33,21 @@ export function LeadCaptureForm() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const storedCampaign = sessionStorage.getItem("tuagendaweb_campaign");
+    let parsedCampaign: Partial<typeof sourceData> = {};
+    try {
+      parsedCampaign = storedCampaign ? JSON.parse(storedCampaign) as Partial<typeof sourceData> : {};
+    } catch {
+      parsedCampaign = {};
+    }
     setSourceData({
       path: `${window.location.pathname}${window.location.search}`,
       referrer: document.referrer,
-      utmSource: params.get("utm_source") ?? "",
-      utmMedium: params.get("utm_medium") ?? "",
-      utmCampaign: params.get("utm_campaign") ?? "",
-      utmContent: params.get("utm_content") ?? "",
-      utmTerm: params.get("utm_term") ?? ""
+      utmSource: params.get("utm_source") ?? parsedCampaign.utmSource ?? "",
+      utmMedium: params.get("utm_medium") ?? parsedCampaign.utmMedium ?? "",
+      utmCampaign: params.get("utm_campaign") ?? parsedCampaign.utmCampaign ?? "",
+      utmContent: params.get("utm_content") ?? parsedCampaign.utmContent ?? "",
+      utmTerm: params.get("utm_term") ?? parsedCampaign.utmTerm ?? ""
     });
     trackEvent(trackingEvents.leadFormOpen, { location: "lead_form" });
   }, []);
@@ -65,6 +72,12 @@ export function LeadCaptureForm() {
     setError("");
 
     try {
+      if (payload.phone.replace(/\D/g, "").length < 8) {
+        setState("error");
+        setError("Revisá el WhatsApp. Necesito un número válido para responderte.");
+        return;
+      }
+
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -117,17 +130,17 @@ export function LeadCaptureForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               Tu nombre
-              <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="name" required type="text" />
+              <input autoComplete="name" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="name" required type="text" />
             </label>
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               WhatsApp
-              <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" name="phone" required type="tel" />
+              <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" name="phone" pattern="[0-9+()\\s-]{8,}" required type="tel" />
             </label>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               Nombre del negocio
-              <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="businessName" required type="text" />
+              <input autoComplete="organization" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="businessName" required type="text" />
             </label>
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               Rubro
@@ -156,8 +169,10 @@ export function LeadCaptureForm() {
             <Send size={18} />
             {state === "submitting" ? "Enviando..." : leadForm.submit}
           </button>
-          {state === "success" ? <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">{leadForm.success}</p> : null}
-          {state === "error" ? <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</p> : null}
+          <div aria-live="polite">
+            {state === "success" ? <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">{leadForm.success}</p> : null}
+            {state === "error" ? <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</p> : null}
+          </div>
           <p className="text-xs leading-5 text-ink/50">{leadForm.fallback}</p>
         </form>
       </div>

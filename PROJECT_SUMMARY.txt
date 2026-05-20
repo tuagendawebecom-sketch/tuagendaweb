@@ -406,3 +406,55 @@ Validación realizada:
 - npm run build
 - npm run test:smoke
 - Smoke test OK: 8 rutas x 2 viewports.
+
+23. Tercera tanda de mejoras sin tocar futuras funciones pagas
+- Fecha: 2026-05-19.
+- Objetivo: mejorar la página activa sin implementar recordatorios, pagos, automatizaciones, reportes avanzados ni extras mensuales futuros.
+
+Mejoras aplicadas:
+1. CTA sticky mobile a WhatsApp.
+2. Sección de aviso para tráfico de Meta Ads.
+3. Sección de tranquilidad comercial: no reemplaza WhatsApp, ordena reservas.
+4. Tracking de profundidad de scroll al 25%.
+5. Tracking de profundidad de scroll al 50%.
+6. Tracking de profundidad de scroll al 75%.
+7. Tracking de profundidad de scroll al 90%.
+8. Tracking de reproducción del video demo.
+9. Tracking de clics en links de detalle de planes.
+10. Persistencia de UTM en sessionStorage.
+11. Formulario reutiliza UTM guardadas si el usuario navega antes de consultar.
+12. Validación client-side más clara del teléfono.
+13. Autocomplete en campos de nombre, teléfono y negocio.
+14. Pattern de teléfono en el formulario.
+15. Mensajes del formulario con aria-live.
+16. Honeypot existente reforzado con persistencia de campaña.
+17. Rate limit simple server-side para /api/leads.
+18. Teléfono de leads normalizado antes de guardar.
+19. WhatsApp helper normaliza el número central.
+20. WhatsAppButton queda deshabilitado si no hay número configurado.
+21. Header mobile cierra con Escape.
+22. Header mobile bloquea scroll de fondo cuando está abierto.
+23. Header mobile usa aria-controls.
+24. Header mobile cambia aria-label entre abrir/cerrar.
+25. Menor padding vertical en mobile para reducir fricción de scroll.
+26. Footer abre redes externas con noopener/noreferrer.
+27. Página 404 agrega salida a consulta comercial.
+28. Super Admin normaliza WhatsApp al crear negocios.
+29. Super Admin muestra feedback accesible con aria-live.
+30. Super Admin maneja errores al cambiar estados de negocios.
+31. Super Admin maneja errores al cambiar estados de leads.
+32. Healthcheck muestra versión corta del commit cuando existe.
+33. FAQ schema JSON-LD.
+34. Open Graph image generada por Next.js.
+35. Twitter image reutilizando la OG image.
+36. Smoke test verifica cantidad mínima de CTAs a WhatsApp en home.
+37. CSS global evita desbordes de video e imágenes.
+38. CSS agrega padding inferior mobile para que el CTA sticky no tape contenido.
+39. CSS oculta marcador nativo de details para FAQ más limpia.
+40. Build limpio sin warnings del generador OG.
+
+Validación realizada:
+- npm run lint
+- npm run build
+- npm run test:smoke
+- Smoke test OK: 8 rutas x 2 viewports.

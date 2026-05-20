@@ -8,6 +8,7 @@ export function GET() {
   return NextResponse.json({
     ok: true,
     app: "tuagendaweb",
+    version: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "local",
     firebaseClientConfigured: isFirebaseClientConfigured(),
     firebaseAdminConfigured: isFirebaseAdminConfigured(),
     timestamp: new Date().toISOString()
