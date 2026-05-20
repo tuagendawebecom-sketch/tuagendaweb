@@ -4,6 +4,8 @@ import { getAdminDb } from "@/lib/firebase/admin";
 import { normalizePhone } from "@/lib/phone";
 import { isValidSlug } from "@/lib/slug";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const slug = body?.slug ? String(body.slug) : "";

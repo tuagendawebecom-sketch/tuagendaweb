@@ -8,6 +8,8 @@ type ReservarPageProps = Readonly<{
   params: Promise<{ slug: string }>;
 }>;
 
+export const dynamic = "force-dynamic";
+
 const demoTimes = ["09:00", "10:00", "11:30", "15:00", "16:30", "18:00"];
 
 export default async function ReservarPage({ params }: ReservarPageProps) {
@@ -41,14 +43,18 @@ export default async function ReservarPage({ params }: ReservarPageProps) {
           <div className="mt-8 grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <h2 className="font-display text-2xl font-extrabold text-teal">1. Elegí el servicio</h2>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {services.map((service, index) => (
-                  <button className={`rounded-2xl border p-4 text-left ${index === 0 ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`} disabled={!canReserve} key={service.id} type="button">
-                    <p className="font-bold text-teal">{service.nombre}</p>
-                    <p className="mt-1 text-sm text-ink/62">{service.duracionMin} min</p>
-                  </button>
-                ))}
-              </div>
+              {services.length ? (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {services.map((service, index) => (
+                    <button className={`rounded-2xl border p-4 text-left ${index === 0 ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`} disabled={!canReserve} key={service.id} type="button">
+                      <p className="font-bold text-teal">{service.nombre}</p>
+                      <p className="mt-1 text-sm text-ink/62">{service.duracionMin} min</p>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-4 rounded-2xl bg-cream p-4 font-semibold text-ink/65">Todavía no hay servicios disponibles para reservar.</p>
+              )}
 
               <h2 className="mt-8 font-display text-2xl font-extrabold text-teal">2. Elegí día y horario</h2>
               <div className="mt-4 rounded-2xl bg-cream p-4">

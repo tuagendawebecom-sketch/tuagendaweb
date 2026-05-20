@@ -1,5 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { SuperAdminDashboard } from "@/components/SuperAdminDashboard";
+
+export const metadata: Metadata = {
+  title: "Super Admin",
+  robots: { index: false, follow: false }
+};
 
 export default function SuperAdminPage() {
   return (

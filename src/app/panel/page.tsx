@@ -1,5 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { PanelDashboard } from "@/components/PanelDashboard";
+
+export const metadata: Metadata = {
+  title: "Panel cliente",
+  robots: { index: false, follow: false }
+};
 
 export default function PanelPage() {
   return (

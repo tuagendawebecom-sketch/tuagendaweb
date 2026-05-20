@@ -1,7 +1,7 @@
 "use client";
 
 import { Send } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { leadForm, plans, trackingEvents, whatsappMessages } from "@/data/site";
 import type { LeadInterestPlan } from "@/types/tenant";
 import { trackEvent } from "@/lib/tracking";
@@ -21,6 +21,29 @@ type FormState = "idle" | "submitting" | "success" | "error";
 export function LeadCaptureForm() {
   const [state, setState] = useState<FormState>("idle");
   const [error, setError] = useState("");
+  const [sourceData, setSourceData] = useState({
+    path: "",
+    referrer: "",
+    utmSource: "",
+    utmMedium: "",
+    utmCampaign: "",
+    utmContent: "",
+    utmTerm: ""
+  });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSourceData({
+      path: `${window.location.pathname}${window.location.search}`,
+      referrer: document.referrer,
+      utmSource: params.get("utm_source") ?? "",
+      utmMedium: params.get("utm_medium") ?? "",
+      utmCampaign: params.get("utm_campaign") ?? "",
+      utmContent: params.get("utm_content") ?? "",
+      utmTerm: params.get("utm_term") ?? ""
+    });
+    trackEvent(trackingEvents.leadFormOpen, { location: "lead_form" });
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,7 +56,9 @@ export function LeadCaptureForm() {
       businessType: String(formData.get("businessType") ?? "").trim(),
       interestedPlan: String(formData.get("interestedPlan") ?? "not_sure"),
       message: String(formData.get("message") ?? "").trim(),
-      source: "landing_form"
+      company: String(formData.get("company") ?? ""),
+      source: "landing_form",
+      ...sourceData
     };
 
     setState("submitting");
@@ -85,6 +110,10 @@ export function LeadCaptureForm() {
         </div>
 
         <form className="grid gap-4 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft sm:p-7" onSubmit={handleSubmit}>
+          <label className="hidden">
+            Empresa
+            <input autoComplete="off" name="company" tabIndex={-1} type="text" />
+          </label>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               Tu nombre

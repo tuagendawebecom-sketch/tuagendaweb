@@ -354,3 +354,55 @@ Validación realizada:
 - npm run build
 - npm run test:smoke con production server local en localhost:3001
 - Rutas del smoke: /, /login, /panel, /superadmin, /agenda/victorias-estetica, /demos/barberia.
+
+22. Segunda tanda de mejoras para campañas y operación
+- Fecha: 2026-05-19.
+- Objetivo: mejorar conversión, trazabilidad, seguridad, SEO y operación sin cambiar el diseño aprobado.
+
+Mejoras aplicadas:
+1. Headers de seguridad globales desde next.config.ts.
+2. Cache larga para assets estáticos.
+3. Cache no-store para rutas /api.
+4. X-Robots-Tag noindex para APIs.
+5. Web manifest en /manifest.webmanifest.
+6. Loading state global para navegación.
+7. Error boundary global con reintento.
+8. Healthcheck en /api/health.
+9. Smoke test ampliado a 8 rutas.
+10. /agenda/[slug] y /agenda/[slug]/reservar forzadas como dinámicas para leer estado fresco.
+11. /api/reservas/consultar y /api/reservas/cancelar forzadas como dinámicas.
+12. /login con metadata noindex.
+13. /panel con metadata noindex.
+14. /superadmin con metadata noindex.
+15. Demos con canonical y Open Graph por rubro.
+16. Sitemap actualizado con la agenda demo.
+17. Agenda pública con canonical y Open Graph dinámico.
+18. Fallback visual cuando un negocio no tiene servicios cargados.
+19. Formulario de leads captura UTM source.
+20. Formulario de leads captura UTM medium.
+21. Formulario de leads captura UTM campaign.
+22. Formulario de leads captura UTM content.
+23. Formulario de leads captura UTM term.
+24. Formulario de leads captura path y referrer.
+25. Honeypot anti-spam simple en formulario de leads.
+26. Leads guardan datos de atribución en Firestore.
+27. Super Admin muestra métricas de negocios activos.
+28. Super Admin muestra métricas de suspendidos/cancelados.
+29. Super Admin muestra cantidad de leads nuevos.
+30. Super Admin tiene búsqueda de negocios.
+31. Super Admin tiene filtro de leads por estado.
+32. Super Admin exporta leads a CSV.
+33. Super Admin permite marcar leads como perdido.
+34. Super Admin agrega link directo a WhatsApp por lead.
+35. Super Admin muestra feedback "Copiado" al copiar links.
+36. Super Admin permite marcar negocio como pago pendiente.
+37. Alta de negocio permite guardar Instagram.
+38. Alta de negocio permite guardar Logo URL.
+39. Alta de negocio permite guardar dominio propio.
+40. Alta de negocio permite asociar UID de dueño a businessUsers/{uid}.
+
+Validación realizada:
+- npm run lint
+- npm run build
+- npm run test:smoke
+- Smoke test OK: 8 rutas x 2 viewports.

@@ -103,7 +103,7 @@ export function PanelDashboard() {
           Plan: {business.plan ?? "agenda_simple"} · Estado: {business.estado ?? "trial"}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link className="inline-flex items-center gap-2 rounded-2xl bg-action px-5 py-3 text-sm font-bold text-white" href={`/agenda/${business.slug}`} target="_blank">
+          <Link className="inline-flex items-center gap-2 rounded-2xl bg-action px-5 py-3 text-sm font-bold text-white" href={`/agenda/${business.slug}`} rel="noopener noreferrer" target="_blank">
             Ver agenda pública <ExternalLink size={16} />
           </Link>
           <button className="rounded-2xl border border-cream/20 px-5 py-3 text-sm font-bold" onClick={() => auth && signOut(auth)} type="button">

@@ -4,10 +4,13 @@ import { notFound } from "next/navigation";
 import { AlertCircle, CalendarCheck, MessageCircle } from "lucide-react";
 import { canReserveBusiness, getBusinessBySlug, getPublicServices } from "@/lib/firebase/business";
 import { isValidSlug } from "@/lib/slug";
+import { siteUrl } from "@/data/site";
 
 type AgendaPageProps = Readonly<{
   params: Promise<{ slug: string }>;
 }>;
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: AgendaPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -17,7 +20,15 @@ export async function generateMetadata({ params }: AgendaPageProps): Promise<Met
 
   return {
     title: `Agenda de ${business.nombre}`,
-    description: `Reservá turno online en ${business.nombre} desde el celular.`
+    description: `Reservá turno online en ${business.nombre} desde el celular.`,
+    alternates: {
+      canonical: `${siteUrl}/agenda/${business.slug}`
+    },
+    openGraph: {
+      title: `Agenda de ${business.nombre}`,
+      description: `Reservá turno online en ${business.nombre} desde el celular.`,
+      url: `${siteUrl}/agenda/${business.slug}`
+    }
   };
 }
 
@@ -66,14 +77,18 @@ export default async function AgendaPage({ params }: AgendaPageProps) {
           <div className="grid gap-4">
             <div className="rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft">
               <h2 className="font-display text-2xl font-extrabold text-teal">Servicios disponibles</h2>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {services.map((service) => (
-                  <div className="rounded-2xl bg-cream p-4" key={service.id}>
-                    <p className="font-bold text-teal">{service.nombre}</p>
-                    <p className="mt-1 text-sm text-ink/62">{service.duracionMin} min{service.precio ? ` · $${service.precio.toLocaleString("es-AR")}` : ""}</p>
-                  </div>
-                ))}
-              </div>
+              {services.length ? (
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {services.map((service) => (
+                    <div className="rounded-2xl bg-cream p-4" key={service.id}>
+                      <p className="font-bold text-teal">{service.nombre}</p>
+                      <p className="mt-1 text-sm text-ink/62">{service.duracionMin} min{service.precio ? ` · $${service.precio.toLocaleString("es-AR")}` : ""}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-5 rounded-2xl bg-cream p-4 font-semibold text-ink/65">Este negocio todavía no tiene servicios públicos cargados.</p>
+              )}
             </div>
             <div className="rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft">
               <h2 className="font-display text-2xl font-extrabold text-teal">Consulta rápida</h2>

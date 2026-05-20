@@ -38,3 +38,5 @@ export type PublicService = {
 };
 
 export type LeadInterestPlan = BusinessPlan | "not_sure";
+
+export type LeadStatus = "new" | "contacted" | "won" | "lost";
