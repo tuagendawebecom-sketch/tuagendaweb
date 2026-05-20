@@ -60,13 +60,15 @@ export const socialLinks = {
 
 export const navigation = [
   { label: "Inicio", href: "/" },
-  { label: "Agenda Simple", href: "#agenda-simple" },
-  { label: "Agenda Pro", href: "#planes" },
-  { label: "Web Completa", href: "#web-completa" },
   { label: "Demos", href: "#demos" },
   { label: "Precios", href: "#precios" },
-  { label: "FAQ", href: "#faq" },
-  { label: "Consultar", href: "#consultar" }
+  { label: "FAQ", href: "#faq" }
+];
+
+export const solutionNavigation = [
+  { label: "Agenda Simple", href: "#agenda-simple", description: "Link de reservas dentro de TuAgendaWeb" },
+  { label: "Agenda Pro", href: "#planes", description: "Agenda preparada para crecer por etapas" },
+  { label: "Web Completa", href: "#web-completa", description: "Web propia con dominio y turnos online" }
 ];
 
 export const hero = {
@@ -82,7 +84,7 @@ export const hero = {
 };
 
 export const trustSignals = [
-  "Dominio tuagendaweb.com.ar listo para campañas",
+  "Opciones claras para empezar simple o con web propia",
   "Pensado para negocios de Tucumán y Argentina",
   "WhatsApp sigue siendo tu canal de venta",
   "Agenda online activa desde el celular"
@@ -119,19 +121,19 @@ export const nextSteps = [
   "Me mostrás tu negocio, rubro y cómo tomás turnos hoy.",
   "Definimos si conviene Agenda Simple, Agenda Pro o Web Completa.",
   "Se cargan servicios, horarios, WhatsApp y datos básicos.",
-  "Probamos el link o la web antes de usarlo en campañas."
+  "Probamos el link o la web antes de compartirlo con tus clientes."
 ] as const;
 
 export const credibilityNotes = [
-  "Precios visibles para no perder tiempo en consultas sin encaje.",
+  "Precios visibles para que sepas de entrada qué opción puede encajar.",
   "Demos por rubro para que puedas imaginar el resultado.",
-  "Panel y agenda preparados para separar cada negocio por slug.",
-  "Sin prometer funciones futuras como si ya estuvieran incluidas."
+  "Cada negocio puede tener su propio link de reserva ordenado.",
+  "Lo incluido y lo opcional se explican por separado, sin letra chica."
 ] as const;
 
 export const urgencyStrip = {
-  title: "¿Estás enviando tráfico desde Meta Ads?",
-  text: "La página ya deja WhatsApp, formulario, demos y precios visibles para que la consulta no se enfríe.",
+  title: "Elegí la forma más simple de ordenar tus turnos",
+  text: "Podés empezar con un link de reservas o avanzar con una web completa. Ves opciones, demos y precios antes de escribir.",
   cta: "Revisar planes"
 };
 

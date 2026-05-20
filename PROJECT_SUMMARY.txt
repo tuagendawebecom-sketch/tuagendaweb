@@ -449,6 +449,16 @@ Validación realizada:
 - npm run test:smoke
 - Smoke test OK: 10 rutas x 2 viewports.
 
+25. Corrección de mensajes internos y header desktop
+- Fecha: 2026-05-20.
+- Se retiró el texto visible que hablaba de Meta Ads porque era un mensaje interno de adquisición, no un mensaje para el cliente final.
+- El bloque ahora habla de elegir entre link de reservas o web completa, con opciones, demos y precios antes de escribir.
+- Se suavizó el texto de "claridad comercial" para que no suene a filtro interno de ventas.
+- Se reemplazó la mención a campañas por "compartirlo con tus clientes".
+- El header desktop se compactó con un dropdown "Soluciones" para Agenda Simple, Agenda Pro y Web Completa.
+- Se quitó el truncado del texto TuAgendaWeb al lado del logo para evitar los puntos suspensivos.
+- El CTA desktop del header ahora dice "WhatsApp" y ocupa menos ancho.
+
 23. Tercera tanda de mejoras sin tocar futuras funciones pagas
 - Fecha: 2026-05-19.
 - Objetivo: mejorar la página activa sin implementar recordatorios, pagos, automatizaciones, reportes avanzados ni extras mensuales futuros.

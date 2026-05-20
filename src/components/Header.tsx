@@ -4,7 +4,7 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
-import { brandAssets, demoCategories, navigation, whatsappMessages } from "@/data/site";
+import { brandAssets, demoCategories, navigation, solutionNavigation, whatsappMessages } from "@/data/site";
 import { createWhatsAppHref } from "@/lib/whatsapp";
 import { WhatsAppButton } from "./WhatsAppButton";
 
@@ -28,20 +28,33 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-ink/10 bg-cream/90 backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link className="flex min-w-0 items-center gap-3" href="/">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+        <Link className="flex shrink-0 items-center gap-3" href="/">
           <Image
             alt="TuAgendaWeb"
-            className="h-12 w-12 shrink-0 rounded-2xl object-contain shadow-soft sm:h-14 sm:w-14"
+            className="h-11 w-11 shrink-0 rounded-2xl object-contain shadow-soft xl:h-12 xl:w-12"
             height={108}
             priority
             src={brandAssets.logo}
             width={108}
           />
-          <span className="truncate font-display text-xl font-extrabold text-teal sm:text-2xl">TuAgendaWeb</span>
+          <span className="font-display text-xl font-extrabold text-teal xl:text-2xl">TuAgendaWeb</span>
         </Link>
 
-        <nav aria-label="Principal" className="hidden items-center gap-8 lg:flex">
+        <nav aria-label="Principal" className="hidden items-center gap-5 xl:gap-7 lg:flex">
+          <div className="group relative">
+            <button className="inline-flex items-center gap-1 rounded-lg py-2 text-sm font-bold text-ink/75 transition hover:text-action focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20" type="button">
+              Soluciones <ChevronDown size={16} />
+            </button>
+            <div className="invisible absolute left-1/2 top-full grid w-80 -translate-x-1/2 translate-y-3 gap-1 rounded-2xl border border-ink/10 bg-paper p-3 opacity-0 shadow-lift transition group-focus-within:visible group-focus-within:translate-y-1 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-1 group-hover:opacity-100">
+              {solutionNavigation.map((item) => (
+                <Link className="rounded-xl px-3 py-3 text-sm font-semibold text-ink/70 hover:bg-mint hover:text-teal" href={item.href} key={item.href}>
+                  <span className="block font-extrabold text-teal">{item.label}</span>
+                  <span className="mt-1 block text-xs font-semibold text-ink/55">{item.description}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
           {navigation.map((item) =>
             item.label === "Demos" ? (
               <div className="group relative" key={item.href}>
@@ -65,7 +78,7 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:block">
-          <WhatsAppButton href={createWhatsAppHref(whatsappMessages.heroAgenda)} label="Consultar por WhatsApp" location="header" />
+          <WhatsAppButton className="min-h-11 rounded-xl px-4 py-2 shadow-soft xl:min-h-12 xl:rounded-2xl xl:px-5 xl:py-3" href={createWhatsAppHref(whatsappMessages.heroAgenda)} label="WhatsApp" location="header" />
         </div>
 
         <button
@@ -83,6 +96,11 @@ export function Header() {
       {open ? (
         <div className="max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-ink/10 bg-paper px-4 py-5 lg:hidden" id={mobileMenuId}>
           <nav aria-label="Mobile" className="mx-auto grid max-w-7xl gap-2">
+            {solutionNavigation.map((item) => (
+              <Link className="rounded-xl bg-mint/60 px-3 py-3 text-sm font-bold text-teal" href={item.href} key={item.href} onClick={() => setOpen(false)}>
+                {item.label}
+              </Link>
+            ))}
             {navigation.map((item) => (
               <Link className="rounded-xl px-3 py-3 text-sm font-bold text-ink/75 hover:bg-mint" href={item.href} key={item.href} onClick={() => setOpen(false)}>
                 {item.label}
