@@ -450,6 +450,33 @@ Validación realizada:
 - Smoke test OK: 10 rutas x 2 viewports.
 - Se dejó libre el puerto localhost:3001 al terminar.
 
+28. Acceso Super Admin automatizable
+- Fecha: 2026-05-20.
+- Objetivo: evitar crear a mano el primer usuario Super Admin cada vez que se configure Firebase.
+
+Mejoras aplicadas:
+1. Se agregó `scripts/ensure-superadmin.mjs`.
+2. Se agregó el comando `npm run admin:ensure-superadmin`.
+3. El script lee `.env.local` automáticamente.
+4. El script crea el usuario en Firebase Auth si no existe.
+5. El script actualiza contraseña si el usuario ya existe.
+6. El script fuerza `emailVerified: true`.
+7. El script reactiva el usuario si estaba deshabilitado.
+8. El script crea/actualiza `businessUsers/{uid}`.
+9. El documento queda con `role: "superadmin"`.
+10. El documento queda con `isActive: true`.
+11. El script usa Firebase Admin SDK, no el SDK cliente.
+12. La contraseña no queda hardcodeada en el repositorio.
+13. `.env.example` ahora incluye `ADMIN_SEED_EMAIL`.
+14. `.env.example` ahora incluye `ADMIN_SEED_PASSWORD`.
+15. `FIREBASE_SETUP.md` documenta el flujo con script.
+16. Se mantiene la alternativa manual por consola Firebase si hiciera falta.
+
+Uso previsto:
+- Cargar `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`, `ADMIN_SEED_EMAIL` y `ADMIN_SEED_PASSWORD`.
+- Ejecutar `npm run admin:ensure-superadmin`.
+- Entrar a `/login` con el email configurado.
+
 26. Quinta tanda de mejoras de navegación, responsive y estabilidad
 - Fecha: 2026-05-20.
 - Objetivo: pulir la landing activa sin implementar recordatorios, pagos, automatizaciones, reportes avanzados ni futuras mejoras mensuales.

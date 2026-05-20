@@ -69,24 +69,44 @@ En Vercel, `FIREBASE_ADMIN_PRIVATE_KEY` debe conservar saltos de línea. Si se p
 
 Camino recomendado para MVP:
 
-1. Crear usuario manualmente en Firebase Auth.
-2. Copiar el UID.
-3. Crear documento:
+1. Cargar estas variables en `.env.local` o en el entorno donde se ejecute el script:
+
+```env
+FIREBASE_ADMIN_PROJECT_ID=
+FIREBASE_ADMIN_CLIENT_EMAIL=
+FIREBASE_ADMIN_PRIVATE_KEY=
+ADMIN_SEED_EMAIL=
+ADMIN_SEED_PASSWORD=
+```
+
+2. Ejecutar:
+
+```bash
+npm run admin:ensure-superadmin
+```
+
+El script crea o actualiza el usuario en Firebase Auth y crea/actualiza:
 
 ```txt
 businessUsers/{uid}
 ```
 
+con:
+
 ```json
 {
   "role": "superadmin",
-  "isActive": true,
-  "createdAt": "serverTimestamp",
-  "updatedAt": "serverTimestamp"
+  "isActive": true
 }
 ```
 
-Luego el panel `/superadmin` debe validar ese rol antes de permitir operaciones reales.
+Luego ingresar desde `/login`. Si el rol es `superadmin`, el login redirige a `/superadmin`.
+
+Alternativa manual:
+
+1. Crear usuario manualmente en Firebase Auth.
+2. Copiar el UID.
+3. Crear manualmente el documento `businessUsers/{uid}` con `role: "superadmin"` e `isActive: true`.
 
 ## 7. Alta de negocio inicial
 
