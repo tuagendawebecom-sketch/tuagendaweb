@@ -108,7 +108,7 @@ Crear documento en `negocios`:
   "colorSecundario": "#E7B85A",
   "whatsapp": "",
   "rubro": "Estética",
-  "monthlyPrice": 15000
+  "monthlyPrice": 10000
 }
 ```
 

@@ -140,8 +140,13 @@ export function PlanSelector() {
             key={plan.id}
             {...reveal}
           >
-            {plan.featured ? <span className="mb-4 w-fit rounded-full bg-gold px-3 py-1 text-xs font-extrabold uppercase tracking-[0.12em] text-teal">Recomendada</span> : null}
+            {plan.featured || plan.badge ? (
+              <span className={`mb-4 w-fit rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-[0.12em] ${plan.featured ? "bg-gold text-teal" : "bg-mint text-teal"}`}>
+                {plan.featured ? "Recomendada" : plan.badge}
+              </span>
+            ) : null}
             <h3 className="font-display text-3xl font-extrabold">{plan.name}</h3>
+            {plan.previousPrice ? <p className={`mt-3 text-sm font-bold line-through ${plan.featured ? "text-cream/45" : "text-ink/38"}`}>{plan.previousPrice}</p> : null}
             <p className={`mt-3 font-display text-2xl font-extrabold ${plan.featured ? "text-gold" : "text-teal"}`}>{plan.price}</p>
             <p className={`mt-4 leading-7 ${plan.featured ? "text-cream/78" : "text-ink/65"}`}>{plan.description}</p>
             <div className="mt-6 grid gap-3">

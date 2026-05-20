@@ -150,7 +150,7 @@ export function SuperAdminDashboard() {
     const nombre = String(formData.get("nombre") ?? "").trim();
     const slug = normalizeSlug(String(formData.get("slug") || nombre));
     const plan = String(formData.get("plan") ?? "agenda_simple") as BusinessPlan;
-    const monthlyPrice = plan === "agenda_simple" ? 15000 : plan === "agenda_pro" ? 30000 : 0;
+    const monthlyPrice = plan === "agenda_simple" ? 10000 : plan === "agenda_pro" ? 20000 : 0;
 
     setError("");
     setMessage("");

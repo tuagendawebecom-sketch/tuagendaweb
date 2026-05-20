@@ -58,6 +58,14 @@ for (const viewport of viewports) {
         issues.push(`${viewport.name} home is missing #comparativa anchor`);
       }
 
+      if ((await page.getByText("Desde $10.000 / mes").count()) < 1) {
+        issues.push(`${viewport.name} home is missing Agenda Simple promotional price`);
+      }
+
+      if ((await page.getByText("Desde $20.000 / mes").count()) < 1) {
+        issues.push(`${viewport.name} home is missing Agenda Pro promotional price`);
+      }
+
       if (viewport.name === "desktop") {
         const solutionsTrigger = page.getByTestId("solutions-menu-trigger");
         const solutionsMenu = page.getByTestId("solutions-menu");

@@ -44,8 +44,8 @@ En Vercel, cargar variables desde `.env.example` con valores reales del Firebase
 
 - Hero visible.
 - Planes visibles:
-  - Agenda Simple desde $15.000 / mes.
-  - Agenda Pro desde $30.000 / mes.
+  - Agenda Simple desde $10.000 / mes.
+  - Agenda Pro desde $20.000 / mes.
   - Web Completa $100.000 pago único.
 - WhatsApp por plan correcto.
 - Responsive mobile correcto.

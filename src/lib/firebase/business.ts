@@ -18,7 +18,7 @@ const demoBusiness: PublicBusiness = {
   colorSecundario: "#E7B85A",
   whatsapp: "5493815746066",
   rubro: "Estética",
-  monthlyPrice: 15000
+  monthlyPrice: 10000
 };
 
 const demoServices: PublicService[] = [
