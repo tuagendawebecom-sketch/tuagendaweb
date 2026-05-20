@@ -10,6 +10,12 @@ const viewports = [
 const browser = await chromium.launch({ headless: true });
 const issues = [];
 
+async function expectVisible(locator, label) {
+  if (!(await locator.isVisible())) {
+    issues.push(`${label} is not visible`);
+  }
+}
+
 for (const viewport of viewports) {
   const page = await browser.newPage({ viewport });
   page.on("console", (message) => {
@@ -37,6 +43,48 @@ for (const viewport of viewports) {
       const ctas = await page.locator('a[href*="wa.me"]').count();
       if (ctas < 3) {
         issues.push(`${viewport.name} home has too few WhatsApp CTAs`);
+      }
+
+      const pricingHref = await page.locator('nav[aria-label="Principal"] a', { hasText: "Precios" }).first().getAttribute("href").catch(() => null);
+      if (viewport.name === "desktop" && pricingHref !== "#planes") {
+        issues.push(`desktop Precios link points to ${pricingHref ?? "nothing"} instead of #planes`);
+      }
+
+      if (!(await page.locator("#planes").count())) {
+        issues.push(`${viewport.name} home is missing #planes anchor`);
+      }
+
+      if (!(await page.locator("#comparativa").count())) {
+        issues.push(`${viewport.name} home is missing #comparativa anchor`);
+      }
+
+      if (viewport.name === "desktop") {
+        const solutionsTrigger = page.getByTestId("solutions-menu-trigger");
+        const solutionsMenu = page.getByTestId("solutions-menu");
+        await solutionsTrigger.hover();
+        await expectVisible(solutionsMenu, "desktop solutions dropdown after hover");
+        const firstSolution = solutionsMenu.getByRole("menuitem").first();
+        await firstSolution.hover();
+        await expectVisible(solutionsMenu, "desktop solutions dropdown while hovering item");
+
+        const demosTrigger = page.getByTestId("demos-menu-trigger");
+        const demosMenu = page.getByTestId("demos-menu");
+        await demosTrigger.hover();
+        await expectVisible(demosMenu, "desktop demos dropdown after hover");
+        const firstDemo = demosMenu.getByRole("menuitem").first();
+        await firstDemo.hover();
+        await expectVisible(demosMenu, "desktop demos dropdown while hovering item");
+      }
+
+      if (viewport.name === "mobile") {
+        await page.locator("button[aria-controls]").click();
+        await expectVisible(page.locator('nav[aria-label="Mobile"]'), "mobile menu");
+        await expectVisible(page.locator('nav[aria-label="Mobile"]').getByText("Soluciones").first(), "mobile solutions heading");
+        await expectVisible(page.locator('nav[aria-label="Mobile"]').getByText("Demos").first(), "mobile demos heading");
+      }
+
+      if ((await page.getByText("Meta Ads").count()) > 0) {
+        issues.push(`${viewport.name} home exposes internal Meta Ads wording`);
       }
     }
   }

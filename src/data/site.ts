@@ -61,7 +61,7 @@ export const socialLinks = {
 export const navigation = [
   { label: "Inicio", href: "/" },
   { label: "Demos", href: "#demos" },
-  { label: "Precios", href: "#precios" },
+  { label: "Precios", href: "#planes" },
   { label: "FAQ", href: "#faq" }
 ];
 
@@ -69,6 +69,13 @@ export const solutionNavigation = [
   { label: "Agenda Simple", href: "#agenda-simple", description: "Link de reservas dentro de TuAgendaWeb" },
   { label: "Agenda Pro", href: "#planes", description: "Agenda preparada para crecer por etapas" },
   { label: "Web Completa", href: "#web-completa", description: "Web propia con dominio y turnos online" }
+];
+
+export const planOverviewNavigation = [
+  { label: "Agenda Simple", href: "#plan-agenda-simple" },
+  { label: "Agenda Pro", href: "#plan-agenda-pro" },
+  { label: "Web Completa", href: "#plan-web-completa" },
+  { label: "Comparativa", href: "#comparativa" }
 ];
 
 export const hero = {
@@ -297,7 +304,7 @@ export const demoCategories: DemoCategory[] = [
     description: "Ordená tratamientos, duraciones, profesionales y disponibilidad con una experiencia cuidada y visual.",
     commercialDescription: "Ideal para estudios de estética que venden confianza, imagen y organización.",
     services: ["Limpieza facial - 60 min", "Depilación - 45 min", "Tratamiento corporal - 75 min", "Consulta estética - 30 min"],
-    benefits: ["Servicios claros antes de consultar", "Agenda por profesional o cabina", "Imagen premium para campañas"],
+    benefits: ["Servicios claros antes de consultar", "Agenda por profesional o cabina", "Imagen premium para compartir"],
     palette: "from-rose-700 to-teal-700",
     cover: "/assets/demos/estetica-cover.png",
     desktop: "/assets/demos/estetica-desktop.png",

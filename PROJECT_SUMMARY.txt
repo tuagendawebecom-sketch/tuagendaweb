@@ -407,6 +407,55 @@ Validación realizada:
 - npm run test:smoke
 - Smoke test OK: 8 rutas x 2 viewports.
 
+26. Quinta tanda de mejoras de navegación, responsive y estabilidad
+- Fecha: 2026-05-20.
+- Objetivo: pulir la landing activa sin implementar recordatorios, pagos, automatizaciones, reportes avanzados ni futuras mejoras mensuales.
+- Se atendió especialmente el problema de sublinks y el dropdown que a veces desaparecía al bajar el mouse desde "Soluciones" o "Demos".
+
+Mejoras aplicadas:
+1. El link "Precios" del header ahora apunta a #planes, donde están las tarjetas de Agenda Simple, Agenda Pro y Web Completa.
+2. La tabla comparativa dejó de usar el id #precios y ahora usa #comparativa para no confundir navegación.
+3. Se agregaron anclas directas para cada plan: #plan-agenda-simple, #plan-agenda-pro y #plan-web-completa.
+4. Las tarjetas de planes tienen scroll-margin para que el header sticky no tape el contenido al navegar por anclas.
+5. Se agregaron accesos rápidos debajo de los planes para saltar entre opciones y comparativa.
+6. Cada tarjeta de plan incluye acceso directo a la comparativa.
+7. El dropdown "Soluciones" ahora tiene un área de hover continua, sin hueco entre botón y panel.
+8. El dropdown "Demos" ahora tiene el mismo puente de hover para evitar cierres accidentales.
+9. Se eliminó el desplazamiento vertical del panel desplegable que generaba pérdida de hover.
+10. Los dropdowns usan top calculado para quedar pegados visualmente al header sin taparlo.
+11. Se agregó aria-haspopup a los botones de dropdown.
+12. Los paneles desplegables usan role="menu".
+13. Los links internos de los dropdowns usan role="menuitem".
+14. Se reforzaron estados focus-visible en links de navegación desktop.
+15. Se reforzaron estados focus-visible dentro de los dropdowns.
+16. El menú desktop redujo un poco los gaps para respirar mejor en notebooks y pantallas medianas.
+17. El dropdown de demos ganó ancho para que los rubros entren con más aire.
+18. Los links de demos tienen mayor altura táctil/visual para verse menos comprimidos.
+19. El menú mobile ahora separa visualmente "Soluciones" y "Demos".
+20. El menú mobile queda más claro para usuarios que entran desde celular.
+21. Se mantuvo el CTA compacto "WhatsApp" en desktop para no chocar con la navegación.
+22. Se mantuvo visible el nombre completo TuAgendaWeb junto al logo.
+23. Se quitó una referencia comercial a "campañas" en la demo de estética para que no suene interna.
+24. La navegación rápida de planes usa aria-label descriptivo.
+25. El smoke test ahora verifica que #planes exista.
+26. El smoke test ahora verifica que #comparativa exista.
+27. El smoke test ahora falla si el link "Precios" vuelve a apuntar a un lugar incorrecto.
+28. El smoke test ahora prueba hover del dropdown "Soluciones".
+29. El smoke test ahora prueba hover del dropdown "Demos".
+30. El smoke test ahora abre el menú mobile y verifica los grupos principales.
+31. El smoke test ahora detecta si vuelve a aparecer texto visible interno como "Meta Ads".
+32. Se validó que no haya overflow horizontal en rutas principales mobile y desktop.
+33. Se validaron rutas comerciales y operativas: /, /login, /panel, /superadmin, agenda pública, reserva, demos y legales.
+34. Se mantuvo intacto el posicionamiento: TuAgendaWeb no se presenta como SaaS genérico.
+35. Se mantuvieron los tres planes actuales sin tocar futuras mejoras pagas.
+
+Validación realizada:
+- npm run lint
+- npm run build
+- npm run test:smoke en localhost:3001
+- Smoke test OK: 10 rutas x 2 viewports.
+- Se dejó libre el puerto localhost:3001 al terminar.
+
 24. Cuarta tanda de mejoras de claridad comercial y confianza
 - Fecha: 2026-05-20.
 - Objetivo: mejorar venta, claridad, confianza, legales básicos y trazabilidad sin implementar futuras mejoras pagas mensuales.

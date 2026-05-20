@@ -17,6 +17,7 @@ import {
   howItWorks,
   includedFeatures,
   nextSteps,
+  planOverviewNavigation,
   plans,
   problemSolution,
   quickExplanation,
@@ -132,9 +133,10 @@ export function PlanSelector() {
       <div className="grid gap-5 lg:grid-cols-3">
         {plans.map((plan) => (
           <motion.article
-            className={`relative flex flex-col rounded-[1.5rem] border p-6 shadow-soft ${
+            className={`relative flex scroll-mt-28 flex-col rounded-[1.5rem] border p-6 shadow-soft ${
               plan.featured ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-ink"
             }`}
+            id={`plan-${plan.id.replace("_", "-")}`}
             key={plan.id}
             {...reveal}
           >
@@ -165,9 +167,22 @@ export function PlanSelector() {
             >
               Ver detalles del plan
             </Link>
+            <Link
+              className={`mt-2 text-center text-xs font-bold ${plan.featured ? "text-cream/70 hover:text-cream" : "text-ink/50 hover:text-teal"}`}
+              href="#comparativa"
+            >
+              Comparar con las otras opciones
+            </Link>
           </motion.article>
         ))}
       </div>
+      <nav aria-label="Accesos rápidos a planes" className="mt-6 flex flex-wrap justify-center gap-2">
+        {planOverviewNavigation.map((item) => (
+          <Link className="rounded-full border border-ink/10 bg-paper px-4 py-2 text-sm font-bold text-ink/65 shadow-soft transition hover:border-action/40 hover:text-teal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20" href={item.href} key={item.href}>
+            {item.label}
+          </Link>
+        ))}
+      </nav>
     </Section>
   );
 }
@@ -353,7 +368,7 @@ export function DemoCarousel() {
 
 export function Comparison() {
   return (
-    <Section id="precios" eyebrow="Comparativa" title="Agenda Simple, Agenda Pro o Web Completa" tone="mint">
+    <Section id="comparativa" eyebrow="Comparativa" title="Agenda Simple, Agenda Pro o Web Completa" tone="mint">
       <div className="overflow-x-auto rounded-[1.5rem] border border-ink/10 bg-paper shadow-soft">
         <div className="min-w-[720px]">
           <div className="grid grid-cols-[1.2fr_repeat(3,1fr)] border-b border-ink/10 bg-teal px-4 py-4 text-sm font-extrabold text-cream">
