@@ -44,6 +44,8 @@ export function Footer() {
             <Link href={socialLinks.email}>{brandEmail}</Link>
             <Link href="#consultar">Consultar</Link>
             <Link href="/login">Acceso clientes</Link>
+            <Link href="/privacidad">Privacidad</Link>
+            <Link href="/terminos">Términos</Link>
             <span>Tucumán, Argentina.</span>
           </div>
         </div>

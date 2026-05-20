@@ -7,9 +7,12 @@ import { LeadCaptureForm } from "@/components/LeadCaptureForm";
 import {
   Benefits,
   AgendaSimpleSection,
+  AudienceFitSection,
   CampaignReadinessStrip,
   Comparison,
+  CredibilityNotesSection,
   DemoCarousel,
+  DecisionGuideSection,
   FAQ,
   FinalCTA,
   HowItWorks,
@@ -19,6 +22,8 @@ import {
   ProblemSolution,
   QuickExplanation,
   ReassuranceSection,
+  StartRequirementsSection,
+  NextStepsSection,
   WebCompletaSection
 } from "@/components/LandingSections";
 
@@ -32,18 +37,23 @@ export default function Home() {
         <CampaignReadinessStrip />
         <QuickExplanation />
         <ProblemSolution />
+        <AudienceFitSection />
         <PlanSelector />
+        <DecisionGuideSection />
         <ReassuranceSection />
         <AgendaSimpleSection />
         <WebCompletaSection />
         <DemoCarousel />
         <Comparison />
         <HowItWorks />
+        <StartRequirementsSection />
         <Benefits />
+        <CredibilityNotesSection />
         <IncludedFeatures />
         <Improvements />
         <FAQ />
         <LeadCaptureForm />
+        <NextStepsSection />
         <FinalCTA />
       </main>
       <Footer />

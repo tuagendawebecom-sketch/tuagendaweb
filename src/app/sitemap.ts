@@ -3,7 +3,7 @@ import { demoCategories, siteUrl } from "@/data/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const staticRoutes = ["", "/agenda/victorias-estetica"].map((path) => ({
+  const staticRoutes = ["", "/agenda/victorias-estetica", "/privacidad", "/terminos"].map((path) => ({
     url: `${siteUrl}${path}`,
     lastModified: now,
     changeFrequency: "weekly" as const,

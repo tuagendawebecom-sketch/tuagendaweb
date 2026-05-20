@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 const baseUrl = process.env.BASE_URL ?? "http://localhost:3001";
-const routes = ["/", "/login", "/panel", "/superadmin", "/agenda/victorias-estetica", "/agenda/victorias-estetica/reservar", "/demos/barberia", "/api/health"];
+const routes = ["/", "/login", "/panel", "/superadmin", "/agenda/victorias-estetica", "/agenda/victorias-estetica/reservar", "/demos/barberia", "/privacidad", "/terminos", "/api/health"];
 const viewports = [
   { name: "mobile", width: 390, height: 844 },
   { name: "desktop", width: 1440, height: 1000 }

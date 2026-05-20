@@ -40,7 +40,7 @@ export function CampaignTelemetry() {
     };
 
     if (Object.values(campaignData).some(Boolean)) {
-      sessionStorage.setItem("tuagendaweb_campaign", JSON.stringify(campaignData));
+      sessionStorage.setItem("tuagendaweb_campaign", JSON.stringify({ ...campaignData, capturedAt: new Date().toISOString() }));
     }
   }, []);
 

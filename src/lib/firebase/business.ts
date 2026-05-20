@@ -97,6 +97,7 @@ export async function createLandingLead(input: {
   utmCampaign?: string;
   utmContent?: string;
   utmTerm?: string;
+  capturedAt?: string;
 }) {
   const db = getAdminDb();
   if (!db) return { ok: false, reason: "firebase_not_configured" as const };

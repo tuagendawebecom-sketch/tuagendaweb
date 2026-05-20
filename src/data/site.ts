@@ -94,6 +94,41 @@ export const reassuranceItems = [
   "Podés empezar con agenda y pasar a web completa cuando tenga sentido para tu negocio."
 ] as const;
 
+export const fitChecklist = [
+  "Tenés clientes que te piden turnos por WhatsApp o Instagram.",
+  "Necesitás mostrar servicios, horarios y una forma clara de reservar.",
+  "Querés separar consultas reales del ida y vuelta repetitivo.",
+  "Querés verte más profesional sin sumar una herramienta complicada."
+] as const;
+
+export const startRequirements = [
+  ["Nombre del negocio", "Para armar el link, la agenda o la web con tu marca."],
+  ["Servicios y duración", "Ejemplo: corte 45 min, limpieza facial 60 min, cancha 1 hora."],
+  ["Horarios de atención", "Días, franjas y disponibilidad básica para recibir turnos."],
+  ["Logo o iniciales", "Si tenés logo se usa; si no, se empieza con iniciales prolijas."],
+  ["WhatsApp de contacto", "Para que la agenda complemente tu canal principal de venta."]
+] as const;
+
+export const decisionGuide = [
+  ["Elegí Agenda Simple", "Si querés empezar rápido con un link de reservas dentro de TuAgendaWeb."],
+  ["Elegí Agenda Pro", "Si necesitás una base más preparada para crecer, sin prometer extras no activos."],
+  ["Elegí Web Completa", "Si querés presencia propia con dominio, landing, reservas y panel."]
+] as const;
+
+export const nextSteps = [
+  "Me mostrás tu negocio, rubro y cómo tomás turnos hoy.",
+  "Definimos si conviene Agenda Simple, Agenda Pro o Web Completa.",
+  "Se cargan servicios, horarios, WhatsApp y datos básicos.",
+  "Probamos el link o la web antes de usarlo en campañas."
+] as const;
+
+export const credibilityNotes = [
+  "Precios visibles para no perder tiempo en consultas sin encaje.",
+  "Demos por rubro para que puedas imaginar el resultado.",
+  "Panel y agenda preparados para separar cada negocio por slug.",
+  "Sin prometer funciones futuras como si ya estuvieran incluidas."
+] as const;
+
 export const urgencyStrip = {
   title: "¿Estás enviando tráfico desde Meta Ads?",
   text: "La página ya deja WhatsApp, formulario, demos y precios visibles para que la consulta no se enfríe.",
@@ -463,6 +498,14 @@ export const faq = [
   {
     question: "¿Puedo usar mi logo?",
     answer: "Sí. Si tenés logo, se usa tu logo. Si no, se pueden usar iniciales."
+  },
+  {
+    question: "¿Necesito tener dominio para empezar?",
+    answer: "No. Con Agenda Simple podés empezar con un link dentro de TuAgendaWeb. El dominio propio aplica para Web Completa."
+  },
+  {
+    question: "¿Qué necesito pasar para arrancar?",
+    answer: "Nombre del negocio, rubro, servicios, horarios, WhatsApp y logo si tenés. Con eso ya se puede preparar una primera versión."
   }
 ];
 

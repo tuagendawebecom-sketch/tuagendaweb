@@ -407,6 +407,48 @@ Validación realizada:
 - npm run test:smoke
 - Smoke test OK: 8 rutas x 2 viewports.
 
+24. Cuarta tanda de mejoras de claridad comercial y confianza
+- Fecha: 2026-05-20.
+- Objetivo: mejorar venta, claridad, confianza, legales básicos y trazabilidad sin implementar futuras mejoras pagas mensuales.
+
+Mejoras aplicadas:
+1. Nueva sección "Buen encaje" para explicar a quién le sirve TuAgendaWeb.
+2. Nueva sección "Decisión rápida" para elegir entre Agenda Simple, Agenda Pro y Web Completa.
+3. Nueva sección "Para empezar" con datos que necesita pasar el cliente.
+4. Nueva sección "Después de consultar" con pasos posteriores.
+5. Nueva sección "Claridad comercial" para reforzar transparencia.
+6. FAQ con primera pregunta abierta por defecto.
+7. FAQ con indicador visual de apertura.
+8. Dos nuevas preguntas frecuentes.
+9. Página /privacidad.
+10. Página /terminos.
+11. Footer con enlaces a Privacidad.
+12. Footer con enlace a Términos.
+13. Sitemap incluye /privacidad.
+14. Sitemap incluye /terminos.
+15. Smoke test incluye /privacidad.
+16. Smoke test incluye /terminos.
+17. UTM guardadas ahora incluyen capturedAt.
+18. Formulario envía capturedAt al backend.
+19. Backend guarda capturedAt en lead.
+20. Landing explica mejor que el producto no reemplaza WhatsApp.
+21. Landing explica mejor qué necesita el negocio antes de arrancar.
+22. Landing explica mejor cómo elegir plan.
+23. Landing explica mejor qué ocurre después de la consulta.
+24. Landing agrega confianza sin prometer features futuras.
+25. Se mantiene el precio de Web Completa.
+26. Se mantienen Agenda Simple y Agenda Pro.
+27. Se evita agregar recordatorios, pagos, automatizaciones o reportes avanzados.
+28. Se amplía contenido indexable útil para SEO local/comercial.
+29. Se mejora orientación para leads fríos de Meta Ads.
+30. Se refuerza la transparencia de alcance antes del WhatsApp.
+
+Validación realizada:
+- npm run lint
+- npm run build
+- npm run test:smoke
+- Smoke test OK: 10 rutas x 2 viewports.
+
 23. Tercera tanda de mejoras sin tocar futuras funciones pagas
 - Fecha: 2026-05-19.
 - Objetivo: mejorar la página activa sin implementar recordatorios, pagos, automatizaciones, reportes avanzados ni extras mensuales futuros.

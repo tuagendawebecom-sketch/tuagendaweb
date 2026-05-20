@@ -8,15 +8,20 @@ import {
   agendaSimpleFeatures,
   benefits,
   comparisonRows,
+  credibilityNotes,
+  decisionGuide,
   demoCategories,
   extras,
+  fitChecklist,
   faq,
   howItWorks,
   includedFeatures,
+  nextSteps,
   plans,
   problemSolution,
   quickExplanation,
   reassuranceItems,
+  startRequirements,
   trackingEvents,
   urgencyStrip,
   webCompletaFeatures,
@@ -160,6 +165,81 @@ export function PlanSelector() {
             >
               Ver detalles del plan
             </Link>
+          </motion.article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+export function AudienceFitSection() {
+  return (
+    <Section eyebrow="Buen encaje" title="TuAgendaWeb sirve si tu negocio trabaja con turnos reales" tone="mint">
+      <div className="grid gap-4 md:grid-cols-2">
+        {fitChecklist.map((item) => (
+          <motion.article className="flex gap-3 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={item} {...reveal}>
+            <CheckCircle2 className="mt-0.5 shrink-0 text-action" size={22} />
+            <p className="font-semibold leading-7 text-ink/72">{item}</p>
+          </motion.article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+export function DecisionGuideSection() {
+  return (
+    <Section eyebrow="Decisión rápida" title="Qué opción elegir según tu momento">
+      <div className="grid gap-5 lg:grid-cols-3">
+        {decisionGuide.map(([title, text]) => (
+          <motion.article className="rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft" key={title} {...reveal}>
+            <p className="font-display text-2xl font-extrabold text-teal">{title}</p>
+            <p className="mt-3 leading-7 text-ink/66">{text}</p>
+          </motion.article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+export function StartRequirementsSection() {
+  return (
+    <Section eyebrow="Para empezar" title="La primera carga de datos es simple" tone="mint">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {startRequirements.map(([title, text]) => (
+          <motion.article className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={title} {...reveal}>
+            <p className="font-display text-xl font-extrabold text-teal">{title}</p>
+            <p className="mt-3 text-sm leading-6 text-ink/65">{text}</p>
+          </motion.article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+export function NextStepsSection() {
+  return (
+    <Section eyebrow="Después de consultar" title="Qué pasa cuando me escribís">
+      <div className="grid gap-4 lg:grid-cols-4">
+        {nextSteps.map((step, index) => (
+          <motion.article className="rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft" key={step} {...reveal}>
+            <span className="font-display text-5xl font-extrabold text-mint">{index + 1}</span>
+            <p className="mt-4 font-semibold leading-7 text-ink/70">{step}</p>
+          </motion.article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+export function CredibilityNotesSection() {
+  return (
+    <Section eyebrow="Claridad comercial" title="Lo importante está dicho antes de que escribas" tone="mint">
+      <div className="grid gap-4 md:grid-cols-2">
+        {credibilityNotes.map((note) => (
+          <motion.article className="flex gap-3 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={note} {...reveal}>
+            <CheckCircle2 className="mt-0.5 shrink-0 text-action" size={22} />
+            <p className="font-semibold leading-7 text-ink/72">{note}</p>
           </motion.article>
         ))}
       </div>
@@ -367,9 +447,12 @@ export function FAQ() {
   return (
     <Section id="faq" eyebrow="Preguntas frecuentes" title="Objeciones normales, respuestas simples" tone="mint">
       <div className="grid gap-4 lg:grid-cols-2">
-        {faq.map((item) => (
-          <details className="group rounded-[1.5rem] border border-ink/10 bg-paper p-6" key={item.question}>
-            <summary className="cursor-pointer list-none font-display text-xl font-extrabold text-teal">{item.question}</summary>
+        {faq.map((item, index) => (
+          <details className="group rounded-[1.5rem] border border-ink/10 bg-paper p-6" key={item.question} open={index === 0}>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-xl font-extrabold text-teal">
+              {item.question}
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-mint text-sm text-teal transition group-open:rotate-45">+</span>
+            </summary>
             <p className="mt-3 leading-7 text-ink/65">{item.answer}</p>
           </details>
         ))}

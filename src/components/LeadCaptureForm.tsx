@@ -28,7 +28,8 @@ export function LeadCaptureForm() {
     utmMedium: "",
     utmCampaign: "",
     utmContent: "",
-    utmTerm: ""
+    utmTerm: "",
+    capturedAt: ""
   });
 
   useEffect(() => {
@@ -47,7 +48,8 @@ export function LeadCaptureForm() {
       utmMedium: params.get("utm_medium") ?? parsedCampaign.utmMedium ?? "",
       utmCampaign: params.get("utm_campaign") ?? parsedCampaign.utmCampaign ?? "",
       utmContent: params.get("utm_content") ?? parsedCampaign.utmContent ?? "",
-      utmTerm: params.get("utm_term") ?? parsedCampaign.utmTerm ?? ""
+      utmTerm: params.get("utm_term") ?? parsedCampaign.utmTerm ?? "",
+      capturedAt: parsedCampaign.capturedAt ?? ""
     });
     trackEvent(trackingEvents.leadFormOpen, { location: "lead_form" });
   }, []);

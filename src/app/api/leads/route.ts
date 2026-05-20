@@ -64,7 +64,8 @@ export async function POST(request: Request) {
     utmMedium: body.utmMedium ? clean(body.utmMedium, 80) : undefined,
     utmCampaign: body.utmCampaign ? clean(body.utmCampaign, 120) : undefined,
     utmContent: body.utmContent ? clean(body.utmContent, 120) : undefined,
-    utmTerm: body.utmTerm ? clean(body.utmTerm, 120) : undefined
+    utmTerm: body.utmTerm ? clean(body.utmTerm, 120) : undefined,
+    capturedAt: body.capturedAt ? clean(body.capturedAt, 40) : undefined
   });
 
   if (!result.ok) {
