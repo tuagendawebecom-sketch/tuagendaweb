@@ -69,7 +69,7 @@ export async function getPublicServices(negocioId: string) {
   const db = getAdminDb();
   if (!db) return [];
 
-  const snapshot = await db.collection("negocios").doc(negocioId).collection("servicios").where("activo", "==", true).orderBy("orden", "asc").get();
+  const snapshot = await db.collection("negocios").doc(negocioId).collection("servicios").where("activo", "==", true).get();
   return snapshot.docs.map((doc) => {
     const data = doc.data();
     return {
@@ -79,7 +79,7 @@ export async function getPublicServices(negocioId: string) {
       precio: data.precio,
       activo: data.activo !== false
     };
-  });
+  }).sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
 }
 
 export async function createLandingLead(input: {

@@ -17,10 +17,10 @@ export default async function ReservarPage({ params }: ReservarPageProps) {
 
   if (!isValidSlug(slug)) notFound();
 
-  const business = await getBusinessBySlug(slug);
+  const business = await getBusinessBySlug(slug).catch(() => null);
   if (!business) notFound();
 
-  const services = await getPublicServices(business.id);
+  const services = await getPublicServices(business.id).catch(() => []);
   const canReserve = canReserveBusiness(business);
 
   return (

@@ -39,13 +39,13 @@ export default async function AgendaPage({ params }: AgendaPageProps) {
     notFound();
   }
 
-  const business = await getBusinessBySlug(slug);
+  const business = await getBusinessBySlug(slug).catch(() => null);
 
   if (!business) {
     notFound();
   }
 
-  const services = await getPublicServices(business.id);
+  const services = await getPublicServices(business.id).catch(() => []);
   const canReserve = canReserveBusiness(business);
   const whatsappHref = business.whatsapp ? `https://wa.me/${business.whatsapp}` : "#";
 
@@ -57,8 +57,12 @@ export default async function AgendaPage({ params }: AgendaPageProps) {
         </Link>
         <section className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div className="rounded-[2rem] bg-teal p-8 text-cream shadow-soft">
-            <div className="grid h-20 w-20 place-items-center rounded-3xl bg-cream font-display text-3xl font-extrabold text-teal">
-              {business.logoUrl ? "Logo" : business.initials ?? business.nombre.slice(0, 2).toUpperCase()}
+            <div className="grid h-20 w-20 overflow-hidden rounded-3xl bg-cream font-display text-3xl font-extrabold text-teal">
+              {business.logoUrl ? (
+                <img alt={`Logo de ${business.nombre}`} className="h-full w-full object-contain p-2" src={business.logoUrl} />
+              ) : (
+                <span className="place-self-center">{business.initials ?? business.nombre.slice(0, 2).toUpperCase()}</span>
+              )}
             </div>
             <p className="mt-6 text-sm font-extrabold uppercase tracking-[0.16em] text-gold">{business.rubro ?? "Agenda online"}</p>
             <h1 className="mt-3 font-display text-4xl font-extrabold leading-tight sm:text-5xl">{business.nombre}</h1>

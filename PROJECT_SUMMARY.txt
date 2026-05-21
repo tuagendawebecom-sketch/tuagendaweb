@@ -478,6 +478,49 @@ Nota operativa:
 - El panel cliente actual es básico: permite entrar, ver el negocio, abrir/copiar el link público y ver módulos preparados.
 - La configuración completa de servicios, horarios, personal y sucursales todavía debe operarse desde Super Admin o implementarse en la siguiente fase del panel cliente.
 
+31. Panel cliente usable para configuración del negocio
+- Fecha: 2026-05-21.
+- Objetivo: que el dueño del negocio configure su agenda desde `/panel`, mientras Super Admin queda para crear negocios y manejar estados de pago/actividad.
+
+Mejoras aplicadas:
+1. `/panel` ahora carga el negocio del owner por `businessUsers/{uid}.negocioId`.
+2. El panel usa lectura directa `negocios/{negocioId}` en lugar de query por nombre de documento.
+3. El cliente puede editar nombre público del negocio.
+4. El cliente puede editar rubro.
+5. El cliente puede editar WhatsApp visible.
+6. El cliente puede editar Instagram.
+7. El cliente puede cargar logo por URL.
+8. El cliente puede definir iniciales cuando no tenga logo.
+9. El cliente puede elegir color principal.
+10. El cliente puede elegir color secundario.
+11. El cliente puede editar nombre de contacto.
+12. El cliente puede editar teléfono de contacto.
+13. El cliente puede crear servicios.
+14. El cliente puede editar nombre de servicio.
+15. El cliente puede editar duración de servicio.
+16. El cliente puede editar precio de servicio.
+17. El cliente puede pausar/activar servicios.
+18. El cliente puede eliminar servicios.
+19. El cliente puede crear personal.
+20. El cliente puede eliminar personal.
+21. El cliente puede crear sucursales.
+22. El cliente puede eliminar sucursales.
+23. El cliente puede guardar horarios básicos.
+24. El cliente puede seleccionar días de atención.
+25. El panel bloquea edición si el negocio está suspendido o cancelado.
+26. El panel mantiene acciones de ver agenda pública y copiar link.
+27. La agenda pública muestra logo si `logoUrl` existe.
+28. La agenda pública muestra iniciales si no hay logo.
+29. La agenda pública ya no se cae si falla la carga de servicios.
+30. La consulta de servicios públicos evita `orderBy + where` para no requerir índice compuesto innecesario.
+31. `/agenda/[slug]/reservar` también tolera fallos de carga de servicios sin tirar error global.
+
+Validación realizada:
+- npm run lint
+- npm run build
+- npm run test:smoke en localhost:3001
+- Smoke test OK: 10 rutas x 2 viewports.
+
 28. Acceso Super Admin automatizable
 - Fecha: 2026-05-20.
 - Objetivo: evitar crear a mano el primer usuario Super Admin cada vez que se configure Firebase.
