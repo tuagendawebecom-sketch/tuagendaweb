@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
-import { findReservationsByPhone } from "@/lib/firebase/reservations";
+import { getAvailableTimes } from "@/lib/firebase/reservations";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
 
-  const result = await findReservationsByPhone({
+  const result = await getAvailableTimes({
     slug: String(body?.slug ?? ""),
-    telefono: String(body?.telefono ?? "")
+    serviceId: String(body?.serviceId ?? ""),
+    date: String(body?.date ?? ""),
+    personalId: body?.personalId ? String(body.personalId) : undefined,
+    sucursalId: body?.sucursalId ? String(body.sucursalId) : undefined
   });
 
   if (!result.ok) {

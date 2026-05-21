@@ -99,6 +99,11 @@ for (const viewport of viewports) {
         issues.push(`${viewport.name} home exposes internal Meta Ads wording`);
       }
     }
+
+    if (route.endsWith("/reservar")) {
+      await expectVisible(page.getByText("Reservá tu turno").first(), `${viewport.name} booking title`);
+      await expectVisible(page.getByText("Ver o cancelar un turno").first(), `${viewport.name} booking lookup/cancel section`);
+    }
   }
 
   await page.close();

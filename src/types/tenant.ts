@@ -37,6 +37,29 @@ export type PublicService = {
   activo: boolean;
 };
 
+export type PublicStaff = {
+  id: string;
+  nombre: string;
+  especialidad?: string;
+  activo: boolean;
+};
+
+export type PublicBranch = {
+  id: string;
+  nombre: string;
+  direccion?: string;
+  activo: boolean;
+};
+
+export type PublicScheduleConfig = {
+  diasAtencion: string[];
+  horarioInicio: string;
+  horarioFin: string;
+  intervaloMin: number;
+  diasReservaMax: number;
+  anticipacionHoras: number;
+};
+
 export type LeadInterestPlan = BusinessPlan | "not_sure";
 
 export type LeadStatus = "new" | "contacted" | "won" | "lost";

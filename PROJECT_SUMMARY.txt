@@ -407,6 +407,38 @@ Validación realizada:
 - npm run test:smoke
 - Smoke test OK: 8 rutas x 2 viewports.
 
+26. Reserva real, consulta y cancelación pública
+- Fecha: 2026-05-21.
+- Se reemplazó la maqueta de /agenda/[slug]/reservar por un flujo real de reserva.
+- El cliente puede elegir servicio, profesional si existe, sucursal si existe, día y horario.
+- La disponibilidad se calcula desde la configuración del negocio: días de atención, horario de inicio, horario de fin, intervalo y anticipación.
+- La creación de turnos usa Firestore Admin SDK y transacciones sobre horariosOcupados para evitar horarios duplicados.
+- Las APIs públicas resuelven el negocio por slug server-side; no aceptan negocioId arbitrario desde el navegador.
+- Se agregaron endpoints:
+  - /api/reservas/disponibilidad
+  - /api/reservas/crear
+  - /api/reservas/consultar
+  - /api/reservas/cancelar
+- La sección "Ver o cancelar un turno" queda debajo del formulario de reserva, como flujo público para el cliente final.
+- La cancelación valida el WhatsApp normalizado del turno antes de cancelar y libera los horariosOcupados.
+- El panel del cliente ahora muestra próximos turnos recibidos desde la agenda pública.
+- Se actualizó el texto del panel para indicar que la reserva transaccional ya está conectada.
+- El smoke test ahora verifica que la página de reserva muestre "Reservá tu turno" y "Ver o cancelar un turno".
+
+Cómo probar antes de vender al primer cliente:
+1. Entrar a /superadmin y crear o revisar el negocio.
+2. Entrar al panel del cliente y cargar servicios, personal, sucursales y horarios.
+3. Abrir /agenda/[slug]/reservar.
+4. Reservar un turno desde celular o desktop.
+5. Volver a buscar el turno con el WhatsApp usado.
+6. Cancelar el turno y verificar que el horario vuelve a quedar disponible.
+
+Validación realizada:
+- npm run lint
+- npm run build
+- npm run test:smoke
+- Smoke test OK: 10 rutas x 2 viewports.
+
 27. Precio promocional y mejoras comerciales para conseguir clientes
 - Fecha: 2026-05-20.
 - Objetivo: ajustar la oferta para captar clientes más rápido sin tocar futuras mejoras pagas ni cambiar el posicionamiento de TuAgendaWeb.

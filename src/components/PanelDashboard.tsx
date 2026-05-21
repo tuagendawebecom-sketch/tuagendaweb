@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  limit,
   onSnapshot,
   orderBy,
   query,
@@ -67,6 +68,18 @@ type BranchItem = {
   activo?: boolean;
 };
 
+type ReservationItem = {
+  id: string;
+  clienteNombre?: string;
+  telefono?: string;
+  servicioNombre?: string;
+  fecha?: string;
+  hora?: string;
+  estado?: string;
+  personalNombre?: string;
+  sucursalNombre?: string;
+};
+
 const planLabels: Record<string, string> = {
   agenda_simple: "Agenda Simple",
   agenda_pro: "Agenda Pro",
@@ -106,6 +119,7 @@ export function PanelDashboard() {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [staff, setStaff] = useState<StaffItem[]>([]);
   const [branches, setBranches] = useState<BranchItem[]>([]);
+  const [reservations, setReservations] = useState<ReservationItem[]>([]);
   const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -129,6 +143,7 @@ export function PanelDashboard() {
         setBusinessUser(null);
         setBusiness(null);
         setBusinessId("");
+        setReservations([]);
         setLoading(false);
         return;
       }
@@ -141,6 +156,7 @@ export function PanelDashboard() {
           setBusinessUser(userData ?? null);
           setBusiness(null);
           setBusinessId("");
+          setReservations([]);
           setLoading(false);
           return;
         }
@@ -167,6 +183,11 @@ export function PanelDashboard() {
         unsubscribers.push(
           onSnapshot(query(collection(activeDb, "negocios", userData.negocioId, "sucursales"), orderBy("nombre", "asc")), (snapshot) => {
             setBranches(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
+          })
+        );
+        unsubscribers.push(
+          onSnapshot(query(collection(activeDb, "negocios", userData.negocioId, "reservas"), orderBy("fechaHora", "asc"), limit(20)), (snapshot) => {
+            setReservations(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
           })
         );
       } catch {
@@ -381,6 +402,36 @@ export function PanelDashboard() {
         {error ? <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</p> : null}
       </div>
 
+      <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+        <div className="flex items-center gap-3">
+          <CalendarCheck className="text-action" />
+          <h2 className="font-display text-2xl font-extrabold text-teal">Próximos turnos</h2>
+        </div>
+        <p className="mt-2 leading-7 text-ink/62">Acá ves los turnos que entran desde tu agenda pública. Para cancelar un turno, el cliente puede hacerlo desde la sección de consulta con su WhatsApp.</p>
+        <div className="mt-5 grid gap-3">
+          {reservations.length ? reservations.map((reservation) => (
+            <article className="grid gap-3 rounded-2xl bg-cream p-4 sm:grid-cols-[1fr_auto] sm:items-center" key={reservation.id}>
+              <div>
+                <p className="font-extrabold text-teal">{reservation.servicioNombre ?? "Servicio"}</p>
+                <p className="mt-1 text-sm text-ink/65">
+                  {reservation.clienteNombre ?? "Cliente"} · {reservation.telefono ?? "Sin teléfono"}
+                </p>
+                <p className="mt-1 text-sm font-bold text-ink/70">
+                  {reservation.fecha ?? "Sin fecha"} · {reservation.hora ?? "Sin horario"}
+                  {reservation.personalNombre ? ` · ${reservation.personalNombre}` : ""}
+                  {reservation.sucursalNombre ? ` · ${reservation.sucursalNombre}` : ""}
+                </p>
+              </div>
+              <span className={`rounded-full px-4 py-2 text-xs font-extrabold ${reservation.estado === "cancelada" ? "bg-red-50 text-red-700" : "bg-mint text-teal"}`}>
+                {reservation.estado ?? "confirmada"}
+              </span>
+            </article>
+          )) : (
+            <p className="rounded-2xl bg-cream p-4 font-semibold text-ink/65">Todavía no hay turnos cargados.</p>
+          )}
+        </div>
+      </section>
+
       <form className="grid gap-5 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-2" onSubmit={handleBusinessSettings}>
         <div className="lg:col-span-2">
           <h2 className="font-display text-2xl font-extrabold text-teal">Datos públicos del negocio</h2>
@@ -527,7 +578,7 @@ export function PanelDashboard() {
           <h2 className="font-display text-2xl font-extrabold text-teal">Qué sigue</h2>
         </div>
         <p className="mt-3 leading-7 text-ink/65">
-          Con datos, servicios, personal, sucursales y horarios cargados, la agenda ya queda lista para mostrarse. La reserva transaccional completa se conecta en la siguiente fase del turnero.
+          Con datos, servicios, personal, sucursales y horarios cargados, la agenda pública ya puede recibir reservas reales. Los turnos se bloquean para evitar duplicados y el cliente puede consultar o cancelar desde su celular.
         </p>
       </section>
     </div>
