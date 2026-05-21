@@ -66,6 +66,10 @@ for (const viewport of viewports) {
         issues.push(`${viewport.name} home is missing Agenda Pro promotional price`);
       }
 
+      if ((await page.getByText("Promo para empezar a recibir reservas online este mes").count()) < 1) {
+        issues.push(`${viewport.name} home is missing launch offer section`);
+      }
+
       if (viewport.name === "desktop") {
         const solutionsTrigger = page.getByTestId("solutions-menu-trigger");
         const solutionsMenu = page.getByTestId("solutions-menu");
@@ -99,6 +103,16 @@ for (const viewport of viewports) {
 
   await page.close();
 }
+
+const apiPage = await browser.newPage();
+const invalidLeadResponse = await apiPage.request.post(`${baseUrl}/api/leads`, {
+  data: "not-json",
+  headers: { "content-type": "text/plain" }
+});
+if (invalidLeadResponse.status() !== 415) {
+  issues.push(`/api/leads invalid content-type returned ${invalidLeadResponse.status()} instead of 415`);
+}
+await apiPage.close();
 
 await browser.close();
 

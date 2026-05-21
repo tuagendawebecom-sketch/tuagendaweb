@@ -477,6 +477,54 @@ Uso previsto:
 - Ejecutar `npm run admin:ensure-superadmin`.
 - Entrar a `/login` con el email configurado.
 
+29. Sexta tanda de mejoras de conversión, operación y estabilidad
+- Fecha: 2026-05-21.
+- Objetivo: mejorar captación y operación actual sin implementar recordatorios, pagos online, reportes avanzados ni futuras mejoras mensuales.
+
+Mejoras aplicadas:
+1. Nueva sección "Oferta de lanzamiento" en la home.
+2. La oferta destaca Agenda Simple desde $10.000 / mes como camino de entrada.
+3. La nueva sección explica que no hace falta web completa para empezar.
+4. La nueva sección agrega CTA directo "Consultar promo".
+5. La nueva sección agrega enlace a detalles de Agenda Simple.
+6. Se agregaron tres tarjetas de beneficios de lanzamiento.
+7. Se agregaron cuatro notas rápidas de confianza debajo de la oferta.
+8. El formulario ahora muestra planes con precio en el select.
+9. El formulario deja Agenda Simple seleccionada por defecto.
+10. El formulario valida nombre, negocio y rubro antes de enviar.
+11. El formulario agrega minlength en campos comerciales clave.
+12. El formulario agrega maxlength para evitar mensajes o campos excesivos.
+13. El formulario mejora placeholders de nombre, WhatsApp y negocio.
+14. El mensaje exitoso del formulario promete una recomendación concreta.
+15. La API /api/leads rechaza payloads demasiado grandes.
+16. La API /api/leads rechaza content-type incorrecto.
+17. La API /api/leads clasifica prioridad del lead por plan.
+18. Leads de Web Completa quedan como prioridad high.
+19. Leads de Agenda Pro quedan como prioridad medium.
+20. Leads de Agenda Simple quedan como prioridad normal.
+21. La API guarda user-agent acotado para diagnóstico operativo.
+22. Super Admin muestra mensual estimado de negocios activos/trial.
+23. Super Admin muestra precio mensual en cada negocio.
+24. Super Admin formatea montos como ARS.
+25. Super Admin maneja errores al copiar link público.
+26. Super Admin abre WhatsApp de leads con mensaje prellenado.
+27. Super Admin muestra prioridad del lead en la tarjeta.
+28. Panel cliente muestra nombres de plan legibles.
+29. Panel cliente permite copiar el link público.
+30. Footer suma accesos directos a planes con precio.
+31. Home usa overflow-x-clip para contener el carrusel sin overflow horizontal.
+32. Smoke test verifica la sección de oferta de lanzamiento.
+33. Smoke test verifica /api/leads con content-type inválido.
+34. Se limpió .next y se rebuildó para eliminar referencias locales obsoletas de CSS.
+35. Se mantuvo intacto el posicionamiento comercial de TuAgendaWeb.
+
+Validación realizada:
+- npm run lint
+- npm run build
+- npm run test:smoke en localhost:3001
+- Smoke test OK: 10 rutas x 2 viewports.
+- Se dejó libre el puerto localhost:3001 al terminar.
+
 26. Quinta tanda de mejoras de navegación, responsive y estabilidad
 - Fecha: 2026-05-20.
 - Objetivo: pulir la landing activa sin implementar recordatorios, pagos, automatizaciones, reportes avanzados ni futuras mejoras mensuales.

@@ -97,6 +97,31 @@ export const trustSignals = [
   "Agenda online activa desde el celular"
 ] as const;
 
+export const launchOfferHighlights = [
+  {
+    title: "Empezás con bajo costo",
+    text: "Agenda Simple queda desde $10.000 al mes para validar rápido si tu negocio recibe más reservas ordenadas.",
+    icon: CalendarCheck
+  },
+  {
+    title: "Sin web completa obligatoria",
+    text: "Podés vender con un link de reserva dentro de TuAgendaWeb y pasar a web propia cuando tenga sentido.",
+    icon: Globe2
+  },
+  {
+    title: "Consulta directa por WhatsApp",
+    text: "La idea es cerrar dudas rápido: rubro, servicios, horarios y qué opción conviene para arrancar.",
+    icon: MessageCircle
+  }
+] as const;
+
+export const quickTrustNotes = [
+  "Precio visible antes de escribir.",
+  "Promo de lanzamiento mientras esté publicada.",
+  "No reemplaza WhatsApp: lo ordena.",
+  "Se puede empezar simple y crecer después."
+] as const;
+
 export const reassuranceItems = [
   "No hace falta dejar WhatsApp: el link ordena la reserva y la conversación sigue ahí.",
   "La reserva está pensada para celular, con pasos simples y textos claros.",
@@ -149,7 +174,7 @@ export const leadForm = {
   title: "Contame qué negocio tenés y te digo cuál plan conviene.",
   text: "Si preferís no escribir todo por WhatsApp, dejá tus datos y te respondo con una recomendación concreta para tu caso.",
   submit: "Enviar consulta",
-  success: "Consulta enviada. Te voy a responder por WhatsApp o email.",
+  success: "Consulta enviada. Te voy a responder por WhatsApp o email con una recomendación concreta.",
   fallback: "Si el formulario no está disponible, escribime directo por WhatsApp."
 };
 

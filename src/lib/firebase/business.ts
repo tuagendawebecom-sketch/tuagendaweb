@@ -98,6 +98,8 @@ export async function createLandingLead(input: {
   utmContent?: string;
   utmTerm?: string;
   capturedAt?: string;
+  userAgent?: string;
+  priority?: "normal" | "medium" | "high";
 }) {
   const db = getAdminDb();
   if (!db) return { ok: false, reason: "firebase_not_configured" as const };

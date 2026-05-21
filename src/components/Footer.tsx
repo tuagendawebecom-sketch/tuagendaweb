@@ -27,8 +27,13 @@ export function Footer() {
           </div>
         </div>
         <div>
-          <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.14em] text-gold">Demos</p>
-          <div className="grid grid-cols-2 gap-2">
+          <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.14em] text-gold">Planes y demos</p>
+          <div className="mb-5 grid gap-2 text-sm font-bold text-cream/80">
+            <Link href="#plan-agenda-simple">Agenda Simple desde $10.000</Link>
+            <Link href="#plan-agenda-pro">Agenda Pro desde $20.000</Link>
+            <Link href="#plan-web-completa">Web Completa $100.000</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-2 border-t border-cream/10 pt-5">
             {demoCategories.map((demo) => (
               <Link className="text-sm text-cream/75 hover:text-white" href={`/demos/${demo.slug}`} key={demo.slug}>
                 {demo.title}

@@ -18,6 +18,7 @@ import {
   HowItWorks,
   Improvements,
   IncludedFeatures,
+  LaunchOfferSection,
   PlanSelector,
   ProblemSolution,
   QuickExplanation,
@@ -32,9 +33,10 @@ export default function Home() {
     <>
       <CampaignTelemetry />
       <Header />
-      <main id="contenido">
+      <main className="overflow-x-clip" id="contenido">
         <Hero />
         <CampaignReadinessStrip />
+        <LaunchOfferSection />
         <QuickExplanation />
         <ProblemSolution />
         <AudienceFitSection />

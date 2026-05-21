@@ -2,7 +2,7 @@
 
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
-import { CalendarCheck, ExternalLink, Loader2, Settings2, ShieldAlert, Users } from "lucide-react";
+import { CalendarCheck, Copy, ExternalLink, Loader2, Settings2, ShieldAlert, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { siteUrl } from "@/data/site";
@@ -22,12 +22,19 @@ type PanelBusiness = {
   whatsapp?: string;
 };
 
+const planLabels: Record<string, string> = {
+  agenda_simple: "Agenda Simple",
+  agenda_pro: "Agenda Pro",
+  web_completa: "Web Completa"
+};
+
 export function PanelDashboard() {
   const auth = useMemo(() => getClientAuth(), []);
   const db = useMemo(() => getClientDb(), []);
   const [loading, setLoading] = useState(true);
   const [businessUser, setBusinessUser] = useState<BusinessUser | null>(null);
   const [business, setBusiness] = useState<PanelBusiness | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!isFirebaseClientConfigured() || !auth || !db) {
@@ -94,13 +101,23 @@ export function PanelDashboard() {
 
   const publicLink = `${siteUrl}/agenda/${business.slug}`;
 
+  async function copyPublicLink() {
+    try {
+      await navigator.clipboard?.writeText(publicLink);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  }
+
   return (
     <div className="grid gap-6">
       <section className="rounded-[2rem] bg-teal p-8 text-cream shadow-soft">
         <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-gold">Panel cliente</p>
         <h1 className="mt-3 font-display text-4xl font-extrabold">{business.nombre}</h1>
         <p className="mt-3 max-w-2xl leading-7 text-cream/75">
-          Plan: {business.plan ?? "agenda_simple"} · Estado: {business.estado ?? "trial"}
+          Plan: {planLabels[business.plan ?? "agenda_simple"] ?? business.plan} · Estado: {business.estado ?? "trial"}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link className="inline-flex items-center gap-2 rounded-2xl bg-action px-5 py-3 text-sm font-bold text-white" href={`/agenda/${business.slug}`} rel="noopener noreferrer" target="_blank">
@@ -108,6 +125,9 @@ export function PanelDashboard() {
           </Link>
           <button className="rounded-2xl border border-cream/20 px-5 py-3 text-sm font-bold" onClick={() => auth && signOut(auth)} type="button">
             Cerrar sesión
+          </button>
+          <button className="inline-flex items-center gap-2 rounded-2xl border border-cream/20 px-5 py-3 text-sm font-bold" onClick={copyPublicLink} type="button">
+            <Copy size={16} /> {copied ? "Link copiado" : "Copiar link"}
           </button>
         </div>
       </section>

@@ -49,6 +49,7 @@ type Lead = {
   businessType?: string;
   interestedPlan?: string;
   status?: string;
+  priority?: string;
 };
 
 const planLabels: Record<BusinessPlan, string> = {
@@ -64,6 +65,15 @@ const statusLabels: Record<BusinessStatus, string> = {
   suspended: "Suspendido",
   cancelled: "Cancelado"
 };
+
+function formatCurrency(value?: number) {
+  if (typeof value !== "number") return "Sin precio";
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0
+  }).format(value);
+}
 
 function toBusiness(id: string, data: Record<string, unknown>): AdminBusiness {
   return {
@@ -265,11 +275,18 @@ export function SuperAdminDashboard() {
   const activeBusinesses = businesses.filter((business) => business.estado === "active" || business.estado === "trial").length;
   const suspendedBusinesses = businesses.filter((business) => business.estado === "suspended" || business.estado === "cancelled").length;
   const newLeads = leads.filter((lead) => (lead.status ?? "new") === "new").length;
+  const estimatedMonthlyRevenue = businesses
+    .filter((business) => business.estado === "active" || business.estado === "trial")
+    .reduce((total, business) => total + (business.monthlyPrice ?? 0), 0);
 
-  function copyPublicLink(slug: string) {
-    navigator.clipboard?.writeText(`${siteUrl}/agenda/${slug}`);
-    setCopiedSlug(slug);
-    window.setTimeout(() => setCopiedSlug(""), 1600);
+  async function copyPublicLink(slug: string) {
+    try {
+      await navigator.clipboard?.writeText(`${siteUrl}/agenda/${slug}`);
+      setCopiedSlug(slug);
+      window.setTimeout(() => setCopiedSlug(""), 1600);
+    } catch {
+      setError("No se pudo copiar el link. Copialo manualmente desde la tarjeta.");
+    }
   }
 
   function exportLeadsCsv() {
@@ -331,15 +348,16 @@ export function SuperAdminDashboard() {
         </button>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           ["Negocios activos", activeBusinesses],
           ["Suspendidos/cancelados", suspendedBusinesses],
-          ["Leads nuevos", newLeads]
+          ["Leads nuevos", newLeads],
+          ["Mensual estimado", formatCurrency(estimatedMonthlyRevenue)]
         ].map(([label, value]) => (
           <div className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={label as string}>
             <p className="text-sm font-bold text-ink/55">{label as string}</p>
-            <p className="mt-2 font-display text-4xl font-extrabold text-teal">{value as number}</p>
+            <p className="mt-2 font-display text-3xl font-extrabold text-teal sm:text-4xl">{value as number | string}</p>
           </div>
         ))}
       </div>
@@ -430,6 +448,7 @@ export function SuperAdminDashboard() {
                 <h3 className="font-display text-2xl font-extrabold text-teal">{business.nombre}</h3>
                 <span className="rounded-full bg-mint px-3 py-1 text-xs font-bold text-teal">{planLabels[business.plan]}</span>
                 <span className="rounded-full bg-gold/25 px-3 py-1 text-xs font-bold text-teal">{statusLabels[business.estado]}</span>
+                <span className="rounded-full bg-cream px-3 py-1 text-xs font-bold text-ink/60">{formatCurrency(business.monthlyPrice)}</span>
               </div>
               <p className="mt-2 text-sm font-semibold text-ink/62">{business.rubro ?? "Sin rubro"} · {business.ownerNombre ?? "Sin dueño asignado"}</p>
               <Link className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-action" href={`/agenda/${business.slug}`} rel="noopener noreferrer" target="_blank">
@@ -479,13 +498,16 @@ export function SuperAdminDashboard() {
             <article className="rounded-[1.5rem] border border-ink/10 bg-paper p-5" key={lead.id}>
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <p className="font-display text-xl font-extrabold text-teal">{lead.businessName ?? "Negocio"}</p>
-                <span className="rounded-full bg-mint px-3 py-1 text-xs font-bold text-teal">{lead.status ?? "new"}</span>
+                <div className="flex flex-wrap gap-2">
+                  {lead.priority ? <span className="rounded-full bg-gold/25 px-3 py-1 text-xs font-bold text-teal">{lead.priority}</span> : null}
+                  <span className="rounded-full bg-mint px-3 py-1 text-xs font-bold text-teal">{lead.status ?? "new"}</span>
+                </div>
               </div>
               <p className="mt-1 text-sm font-semibold text-ink/62">{lead.name} · {lead.phone}</p>
               <p className="mt-2 text-sm text-ink/62">{lead.businessType} · {lead.interestedPlan}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {lead.phone ? (
-                  <Link className="inline-flex items-center gap-2 rounded-xl bg-teal px-3 py-2 text-xs font-bold text-cream" href={`https://wa.me/${normalizePhone(String(lead.phone))}`} rel="noopener noreferrer" target="_blank">
+                  <Link className="inline-flex items-center gap-2 rounded-xl bg-teal px-3 py-2 text-xs font-bold text-cream" href={`https://wa.me/${normalizePhone(String(lead.phone))}?text=${encodeURIComponent(`Hola ${lead.name ?? ""}, vi tu consulta por TuAgendaWeb para ${lead.businessName ?? "tu negocio"}. Te escribo para ayudarte a elegir el plan.`)}`} rel="noopener noreferrer" target="_blank">
                     <MessageCircle size={14} /> WhatsApp
                   </Link>
                 ) : null}

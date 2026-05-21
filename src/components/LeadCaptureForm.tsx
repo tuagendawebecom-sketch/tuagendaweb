@@ -10,9 +10,9 @@ import { WhatsAppButton } from "./WhatsAppButton";
 import { Section } from "./Section";
 
 const planOptions: Array<{ value: LeadInterestPlan; label: string }> = [
-  { value: "agenda_simple", label: "Agenda Simple" },
-  { value: "agenda_pro", label: "Agenda Pro" },
-  { value: "web_completa", label: "Web Completa" },
+  { value: "agenda_simple", label: "Agenda Simple - desde $10.000/mes" },
+  { value: "agenda_pro", label: "Agenda Pro - desde $20.000/mes" },
+  { value: "web_completa", label: "Web Completa - $100.000 pago único" },
   { value: "not_sure", label: "No sé todavía" }
 ];
 
@@ -74,6 +74,12 @@ export function LeadCaptureForm() {
     setError("");
 
     try {
+      if (payload.name.length < 2 || payload.businessName.length < 2 || payload.businessType.length < 2) {
+        setState("error");
+        setError("Completá nombre, negocio y rubro con al menos 2 caracteres.");
+        return;
+      }
+
       if (payload.phone.replace(/\D/g, "").length < 8) {
         setState("error");
         setError("Revisá el WhatsApp. Necesito un número válido para responderte.");
@@ -132,26 +138,26 @@ export function LeadCaptureForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               Tu nombre
-              <input autoComplete="name" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="name" required type="text" />
+              <input autoComplete="name" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" maxLength={80} minLength={2} name="name" placeholder="Tu nombre" required type="text" />
             </label>
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               WhatsApp
-              <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" name="phone" pattern="[0-9+()\\s-]{8,}" required type="tel" />
+              <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" maxLength={40} name="phone" pattern="[0-9+()\\s-]{8,}" placeholder="+54 9 381..." required type="tel" />
             </label>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               Nombre del negocio
-              <input autoComplete="organization" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="businessName" required type="text" />
+              <input autoComplete="organization" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" maxLength={100} minLength={2} name="businessName" placeholder="Nombre de tu negocio" required type="text" />
             </label>
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               Rubro
-              <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="businessType" placeholder="Barbería, estética, consultorio..." required type="text" />
+              <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" maxLength={80} minLength={2} name="businessType" placeholder="Barbería, estética, consultorio..." required type="text" />
             </label>
           </div>
           <label className="grid gap-2 text-sm font-bold text-ink/70">
             Plan que te interesa
-            <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="interestedPlan" required>
+            <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue="agenda_simple" name="interestedPlan" required>
               {planOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -161,7 +167,7 @@ export function LeadCaptureForm() {
           </label>
           <label className="grid gap-2 text-sm font-bold text-ink/70">
             Mensaje opcional
-            <textarea className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="message" placeholder="Contame si ya tenés logo, dominio, servicios o cantidad de personas que atienden." />
+            <textarea className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" maxLength={600} name="message" placeholder="Contame si ya tenés logo, dominio, servicios o cantidad de personas que atienden." />
           </label>
           <button
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream shadow-lift transition hover:bg-action disabled:cursor-wait disabled:opacity-70"

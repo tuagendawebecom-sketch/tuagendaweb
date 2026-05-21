@@ -16,11 +16,13 @@ import {
   faq,
   howItWorks,
   includedFeatures,
+  launchOfferHighlights,
   nextSteps,
   planOverviewNavigation,
   plans,
   problemSolution,
   quickExplanation,
+  quickTrustNotes,
   reassuranceItems,
   startRequirements,
   trackingEvents,
@@ -75,6 +77,49 @@ export function CampaignReadinessStrip() {
         </Link>
       </div>
     </section>
+  );
+}
+
+export function LaunchOfferSection() {
+  return (
+    <Section eyebrow="Oferta de lanzamiento" text="La prioridad ahora es que puedas probar turnos online con una inversión baja y una conversación clara antes de contratar." title="Promo para empezar a recibir reservas online este mes">
+      <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
+        <motion.div className="rounded-[1.75rem] border border-teal/15 bg-paper p-6 shadow-soft sm:p-8" {...reveal}>
+          <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-action">Agenda Simple</p>
+          <div className="mt-4 flex flex-wrap items-end gap-3">
+            <p className="font-display text-5xl font-extrabold text-teal">$10.000</p>
+            <p className="pb-2 text-lg font-bold text-ink/58">/ mes</p>
+          </div>
+          <p className="mt-4 max-w-2xl leading-7 text-ink/68">
+            Un link de reservas para que tus clientes elijan servicio, día y horario desde el celular. Ideal para validar rápido sin armar una web completa desde el primer día.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <WhatsAppButton className="w-full sm:w-auto" href={createWhatsAppHref(whatsappMessages.agendaSimple)} label="Consultar promo" location="launch_offer" />
+            <Link className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-teal px-5 py-3 text-sm font-bold text-teal transition hover:bg-mint sm:w-auto" href="#plan-agenda-simple">
+              Ver qué incluye
+            </Link>
+          </div>
+        </motion.div>
+        <div className="grid gap-3">
+          {launchOfferHighlights.map((item) => (
+            <motion.article className="flex gap-4 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={item.title} {...reveal}>
+              <item.icon className="mt-1 shrink-0 text-action" size={24} />
+              <div>
+                <h3 className="font-display text-xl font-extrabold text-teal">{item.title}</h3>
+                <p className="mt-2 leading-7 text-ink/66">{item.text}</p>
+              </div>
+            </motion.article>
+          ))}
+        </div>
+      </div>
+      <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {quickTrustNotes.map((note) => (
+          <p className="rounded-2xl bg-mint/65 px-4 py-3 text-sm font-bold text-teal" key={note}>
+            {note}
+          </p>
+        ))}
+      </div>
+    </Section>
   );
 }
 
