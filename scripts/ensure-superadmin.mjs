@@ -87,15 +87,25 @@ try {
   console.log(`Usuario creado en Firebase Auth: ${email}`);
 }
 
-await db.collection("businessUsers").doc(user.uid).set(
-  {
-    role: "superadmin",
-    isActive: true,
-    email,
-    updatedAt: FieldValue.serverTimestamp(),
-    createdAt: FieldValue.serverTimestamp()
-  },
-  { merge: true }
-);
+try {
+  await db.collection("businessUsers").doc(user.uid).set(
+    {
+      role: "superadmin",
+      isActive: true,
+      email,
+      updatedAt: FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp()
+    },
+    { merge: true }
+  );
+} catch (error) {
+  if (error?.code === 5) {
+    throw new Error(
+      "Firebase Auth quedó configurado, pero Firestore respondió NOT_FOUND. Activá Firestore Database en el proyecto Firebase y volvé a ejecutar este script."
+    );
+  }
+
+  throw error;
+}
 
 console.log(`Super Admin listo. UID: ${user.uid}`);
