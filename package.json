@@ -13,6 +13,7 @@
     "remotion:render:vertical": "remotion render src/remotion/index.ts TuAgendaWebVerticalAd public/assets/videos/tuagendaweb-demo-vertical.mp4",
     "remotion:poster": "remotion still src/remotion/index.ts TuAgendaWebVideoPoster public/assets/videos/tuagendaweb-demo-poster.png --frame=0",
     "admin:ensure-superadmin": "node scripts/ensure-superadmin.mjs",
+    "admin:ensure-owner": "node scripts/ensure-owner.mjs",
     "test:smoke": "node scripts/smoke-check.mjs"
   },
   "dependencies": {

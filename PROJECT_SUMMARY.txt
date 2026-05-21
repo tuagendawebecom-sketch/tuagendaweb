@@ -450,6 +450,34 @@ Validación realizada:
 - Smoke test OK: 10 rutas x 2 viewports.
 - Se dejó libre el puerto localhost:3001 al terminar.
 
+30. Acceso owner para clientes
+- Fecha: 2026-05-21.
+- Objetivo: permitir crear acceso al panel cliente después de crear un negocio desde Super Admin.
+
+Qué se agregó:
+1. Script `scripts/ensure-owner.mjs`.
+2. Comando `npm run admin:ensure-owner`.
+3. El script busca el negocio por slug.
+4. El script crea o actualiza usuario dueño en Firebase Auth.
+5. El script asigna contraseña al dueño.
+6. El script crea/actualiza `businessUsers/{uid}` con `role: "owner"`.
+7. El script vincula `businessUsers/{uid}.negocioId` al negocio correcto.
+8. El script actualiza `ownerEmail` y `ownerNombre` del negocio.
+9. `.env.example` documenta variables OWNER_*.
+10. `FIREBASE_SETUP.md` explica que crear negocio no crea contraseña automáticamente.
+11. `FIREBASE_SETUP.md` documenta cómo crear acceso de dueño.
+
+Primer cliente configurado:
+- Negocio: Matias Barber Shop.
+- Slug: `matias-barber-shop`.
+- Email owner: `matieldebocajdr12@gmail.com`.
+- UID owner: `SZFjJbq6YTT1BWEr7pKLmmZ86G12`.
+- Negocio vinculado: `9Bz3GHADIRgqOPNziBdS`.
+
+Nota operativa:
+- El panel cliente actual es básico: permite entrar, ver el negocio, abrir/copiar el link público y ver módulos preparados.
+- La configuración completa de servicios, horarios, personal y sucursales todavía debe operarse desde Super Admin o implementarse en la siguiente fase del panel cliente.
+
 28. Acceso Super Admin automatizable
 - Fecha: 2026-05-20.
 - Objetivo: evitar crear a mano el primer usuario Super Admin cada vez que se configure Firebase.

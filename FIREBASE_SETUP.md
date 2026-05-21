@@ -108,6 +108,43 @@ Alternativa manual:
 2. Copiar el UID.
 3. Crear manualmente el documento `businessUsers/{uid}` con `role: "superadmin"` e `isActive: true`.
 
+## 6.1. Acceso del dueño de un negocio
+
+Crear un negocio desde `/superadmin` no crea automáticamente usuario ni contraseña. Para que el dueño pueda entrar a `/panel`, se necesita:
+
+1. Usuario en Firebase Auth.
+2. Documento `businessUsers/{uid}` con:
+
+```json
+{
+  "negocioId": "ID_DEL_NEGOCIO",
+  "role": "owner",
+  "isActive": true
+}
+```
+
+Camino recomendado:
+
+```bash
+npm run admin:ensure-owner -- --slug matias-barber-shop --email cliente@email.com --password "Temporal123+" --name "Nombre Cliente"
+```
+
+El script busca el negocio por `slug`, crea o actualiza el usuario en Firebase Auth y lo vincula como `owner`.
+
+Luego el cliente entra por:
+
+```txt
+/login
+```
+
+y el sistema lo redirige a:
+
+```txt
+/panel
+```
+
+Importante: el panel cliente actual es básico. Permite ver el negocio y copiar/abrir el link público. La configuración completa de servicios, horarios, personal y sucursales todavía se opera desde Super Admin o queda para la siguiente fase del panel cliente.
+
 ## 7. Alta de negocio inicial
 
 Crear documento en `negocios`:
