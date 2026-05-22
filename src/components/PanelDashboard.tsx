@@ -689,18 +689,18 @@ export function PanelDashboard() {
           <Settings2 className="text-action" />
           <h2 className="font-display text-2xl font-extrabold text-teal">Servicios</h2>
         </div>
-        <form className="mt-5 grid gap-3 lg:grid-cols-[1fr_140px_160px_auto]" onSubmit={handleService}>
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" placeholder="Corte + barba" />
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="duracionMin" placeholder="60 min" type="number" />
-          <label className="relative">
+        <form className="mt-5 grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_140px_160px_124px]" onSubmit={handleService}>
+          <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action md:col-span-2 xl:col-span-1" name="nombre" placeholder="Corte + barba" />
+          <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="duracionMin" placeholder="60 min" type="number" />
+          <label className="relative min-w-0">
             <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-ink/45">$</span>
             <input className="w-full rounded-2xl border border-ink/10 bg-cream py-3 pl-8 pr-4 outline-none focus:border-action" name="precio" placeholder="Precio" type="number" />
           </label>
-          <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60" disabled={!canEdit || saving === "service"} type="submit">
+          <button className="inline-flex min-w-0 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60 md:col-span-2 xl:col-span-1" disabled={!canEdit || saving === "service"} type="submit">
             <PlusCircle size={17} /> Agregar
           </button>
           {(staff.length || branches.length) ? (
-            <div className="grid gap-4 rounded-2xl bg-cream p-4 lg:col-span-4 md:grid-cols-2">
+            <div className="grid gap-4 rounded-2xl bg-cream p-4 md:col-span-2 md:grid-cols-2 xl:col-span-4">
               {staff.length ? (
                 <div>
                   <p className="text-sm font-extrabold text-teal">Personal que realiza este servicio</p>
@@ -780,16 +780,16 @@ export function PanelDashboard() {
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+      <div className="grid min-w-0 gap-6 2xl:grid-cols-2">
+        <section className="min-w-0 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
           <div className="flex items-center gap-3">
             <Users className="text-action" />
             <h2 className="font-display text-2xl font-extrabold text-teal">Personal</h2>
           </div>
-          <form className="mt-5 grid gap-3 xl:grid-cols-[1fr_1fr_auto]" onSubmit={handleStaff}>
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" placeholder="Nombre" />
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="especialidad" placeholder="Especialidad" />
-            <button className="rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" disabled={!canEdit} type="submit">Agregar</button>
+          <form className="mt-5 grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_124px]" onSubmit={handleStaff}>
+            <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" placeholder="Nombre" />
+            <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="especialidad" placeholder="Especialidad" />
+            <button className="min-w-0 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" disabled={!canEdit} type="submit">Agregar</button>
           </form>
           <div className="mt-4 grid gap-2">
             {staff.map((person) => (
@@ -801,15 +801,15 @@ export function PanelDashboard() {
           </div>
         </section>
 
-        <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+        <section className="min-w-0 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
           <div className="flex items-center gap-3">
             <MapPin className="text-action" />
             <h2 className="font-display text-2xl font-extrabold text-teal">Sucursales</h2>
           </div>
-          <form className="mt-5 grid gap-3 xl:grid-cols-[1fr_1fr_auto]" onSubmit={handleBranch}>
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" placeholder="Sucursal centro" />
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="direccion" placeholder="Dirección" />
-            <button className="rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" disabled={!canEdit} type="submit">Agregar</button>
+          <form className="mt-5 grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_124px]" onSubmit={handleBranch}>
+            <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" placeholder="Sucursal centro" />
+            <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="direccion" placeholder="Dirección" />
+            <button className="min-w-0 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" disabled={!canEdit} type="submit">Agregar</button>
           </form>
           <div className="mt-4 grid gap-2">
             {branches.map((branch) => (
