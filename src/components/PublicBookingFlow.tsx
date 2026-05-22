@@ -63,6 +63,8 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [confirmed, setConfirmed] = useState<ConfirmedReservation | null>(null);
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [lookupPhone, setLookupPhone] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState("");
@@ -82,6 +84,14 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
   const needsStaff = filteredStaff.length > 0;
   const needsBranch = filteredBranches.length > 0;
   const readyForTimes = canReserve && serviceId && date && (!needsStaff || personalId) && (!needsBranch || sucursalId);
+
+  useEffect(() => {
+    const savedName = window.localStorage.getItem("tuagendaweb_customer_name") ?? "";
+    const savedPhone = window.localStorage.getItem("tuagendaweb_customer_phone") ?? "";
+    setCustomerName(savedName);
+    setCustomerPhone(savedPhone);
+    setLookupPhone(savedPhone);
+  }, []);
 
   useEffect(() => {
     if (personalId && !filteredStaff.some((person) => person.id === personalId)) setPersonalId("");
@@ -129,6 +139,8 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
     }
 
     const formData = new FormData(event.currentTarget);
+    const clienteNombre = String(formData.get("clienteNombre") ?? "").trim();
+    const telefono = String(formData.get("telefono") ?? "").trim();
     setBooking(true);
     try {
       const response = await fetch("/api/reservas/crear", {
@@ -141,8 +153,8 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
           time,
           personalId,
           sucursalId,
-          clienteNombre: formData.get("clienteNombre"),
-          telefono: formData.get("telefono")
+          clienteNombre,
+          telefono
         })
       });
       const data = await response.json();
@@ -150,9 +162,13 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
 
       setConfirmed(data.reserva);
       setMessage("Turno confirmado. También podés consultarlo o cancelarlo con tu WhatsApp más abajo.");
+      window.localStorage.setItem("tuagendaweb_customer_name", clienteNombre);
+      window.localStorage.setItem("tuagendaweb_customer_phone", telefono);
+      setCustomerName(clienteNombre);
+      setCustomerPhone(telefono);
+      setLookupPhone(telefono);
       setTime("");
       setTimes((current) => current.filter((item) => item !== time));
-      event.currentTarget.reset();
     } catch (caughtError) {
       setError(getErrorMessage(caughtError instanceof Error ? caughtError.message : "reservation_failed"));
     } finally {
@@ -184,6 +200,9 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
   }
 
   async function cancelPublicReservation(reservaId: string) {
+    const confirmedCancel = window.confirm("Seguro que queres cancelar este turno?");
+    if (!confirmedCancel) return;
+
     setLookupError("");
     try {
       const response = await fetch("/api/reservas/cancelar", {
@@ -221,6 +240,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {bookingData.services.map((service) => (
                     <button
+                      aria-pressed={serviceId === service.id}
                       className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${serviceId === service.id ? "border-teal bg-mint shadow-soft" : "border-ink/10 bg-cream"}`}
                       disabled={!canReserve}
                       key={service.id}
@@ -247,6 +267,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {filteredStaff.map((person) => (
                     <button
+                      aria-pressed={personalId === person.id}
                       className={`rounded-2xl border p-4 text-left transition ${personalId === person.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
                       disabled={!canReserve}
                       key={person.id}
@@ -267,6 +288,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {filteredBranches.map((branch) => (
                     <button
+                      aria-pressed={sucursalId === branch.id}
                       className={`rounded-2xl border p-4 text-left transition ${sucursalId === branch.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
                       disabled={!canReserve}
                       key={branch.id}
@@ -289,6 +311,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                     const [year, month, day] = item.value.split("-");
                     return (
                       <button
+                        aria-pressed={date === item.value}
                         className={`rounded-2xl border px-3 py-3 text-left transition ${date === item.value ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal hover:border-teal/40"}`}
                         disabled={!canReserve}
                         key={item.value}
@@ -308,7 +331,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {times.map((item) => (
-                    <button className={`rounded-xl border px-4 py-3 text-sm font-bold ${time === item ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal"}`} key={item} onClick={() => setTime(item)} type="button">
+                    <button aria-pressed={time === item} className={`rounded-xl border px-4 py-3 text-sm font-bold ${time === item ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal"}`} key={item} onClick={() => setTime(item)} type="button">
                       {item}
                     </button>
                   ))}
@@ -321,8 +344,8 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
             <div>
               <h2 className="font-display text-2xl font-extrabold text-teal">{needsStaff && needsBranch ? "5" : needsStaff || needsBranch ? "4" : "3"}. Confirmá tus datos</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} name="clienteNombre" placeholder="Tu nombre" required />
-                <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} inputMode="tel" name="telefono" placeholder="WhatsApp" required />
+                <input autoComplete="name" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} minLength={2} name="clienteNombre" onChange={(event) => setCustomerName(event.target.value)} placeholder="Tu nombre" required value={customerName} />
+                <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} inputMode="tel" minLength={8} name="telefono" onChange={(event) => setCustomerPhone(event.target.value)} placeholder="WhatsApp" required value={customerPhone} />
               </div>
             </div>
           </div>

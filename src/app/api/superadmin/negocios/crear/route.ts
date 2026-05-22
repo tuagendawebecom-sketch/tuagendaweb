@@ -27,7 +27,33 @@ function planPrice(plan: BusinessPlan) {
   return 0;
 }
 
+const defaultScheduleConfig = {
+  intervaloMin: 30,
+  diasReservaMax: 21,
+  anticipacionHoras: 1,
+  diasAtencion: ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
+  horariosPorDia: {
+    lunes: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    martes: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    miércoles: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    jueves: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    viernes: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    sábado: { activo: true, rangos: [{ inicio: "09:00", fin: "13:00" }] },
+    domingo: { activo: false, rangos: [] }
+  }
+};
+
 export async function POST(request: Request) {
+  const contentLength = Number(request.headers.get("content-length") ?? "0");
+  if (contentLength > 12_000) {
+    return NextResponse.json({ ok: false, error: "payload_too_large" }, { status: 413 });
+  }
+
+  const contentType = request.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    return NextResponse.json({ ok: false, error: "invalid_content_type" }, { status: 415 });
+  }
+
   const admin = await requireSuperAdmin(request);
   if (!admin.ok) {
     const status = admin.error === "firebase_admin_not_configured" ? 503 : admin.error === "forbidden" ? 403 : 401;
@@ -35,6 +61,9 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => null);
+  if (!body) {
+    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+  }
   const nombre = clean(body?.nombre);
   const slug = normalizeSlug(clean(body?.slug) || nombre);
   const plan = (clean(body?.plan) || "agenda_simple") as BusinessPlan;
@@ -131,6 +160,12 @@ export async function POST(request: Request) {
     precio: 0,
     activo: true,
     orden: 1,
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp()
+  });
+
+  await businessRef.collection("configuracion").doc("general").set({
+    ...defaultScheduleConfig,
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp()
   });

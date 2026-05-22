@@ -1,6 +1,6 @@
 "use client";
 
-import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,7 @@ export function LoginForm() {
     setMessage("");
 
     if (!isFirebaseClientConfigured()) {
-      setError("Firebase todavía no está configurado en este entorno.");
+      setError("Firebase todavia no esta configurado en este entorno.");
       return;
     }
 
@@ -32,23 +32,31 @@ export function LoginForm() {
     }
 
     const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const password = String(formData.get("password") ?? "");
 
     setLoading(true);
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const userDoc = await getDoc(doc(db, "businessUsers", credential.user.uid));
-      const role = userDoc.data()?.role;
+      const userData = userDoc.data();
+      const role = userData?.role;
+      const isActive = userData?.isActive === true;
 
-      if (role === "superadmin") {
-        router.push("/superadmin");
+      if (!userDoc.exists() || !isActive) {
+        await signOut(auth);
+        setError("Tu usuario todavia no esta activo. Escribime por WhatsApp para revisar el acceso.");
         return;
       }
 
-      router.push("/panel");
+      if (role === "superadmin") {
+        router.replace("/superadmin");
+        return;
+      }
+
+      router.replace("/panel");
     } catch {
-      setError("No se pudo ingresar. Revisá email, contraseña y permisos del usuario.");
+      setError("No se pudo ingresar. Revisa email, contrasena y permisos del usuario.");
     } finally {
       setLoading(false);
     }
@@ -59,7 +67,7 @@ export function LoginForm() {
     setMessage("");
 
     if (!resetEmail) {
-      setError("Escribí tu email arriba para enviarte el cambio de contraseña.");
+      setError("Escribi tu email arriba para enviarte el cambio de contrasena.");
       return;
     }
 
@@ -71,9 +79,9 @@ export function LoginForm() {
 
     try {
       await sendPasswordResetEmail(auth, resetEmail);
-      setMessage("Te enviamos un email para cambiar tu contraseña.");
+      setMessage("Te enviamos un email para cambiar tu contrasena.");
     } catch {
-      setError("No se pudo enviar el email. Revisá que el correo esté bien escrito.");
+      setError("No se pudo enviar el email. Revisa que el correo este bien escrito.");
     }
   }
 
@@ -81,11 +89,11 @@ export function LoginForm() {
     <form className="mt-7 grid gap-4" onSubmit={handleSubmit}>
       <label className="grid gap-2 text-sm font-bold text-ink/70">
         Email
-        <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="email" onChange={(event) => setResetEmail(event.target.value.trim())} placeholder="admin@tuagendaweb.com.ar" required type="email" />
+        <input autoComplete="email" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="email" onChange={(event) => setResetEmail(event.target.value.trim().toLowerCase())} placeholder="admin@tuagendaweb.com.ar" required type="email" />
       </label>
       <label className="grid gap-2 text-sm font-bold text-ink/70">
-        Contraseña
-        <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="password" placeholder="••••••••" required type="password" />
+        Contrasena
+        <input autoComplete="current-password" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="password" placeholder="********" required type="password" />
       </label>
       <button
         className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-4 py-3 text-sm font-bold text-cream transition hover:bg-action disabled:cursor-wait disabled:opacity-70"
@@ -98,7 +106,7 @@ export function LoginForm() {
       {error ? <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</p> : null}
       {message ? <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">{message}</p> : null}
       <button className="text-sm font-bold text-action hover:text-teal" onClick={handlePasswordReset} type="button">
-        Quiero cambiar o recuperar mi contraseña
+        Quiero cambiar o recuperar mi contrasena
       </button>
     </form>
   );

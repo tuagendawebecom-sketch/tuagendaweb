@@ -15,7 +15,7 @@ import {
   setDoc,
   updateDoc
 } from "firebase/firestore";
-import { Building2, CalendarCheck, Copy, ExternalLink, Loader2, MapPin, PlusCircle, Save, Settings2, ShieldAlert, Trash2, Users } from "lucide-react";
+import { Building2, CalendarCheck, Copy, ExternalLink, Loader2, MapPin, MessageCircle, PlusCircle, Save, Settings2, ShieldAlert, Trash2, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { siteUrl } from "@/data/site";
@@ -610,9 +610,16 @@ export function PanelDashboard() {
                   {reservation.sucursalNombre ? ` · ${reservation.sucursalNombre}` : ""}
                 </p>
               </div>
-              <span className={`rounded-full px-4 py-2 text-xs font-extrabold ${reservation.estado === "cancelada" ? "bg-red-50 text-red-700" : "bg-mint text-teal"}`}>
-                {reservation.estado ?? "confirmada"}
-              </span>
+              <div className="flex flex-wrap gap-2 sm:justify-end">
+                {reservation.telefono ? (
+                  <Link className="inline-flex items-center gap-2 rounded-full bg-teal px-4 py-2 text-xs font-extrabold text-cream" href={`https://wa.me/${normalizePhone(reservation.telefono)}`} rel="noopener noreferrer" target="_blank">
+                    <MessageCircle size={14} /> WhatsApp
+                  </Link>
+                ) : null}
+                <span className={`rounded-full px-4 py-2 text-xs font-extrabold ${reservation.estado === "cancelada" ? "bg-red-50 text-red-700" : "bg-mint text-teal"}`}>
+                  {reservation.estado ?? "confirmada"}
+                </span>
+              </div>
             </article>
           )) : (
             <p className="rounded-2xl bg-cream p-4 font-semibold text-ink/65">Todavía no hay turnos cargados.</p>
@@ -690,11 +697,11 @@ export function PanelDashboard() {
           <h2 className="font-display text-2xl font-extrabold text-teal">Servicios</h2>
         </div>
         <form className="mt-5 grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_140px_160px_124px]" onSubmit={handleService}>
-          <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action md:col-span-2 xl:col-span-1" name="nombre" placeholder="Corte + barba" />
-          <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="duracionMin" placeholder="60 min" type="number" />
+          <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action md:col-span-2 xl:col-span-1" minLength={2} name="nombre" placeholder="Corte + barba" required />
+          <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" min={5} name="duracionMin" placeholder="60 min" required step={5} type="number" />
           <label className="relative min-w-0">
             <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-ink/45">$</span>
-            <input className="w-full rounded-2xl border border-ink/10 bg-cream py-3 pl-8 pr-4 outline-none focus:border-action" name="precio" placeholder="Precio" type="number" />
+            <input className="w-full rounded-2xl border border-ink/10 bg-cream py-3 pl-8 pr-4 outline-none focus:border-action" min={0} name="precio" placeholder="Precio" required step={100} type="number" />
           </label>
           <button className="inline-flex min-w-0 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60 md:col-span-2 xl:col-span-1" disabled={!canEdit || saving === "service"} type="submit">
             <PlusCircle size={17} /> Agregar
@@ -787,7 +794,7 @@ export function PanelDashboard() {
             <h2 className="font-display text-2xl font-extrabold text-teal">Personal</h2>
           </div>
           <form className="mt-5 grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_124px]" onSubmit={handleStaff}>
-            <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" placeholder="Nombre" />
+            <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" minLength={2} name="nombre" placeholder="Nombre" required />
             <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="especialidad" placeholder="Especialidad" />
             <button className="min-w-0 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" disabled={!canEdit} type="submit">Agregar</button>
           </form>
@@ -807,7 +814,7 @@ export function PanelDashboard() {
             <h2 className="font-display text-2xl font-extrabold text-teal">Sucursales</h2>
           </div>
           <form className="mt-5 grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_124px]" onSubmit={handleBranch}>
-            <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" placeholder="Sucursal centro" />
+            <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" minLength={2} name="nombre" placeholder="Sucursal centro" required />
             <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="direccion" placeholder="Dirección" />
             <button className="min-w-0 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" disabled={!canEdit} type="submit">Agregar</button>
           </form>

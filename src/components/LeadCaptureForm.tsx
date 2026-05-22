@@ -21,6 +21,7 @@ type FormState = "idle" | "submitting" | "success" | "error";
 export function LeadCaptureForm() {
   const [state, setState] = useState<FormState>("idle");
   const [error, setError] = useState("");
+  const [lastPlan, setLastPlan] = useState<LeadInterestPlan>("agenda_simple");
   const [sourceData, setSourceData] = useState({
     path: "",
     referrer: "",
@@ -101,6 +102,7 @@ export function LeadCaptureForm() {
         interestedPlan: payload.interestedPlan,
         businessType: payload.businessType
       });
+      setLastPlan(payload.interestedPlan as LeadInterestPlan);
       setState("success");
       form.reset();
     } catch {
@@ -178,7 +180,12 @@ export function LeadCaptureForm() {
             {state === "submitting" ? "Enviando..." : leadForm.submit}
           </button>
           <div aria-live="polite">
-            {state === "success" ? <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">{leadForm.success}</p> : null}
+            {state === "success" ? (
+              <div className="grid gap-3 rounded-2xl bg-mint p-4 text-sm font-bold text-teal">
+                <p>{leadForm.success}</p>
+                <WhatsAppButton className="w-full sm:w-fit" href={createWhatsAppHref(plans.find((plan) => plan.id === lastPlan)?.message ?? whatsappMessages.pricing)} label="Acelerar por WhatsApp" location="lead_form_success" />
+              </div>
+            ) : null}
             {state === "error" ? <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</p> : null}
           </div>
           <p className="text-xs leading-5 text-ink/50">{leadForm.fallback}</p>

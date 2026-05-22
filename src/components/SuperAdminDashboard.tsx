@@ -35,8 +35,14 @@ type Lead = {
   businessName?: string;
   businessType?: string;
   interestedPlan?: string;
+  message?: string;
+  source?: string;
+  path?: string;
+  utmSource?: string;
+  utmCampaign?: string;
   status?: string;
   priority?: string;
+  createdAt?: { toDate?: () => Date };
 };
 
 const planLabels: Record<BusinessPlan, string> = {
@@ -60,6 +66,12 @@ function formatCurrency(value?: number) {
     currency: "ARS",
     maximumFractionDigits: 0
   }).format(value);
+}
+
+function formatLeadDate(value?: Lead["createdAt"]) {
+  const date = value?.toDate?.();
+  if (!date) return "";
+  return new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle: "short" }).format(date);
 }
 
 function toBusiness(id: string, data: Record<string, unknown>): AdminBusiness {
@@ -266,8 +278,8 @@ export function SuperAdminDashboard() {
   }
 
   function exportLeadsCsv() {
-    const headers = ["nombre", "telefono", "negocio", "rubro", "plan", "estado"];
-    const rows = filteredLeads.map((lead) => [lead.name, lead.phone, lead.businessName, lead.businessType, lead.interestedPlan, lead.status ?? "new"]);
+    const headers = ["nombre", "telefono", "negocio", "rubro", "plan", "estado", "mensaje", "origen", "campana"];
+    const rows = filteredLeads.map((lead) => [lead.name, lead.phone, lead.businessName, lead.businessType, lead.interestedPlan, lead.status ?? "new", lead.message ?? "", lead.source ?? "", lead.utmCampaign ?? ""]);
     const csv = [headers, ...rows]
       .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
       .join("\n");
@@ -493,6 +505,10 @@ export function SuperAdminDashboard() {
               </div>
               <p className="mt-1 text-sm font-semibold text-ink/62">{lead.name} · {lead.phone}</p>
               <p className="mt-2 text-sm text-ink/62">{lead.businessType} · {lead.interestedPlan}</p>
+              {lead.message ? <p className="mt-3 rounded-2xl bg-cream p-3 text-sm leading-6 text-ink/70">{lead.message}</p> : null}
+              <p className="mt-3 text-xs font-semibold text-ink/45">
+                {[formatLeadDate(lead.createdAt), lead.source, lead.utmCampaign ? `campana: ${lead.utmCampaign}` : "", lead.path].filter(Boolean).join(" | ")}
+              </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {lead.phone ? (
                   <Link className="inline-flex items-center gap-2 rounded-xl bg-teal px-3 py-2 text-xs font-bold text-cream" href={`https://wa.me/${normalizePhone(String(lead.phone))}?text=${encodeURIComponent(`Hola ${lead.name ?? ""}, vi tu consulta por TuAgendaWeb para ${lead.businessName ?? "tu negocio"}. Te escribo para ayudarte a elegir el plan.`)}`} rel="noopener noreferrer" target="_blank">

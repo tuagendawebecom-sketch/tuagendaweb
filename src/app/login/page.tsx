@@ -16,10 +16,10 @@ export default function LoginPage() {
         </Link>
         <h1 className="mt-8 font-display text-4xl font-extrabold text-teal">Acceso al panel</h1>
         <p className="mt-3 leading-7 text-ink/65">
-          Ingresá con Firebase Auth. Si tu usuario tiene role `superadmin`, vas al panel de gestión; si pertenece a un negocio, vas al panel cliente.
+          Ingresa con el email y la contrasena que recibiste. Si sos dueno de un negocio, vas a tu panel; si sos administrador, vas al panel general.
         </p>
         <LoginForm />
-        <p className="mt-4 text-xs leading-5 text-ink/50">El primer superadmin se crea en Firebase Auth y se vincula en Firestore con businessUsers/UID.</p>
+        <p className="mt-4 text-xs leading-5 text-ink/50">Si es tu primer ingreso, podes cambiar la contrasena despues de entrar.</p>
       </section>
     </main>
   );

@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   const businessType = clean(body.businessType, 80);
   const priority = interestedPlan === "web_completa" ? "high" : interestedPlan === "agenda_pro" ? "medium" : "normal";
 
-  if (name.length < 2 || phone.length < 6 || businessName.length < 2 || businessType.length < 2) {
+  if (name.length < 2 || phone.length < 10 || businessName.length < 2 || businessType.length < 2) {
     return NextResponse.json({ ok: false, error: "invalid_fields" }, { status: 400 });
   }
 
