@@ -17,7 +17,7 @@ import {
 } from "firebase/firestore";
 import { Building2, CalendarCheck, Copy, ExternalLink, Loader2, MapPin, PlusCircle, Save, Settings2, ShieldAlert, Trash2, Users } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { siteUrl } from "@/data/site";
 import { getClientAuth, getClientDb, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { normalizePhone } from "@/lib/phone";
@@ -52,6 +52,8 @@ type ServiceItem = {
   precio?: number;
   activo?: boolean;
   orden?: number;
+  personalIds?: string[];
+  sucursalIds?: string[];
 };
 
 type StaffItem = {
@@ -78,6 +80,35 @@ type ReservationItem = {
   estado?: string;
   personalNombre?: string;
   sucursalNombre?: string;
+};
+
+type DaySchedule = {
+  activo: boolean;
+  rangos: Array<{ inicio: string; fin: string }>;
+};
+
+type ScheduleConfig = {
+  intervaloMin: number;
+  diasReservaMax: number;
+  anticipacionHoras: number;
+  horariosPorDia: Record<string, DaySchedule>;
+};
+
+const weekDays = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
+
+const defaultSchedule: ScheduleConfig = {
+  intervaloMin: 30,
+  diasReservaMax: 21,
+  anticipacionHoras: 1,
+  horariosPorDia: {
+    lunes: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    martes: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    miércoles: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    jueves: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    viernes: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    sábado: { activo: true, rangos: [{ inicio: "09:00", fin: "13:00" }] },
+    domingo: { activo: false, rangos: [] }
+  }
 };
 
 const planLabels: Record<string, string> = {
@@ -109,6 +140,66 @@ function initialsFromName(name: string) {
     .toUpperCase();
 }
 
+function formatCurrency(value?: number) {
+  return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(value ?? 0);
+}
+
+function readSchedule(data: Record<string, unknown> | undefined): ScheduleConfig {
+  if (!data) return defaultSchedule;
+  const rawDays = data.horariosPorDia && typeof data.horariosPorDia === "object" ? data.horariosPorDia as Record<string, unknown> : null;
+  const horariosPorDia = rawDays ? Object.fromEntries(weekDays.map((day) => {
+    const raw = rawDays[day] && typeof rawDays[day] === "object" ? rawDays[day] as { activo?: unknown; rangos?: unknown } : undefined;
+    const rangos = Array.isArray(raw?.rangos)
+      ? raw.rangos
+          .map((range) => {
+            const item = range && typeof range === "object" ? range as { inicio?: unknown; fin?: unknown } : {};
+            return { inicio: String(item.inicio ?? ""), fin: String(item.fin ?? "") };
+          })
+          .filter((range) => range.inicio && range.fin)
+      : defaultSchedule.horariosPorDia[day].rangos;
+
+    return [day, { activo: raw?.activo === true, rangos }];
+  })) as Record<string, DaySchedule> : defaultSchedule.horariosPorDia;
+
+  return {
+    intervaloMin: Number(data.intervaloMin ?? defaultSchedule.intervaloMin),
+    diasReservaMax: Number(data.diasReservaMax ?? defaultSchedule.diasReservaMax),
+    anticipacionHoras: Number(data.anticipacionHoras ?? defaultSchedule.anticipacionHoras),
+    horariosPorDia
+  };
+}
+
+function resizeLogo(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const size = 512;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          reject(new Error("canvas_failed"));
+          return;
+        }
+        context.fillStyle = "#F7F4EE";
+        context.fillRect(0, 0, size, size);
+        const ratio = Math.min(size / image.width, size / image.height);
+        const width = image.width * ratio;
+        const height = image.height * ratio;
+        context.drawImage(image, (size - width) / 2, (size - height) / 2, width, height);
+        resolve(canvas.toDataURL("image/webp", 0.86));
+      };
+      image.onerror = () => reject(new Error("image_failed"));
+      image.src = String(reader.result);
+    };
+    reader.onerror = () => reject(new Error("reader_failed"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function PanelDashboard() {
   const auth = useMemo(() => getClientAuth(), []);
   const db = useMemo(() => getClientDb(), []);
@@ -120,6 +211,7 @@ export function PanelDashboard() {
   const [staff, setStaff] = useState<StaffItem[]>([]);
   const [branches, setBranches] = useState<BranchItem[]>([]);
   const [reservations, setReservations] = useState<ReservationItem[]>([]);
+  const [schedule, setSchedule] = useState<ScheduleConfig>(defaultSchedule);
   const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -188,6 +280,11 @@ export function PanelDashboard() {
         unsubscribers.push(
           onSnapshot(query(collection(activeDb, "negocios", userData.negocioId, "reservas"), orderBy("fechaHora", "asc"), limit(20)), (snapshot) => {
             setReservations(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
+          })
+        );
+        unsubscribers.push(
+          onSnapshot(doc(activeDb, "negocios", userData.negocioId, "configuracion", "general"), (snapshot) => {
+            setSchedule(readSchedule(snapshot.data()));
           })
         );
       } catch {
@@ -262,7 +359,6 @@ export function PanelDashboard() {
         rubro: String(formData.get("rubro") ?? "").trim(),
         whatsapp: normalizePhone(String(formData.get("whatsapp") ?? "")),
         instagram: String(formData.get("instagram") ?? "").trim(),
-        logoUrl: String(formData.get("logoUrl") ?? "").trim(),
         initials: initials.slice(0, 3),
         colorPrimario: String(formData.get("colorPrimario") ?? "#123D3A"),
         colorSecundario: String(formData.get("colorSecundario") ?? "#E7B85A"),
@@ -275,6 +371,35 @@ export function PanelDashboard() {
       setError("No se pudieron guardar los datos del negocio.");
     } finally {
       setSaving("");
+    }
+  }
+
+  async function handleLogoUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file || !canEdit) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Subí una imagen válida para el logo.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("El logo no puede pesar más de 5 MB.");
+      return;
+    }
+
+    setSaving("logo");
+    setError("");
+    try {
+      const logoUrl = await resizeLogo(file);
+      await updateDoc(doc(activeDb, "negocios", businessId), {
+        logoUrl,
+        updatedAt: serverTimestamp()
+      });
+      setMessage("Logo cargado correctamente.");
+    } catch {
+      setError("No se pudo cargar el logo.");
+    } finally {
+      setSaving("");
+      event.target.value = "";
     }
   }
 
@@ -297,6 +422,8 @@ export function PanelDashboard() {
         nombre,
         duracionMin: Math.max(5, toNumber(formData.get("duracionMin"), 60)),
         precio: Math.max(0, toNumber(formData.get("precio"), 0)),
+        personalIds: formData.getAll("personalIds").map(String),
+        sucursalIds: formData.getAll("sucursalIds").map(String),
         activo: true,
         orden: services.length + 1,
         createdAt: serverTimestamp(),
@@ -314,6 +441,13 @@ export function PanelDashboard() {
   async function updateService(service: ServiceItem, patch: Partial<ServiceItem>) {
     if (!canEdit) return;
     await updateDoc(doc(activeDb, "negocios", businessId, "servicios", service.id), { ...patch, updatedAt: serverTimestamp() });
+  }
+
+  async function toggleServiceRelation(service: ServiceItem, field: "personalIds" | "sucursalIds", value: string) {
+    const current = new Set((service[field] ?? []).map(String));
+    if (current.has(value)) current.delete(value);
+    else current.add(value);
+    await updateService(service, { [field]: Array.from(current) } as Partial<ServiceItem>);
   }
 
   async function handleStaff(event: FormEvent<HTMLFormElement>) {
@@ -361,18 +495,38 @@ export function PanelDashboard() {
     if (!canEdit) return;
 
     const formData = new FormData(event.currentTarget);
-    await setDoc(
-      doc(activeDb, "negocios", businessId, "configuracion", "general"),
-      {
-        diasAtencion: formData.getAll("diasAtencion"),
-        horarioInicio: String(formData.get("horarioInicio") ?? "09:00"),
-        horarioFin: String(formData.get("horarioFin") ?? "18:00"),
-        intervaloMin: Math.max(5, toNumber(formData.get("intervaloMin"), 30)),
-        updatedAt: serverTimestamp()
-      },
-      { merge: true }
-    );
-    setMessage("Horarios básicos guardados.");
+    const horariosPorDia = Object.fromEntries(weekDays.map((day) => {
+      const activo = formData.get(`${day}-activo`) === "on";
+      const rangos = [
+        { inicio: String(formData.get(`${day}-inicio-1`) ?? ""), fin: String(formData.get(`${day}-fin-1`) ?? "") },
+        { inicio: String(formData.get(`${day}-inicio-2`) ?? ""), fin: String(formData.get(`${day}-fin-2`) ?? "") }
+      ].filter((range) => range.inicio && range.fin && range.inicio < range.fin);
+      return [day, { activo, rangos: activo ? rangos : [] }];
+    })) as Record<string, DaySchedule>;
+
+    setSaving("schedule");
+    setError("");
+    try {
+      await setDoc(
+        doc(activeDb, "negocios", businessId, "configuracion", "general"),
+        {
+          diasAtencion: weekDays.filter((day) => horariosPorDia[day].activo),
+          horarioInicio: "09:00",
+          horarioFin: "18:00",
+          intervaloMin: Math.max(5, toNumber(formData.get("intervaloMin"), 30)),
+          diasReservaMax: Math.max(1, toNumber(formData.get("diasReservaMax"), 21)),
+          anticipacionHoras: Math.max(0, toNumber(formData.get("anticipacionHoras"), 1)),
+          horariosPorDia,
+          updatedAt: serverTimestamp()
+        },
+        { merge: true }
+      );
+      setMessage("Horarios guardados correctamente.");
+    } catch {
+      setError("No se pudieron guardar los horarios.");
+    } finally {
+      setSaving("");
+    }
   }
 
   async function handlePasswordChange(event: FormEvent<HTMLFormElement>) {
@@ -469,14 +623,23 @@ export function PanelDashboard() {
       <form className="grid gap-5 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-2" onSubmit={handleBusinessSettings}>
         <div className="lg:col-span-2">
           <h2 className="font-display text-2xl font-extrabold text-teal">Datos públicos del negocio</h2>
-          <p className="mt-2 leading-7 text-ink/62">Esto se ve en tu agenda pública. Podés usar logo por URL o iniciales.</p>
+          <p className="mt-2 leading-7 text-ink/62">Esto se ve en tu agenda pública. Podés cargar un logo o usar iniciales.</p>
+        </div>
+        <div className="grid gap-3 rounded-2xl bg-cream p-4 lg:col-span-2 sm:grid-cols-[96px_1fr] sm:items-center">
+          <div className="grid h-24 w-24 place-items-center overflow-hidden rounded-3xl bg-paper text-xl font-extrabold text-teal ring-1 ring-ink/10">
+            {business.logoUrl ? <img alt={`Logo de ${business.nombre}`} className="h-full w-full object-contain p-2" src={business.logoUrl} /> : business.initials ?? initialsFromName(business.nombre ?? "")}
+          </div>
+          <label className="grid gap-2 text-sm font-bold text-ink/70">
+            Logo del negocio
+            <input accept="image/*" className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 outline-none focus:border-action" disabled={!canEdit || saving === "logo"} onChange={handleLogoUpload} type="file" />
+            <span className="text-xs font-semibold text-ink/50">Se optimiza a 512x512 y queda guardado en el negocio.</span>
+          </label>
         </div>
         {[
           ["nombre", "Nombre del negocio", business.nombre ?? ""],
           ["rubro", "Rubro", business.rubro ?? ""],
           ["whatsapp", "WhatsApp visible", business.whatsapp ?? ""],
           ["instagram", "Instagram URL", business.instagram ?? ""],
-          ["logoUrl", "Logo URL", business.logoUrl ?? ""],
           ["initials", "Iniciales si no tenés logo", business.initials ?? initialsFromName(business.nombre ?? "")],
           ["ownerNombre", "Nombre de contacto", business.ownerNombre ?? ""],
           ["ownerTelefono", "Teléfono de contacto", business.ownerTelefono ?? ""]
@@ -526,22 +689,84 @@ export function PanelDashboard() {
           <Settings2 className="text-action" />
           <h2 className="font-display text-2xl font-extrabold text-teal">Servicios</h2>
         </div>
-        <form className="mt-5 grid gap-3 lg:grid-cols-[1fr_140px_140px_auto]" onSubmit={handleService}>
+        <form className="mt-5 grid gap-3 lg:grid-cols-[1fr_140px_160px_auto]" onSubmit={handleService}>
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" placeholder="Corte + barba" />
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="duracionMin" placeholder="60 min" type="number" />
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="precio" placeholder="Precio" type="number" />
+          <label className="relative">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-ink/45">$</span>
+            <input className="w-full rounded-2xl border border-ink/10 bg-cream py-3 pl-8 pr-4 outline-none focus:border-action" name="precio" placeholder="Precio" type="number" />
+          </label>
           <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60" disabled={!canEdit || saving === "service"} type="submit">
             <PlusCircle size={17} /> Agregar
           </button>
+          {(staff.length || branches.length) ? (
+            <div className="grid gap-4 rounded-2xl bg-cream p-4 lg:col-span-4 md:grid-cols-2">
+              {staff.length ? (
+                <div>
+                  <p className="text-sm font-extrabold text-teal">Personal que realiza este servicio</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {staff.map((person) => (
+                      <label className="rounded-full bg-paper px-3 py-2 text-xs font-bold text-ink/70" key={person.id}>
+                        <input className="mr-2" name="personalIds" type="checkbox" value={person.id} />
+                        {person.nombre}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {branches.length ? (
+                <div>
+                  <p className="text-sm font-extrabold text-teal">Sucursales donde se ofrece</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {branches.map((branch) => (
+                      <label className="rounded-full bg-paper px-3 py-2 text-xs font-bold text-ink/70" key={branch.id}>
+                        <input className="mr-2" name="sucursalIds" type="checkbox" value={branch.id} />
+                        {branch.nombre}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </form>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
           {services.map((service) => (
             <article className="rounded-2xl bg-cream p-4" key={service.id}>
               <input className="w-full bg-transparent font-bold text-teal outline-none" defaultValue={service.nombre} onBlur={(event) => updateService(service, { nombre: event.target.value.trim() || service.nombre })} />
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <input className="rounded-xl border border-ink/10 bg-paper px-3 py-2 text-sm" defaultValue={service.duracionMin ?? 60} onBlur={(event) => updateService(service, { duracionMin: Math.max(5, Number(event.target.value) || 60) })} type="number" />
-                <input className="rounded-xl border border-ink/10 bg-paper px-3 py-2 text-sm" defaultValue={service.precio ?? 0} onBlur={(event) => updateService(service, { precio: Math.max(0, Number(event.target.value) || 0) })} type="number" />
+                <label className="grid gap-1 text-xs font-bold text-ink/55">Duración min<input className="rounded-xl border border-ink/10 bg-paper px-3 py-2 text-sm text-ink" defaultValue={service.duracionMin ?? 60} onBlur={(event) => updateService(service, { duracionMin: Math.max(5, Number(event.target.value) || 60) })} type="number" /></label>
+                <label className="grid gap-1 text-xs font-bold text-ink/55">Precio<input className="rounded-xl border border-ink/10 bg-paper px-3 py-2 text-sm text-ink" defaultValue={service.precio ?? 0} onBlur={(event) => updateService(service, { precio: Math.max(0, Number(event.target.value) || 0) })} type="number" /></label>
               </div>
+              <p className="mt-2 text-sm font-extrabold text-teal">{formatCurrency(service.precio)}</p>
+              {(staff.length || branches.length) ? (
+                <div className="mt-4 grid gap-3">
+                  {staff.length ? (
+                    <div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-ink/45">Personal</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {staff.map((person) => (
+                          <button className={`rounded-full px-3 py-2 text-xs font-bold ${service.personalIds?.includes(person.id) ? "bg-teal text-cream" : "bg-paper text-ink/70"}`} key={person.id} onClick={() => toggleServiceRelation(service, "personalIds", person.id)} type="button">
+                            {person.nombre}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  {branches.length ? (
+                    <div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-ink/45">Sucursales</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {branches.map((branch) => (
+                          <button className={`rounded-full px-3 py-2 text-xs font-bold ${service.sucursalIds?.includes(branch.id) ? "bg-teal text-cream" : "bg-paper text-ink/70"}`} key={branch.id} onClick={() => toggleServiceRelation(service, "sucursalIds", branch.id)} type="button">
+                            {branch.nombre}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="mt-3 flex flex-wrap gap-2">
                 <button className="rounded-xl bg-mint px-3 py-2 text-xs font-bold text-teal" onClick={() => updateService(service, { activo: service.activo === false })} type="button">
                   {service.activo === false ? "Activar" : "Pausar"}
@@ -561,7 +786,7 @@ export function PanelDashboard() {
             <Users className="text-action" />
             <h2 className="font-display text-2xl font-extrabold text-teal">Personal</h2>
           </div>
-          <form className="mt-5 grid gap-3 sm:grid-cols-[1fr_1fr_auto]" onSubmit={handleStaff}>
+          <form className="mt-5 grid gap-3 xl:grid-cols-[1fr_1fr_auto]" onSubmit={handleStaff}>
             <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" placeholder="Nombre" />
             <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="especialidad" placeholder="Especialidad" />
             <button className="rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" disabled={!canEdit} type="submit">Agregar</button>
@@ -581,7 +806,7 @@ export function PanelDashboard() {
             <MapPin className="text-action" />
             <h2 className="font-display text-2xl font-extrabold text-teal">Sucursales</h2>
           </div>
-          <form className="mt-5 grid gap-3 sm:grid-cols-[1fr_1fr_auto]" onSubmit={handleBranch}>
+          <form className="mt-5 grid gap-3 xl:grid-cols-[1fr_1fr_auto]" onSubmit={handleBranch}>
             <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" placeholder="Sucursal centro" />
             <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="direccion" placeholder="Dirección" />
             <button className="rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" disabled={!canEdit} type="submit">Agregar</button>
@@ -600,32 +825,49 @@ export function PanelDashboard() {
       <form className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" onSubmit={saveBasicSchedule}>
         <div className="flex items-center gap-3">
           <CalendarCheck className="text-action" />
-          <h2 className="font-display text-2xl font-extrabold text-teal">Horarios básicos</h2>
+          <h2 className="font-display text-2xl font-extrabold text-teal">Horarios de atención</h2>
         </div>
-        <p className="mt-2 leading-7 text-ink/62">Estos datos dejan preparada la disponibilidad base del negocio.</p>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="grid gap-2 text-sm font-bold text-ink/70">
-            Inicio
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue="09:00" name="horarioInicio" type="time" />
-          </label>
-          <label className="grid gap-2 text-sm font-bold text-ink/70">
-            Fin
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue="18:00" name="horarioFin" type="time" />
-          </label>
+        <p className="mt-2 leading-7 text-ink/62">Definí rangos por día. Por ejemplo, sábado solo por la mañana.</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
           <label className="grid gap-2 text-sm font-bold text-ink/70">
             Intervalo
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue="30" name="intervaloMin" type="number" />
+            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue={schedule.intervaloMin} name="intervaloMin" type="number" />
           </label>
-          <button className="self-end rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" disabled={!canEdit} type="submit">Guardar horarios</button>
+          <label className="grid gap-2 text-sm font-bold text-ink/70">
+            Días para reservar
+            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue={schedule.diasReservaMax} name="diasReservaMax" type="number" />
+          </label>
+          <label className="grid gap-2 text-sm font-bold text-ink/70">
+            Anticipación mínima en horas
+            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue={schedule.anticipacionHoras} name="anticipacionHoras" type="number" />
+          </label>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"].map((day) => (
-            <label className="rounded-full bg-mint px-4 py-2 text-sm font-bold text-teal" key={day}>
-              <input className="mr-2" defaultChecked={day !== "domingo"} name="diasAtencion" type="checkbox" value={day} />
-              {day}
-            </label>
-          ))}
+        <div className="mt-5 grid gap-3">
+          {weekDays.map((day) => {
+            const dayConfig = schedule.horariosPorDia[day] ?? defaultSchedule.horariosPorDia[day];
+            const firstRange = dayConfig.rangos[0] ?? { inicio: "09:00", fin: "18:00" };
+            const secondRange = dayConfig.rangos[1] ?? { inicio: "", fin: "" };
+            return (
+              <div className="grid gap-3 rounded-2xl bg-cream p-4 lg:grid-cols-[150px_1fr_1fr] lg:items-end" key={day}>
+                <label className="flex items-center gap-3 rounded-2xl bg-paper px-4 py-3 text-sm font-extrabold capitalize text-teal">
+                  <input defaultChecked={dayConfig.activo} name={`${day}-activo`} type="checkbox" />
+                  {day}
+                </label>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <label className="grid gap-1 text-xs font-bold text-ink/55">Desde<input className="rounded-xl border border-ink/10 bg-paper px-3 py-2 text-sm" defaultValue={firstRange.inicio} name={`${day}-inicio-1`} type="time" /></label>
+                  <label className="grid gap-1 text-xs font-bold text-ink/55">Hasta<input className="rounded-xl border border-ink/10 bg-paper px-3 py-2 text-sm" defaultValue={firstRange.fin} name={`${day}-fin-1`} type="time" /></label>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <label className="grid gap-1 text-xs font-bold text-ink/55">Desde opcional<input className="rounded-xl border border-ink/10 bg-paper px-3 py-2 text-sm" defaultValue={secondRange.inicio} name={`${day}-inicio-2`} type="time" /></label>
+                  <label className="grid gap-1 text-xs font-bold text-ink/55">Hasta opcional<input className="rounded-xl border border-ink/10 bg-paper px-3 py-2 text-sm" defaultValue={secondRange.fin} name={`${day}-fin-2`} type="time" /></label>
+                </div>
+              </div>
+            );
+          })}
         </div>
+        <button className="mt-5 w-full rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60" disabled={!canEdit || saving === "schedule"} type="submit">
+          {saving === "schedule" ? "Guardando horarios..." : "Guardar horarios"}
+        </button>
       </form>
 
       <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">

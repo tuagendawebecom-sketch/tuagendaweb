@@ -235,6 +235,7 @@ export function SuperAdminDashboard() {
         activo: false,
         billingStatus: "manual_suspended",
         slug: `${business.slug}-archivado-${Date.now()}`,
+        logoUrl: "",
         updatedAt: serverTimestamp()
       });
       setMessage(`${business.nombre} archivado. El slug quedó liberado para otro negocio.`);

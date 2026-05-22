@@ -90,8 +90,20 @@ function normalizeDayName(day: string) {
 
 function isBusinessDay(date: string, schedule: PublicScheduleConfig) {
   const current = localDateFromISO(date);
+  const dayName = dayNames[current.getUTCDay()];
+  const daySchedule = schedule.horariosPorDia?.[dayName];
+  if (daySchedule) return daySchedule.activo && daySchedule.rangos.length > 0;
+
   const allowed = new Set(schedule.diasAtencion.map(normalizeDayName));
-  return allowed.has(dayNames[current.getUTCDay()]);
+  return allowed.has(dayName);
+}
+
+function getRangesForDate(date: string, schedule: PublicScheduleConfig) {
+  const current = localDateFromISO(date);
+  const daySchedule = schedule.horariosPorDia?.[dayNames[current.getUTCDay()]];
+  if (daySchedule?.activo && daySchedule.rangos.length) return daySchedule.rangos;
+  if (!daySchedule && isBusinessDay(date, schedule)) return [{ inicio: schedule.horarioInicio, fin: schedule.horarioFin }];
+  return [];
 }
 
 function isWithinReservableRange(date: string, schedule: PublicScheduleConfig) {
@@ -185,6 +197,8 @@ export async function getAvailableTimes(input: {
   const [services, schedule] = await Promise.all([getPublicServices(business.id), getPublicScheduleConfig(business.id)]);
   const service = services.find((item) => item.id === input.serviceId && item.activo !== false);
   if (!service) return { ok: false as const, error: "service_not_found" };
+  if (service.personalIds?.length && input.personalId && !service.personalIds.includes(input.personalId)) return { ok: false as const, error: "staff_not_found" };
+  if (service.sucursalIds?.length && input.sucursalId && !service.sucursalIds.includes(input.sucursalId)) return { ok: false as const, error: "branch_not_found" };
   if (!isWithinReservableRange(input.date, schedule)) return { ok: true as const, times: [] };
   if (!isBusinessDay(input.date, schedule)) return { ok: true as const, times: [] };
 
@@ -192,25 +206,29 @@ export async function getAvailableTimes(input: {
   const occupied = new Set(occupiedSnapshot.docs.map((doc) => doc.id));
   const today = todayInArgentina();
   const earliestToday = nowMinutesInArgentina() + schedule.anticipacionHoras * 60;
-  const start = minutesFromTime(schedule.horarioInicio);
-  const end = minutesFromTime(schedule.horarioFin);
-  const lastStart = end - Math.max(service.duracionMin, schedule.intervaloMin);
+  const ranges = getRangesForDate(input.date, schedule);
   const times: string[] = [];
 
-  for (let minute = start; minute <= lastStart; minute += schedule.intervaloMin) {
-    if (input.date === today && minute < earliestToday) continue;
+  for (const range of ranges) {
+    const start = minutesFromTime(range.inicio);
+    const end = minutesFromTime(range.fin);
+    const lastStart = end - Math.max(service.duracionMin, schedule.intervaloMin);
 
-    const time = timeFromMinutes(minute);
-    const slotIds = getSlotIdsForDuration({
-      date: input.date,
-      time,
-      durationMin: service.duracionMin,
-      intervalMin: schedule.intervaloMin,
-      personalId: input.personalId,
-      sucursalId: input.sucursalId
-    });
+    for (let minute = start; minute <= lastStart; minute += schedule.intervaloMin) {
+      if (input.date === today && minute < earliestToday) continue;
 
-    if (slotIds.every((slotId) => !occupied.has(slotId))) times.push(time);
+      const time = timeFromMinutes(minute);
+      const slotIds = getSlotIdsForDuration({
+        date: input.date,
+        time,
+        durationMin: service.duracionMin,
+        intervalMin: schedule.intervaloMin,
+        personalId: input.personalId,
+        sucursalId: input.sucursalId
+      });
+
+      if (slotIds.every((slotId) => !occupied.has(slotId))) times.push(time);
+    }
   }
 
   return { ok: true as const, times };
@@ -247,6 +265,8 @@ export async function createReservation(input: {
   const telefonoNormalizado = normalizePhone(input.telefono);
 
   if (!service) return { ok: false as const, error: "service_not_found" };
+  if (service.personalIds?.length && input.personalId && !service.personalIds.includes(input.personalId)) return { ok: false as const, error: "staff_not_found" };
+  if (service.sucursalIds?.length && input.sucursalId && !service.sucursalIds.includes(input.sucursalId)) return { ok: false as const, error: "branch_not_found" };
   if (input.personalId && !person) return { ok: false as const, error: "staff_not_found" };
   if (input.sucursalId && !branch) return { ok: false as const, error: "branch_not_found" };
   if (input.clienteNombre.trim().length < 2 || telefonoNormalizado.length < 10) return { ok: false as const, error: "invalid_customer" };

@@ -8,7 +8,16 @@ export const defaultScheduleConfig: PublicScheduleConfig = {
   horarioFin: "18:00",
   intervaloMin: 30,
   diasReservaMax: 21,
-  anticipacionHoras: 1
+  anticipacionHoras: 1,
+  horariosPorDia: {
+    lunes: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    martes: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    miércoles: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    jueves: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    viernes: { activo: true, rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    sábado: { activo: true, rangos: [{ inicio: "09:00", fin: "13:00" }] },
+    domingo: { activo: false, rangos: [] }
+  }
 };
 
 function serializeBusiness(id: string, data: FirebaseFirestore.DocumentData): PublicBusiness {
@@ -62,7 +71,9 @@ export async function getPublicServices(negocioId: string) {
       nombre: data.nombre ?? "Servicio",
       duracionMin: data.duracionMin ?? 30,
       precio: data.precio,
-      activo: data.activo !== false
+      activo: data.activo !== false,
+      personalIds: Array.isArray(data.personalIds) ? data.personalIds.map(String) : [],
+      sucursalIds: Array.isArray(data.sucursalIds) ? data.sucursalIds.map(String) : []
     };
   }));
 }
@@ -105,6 +116,23 @@ export async function getPublicScheduleConfig(negocioId: string): Promise<Public
 
   const snapshot = await db.collection("negocios").doc(negocioId).collection("configuracion").doc("general").get();
   const data = snapshot.data();
+  const rawHorariosPorDia = data?.horariosPorDia && typeof data.horariosPorDia === "object" ? data.horariosPorDia as Record<string, unknown> : null;
+  const horariosPorDia = rawHorariosPorDia
+    ? Object.fromEntries(
+        Object.entries(rawHorariosPorDia).map(([day, value]) => {
+          const item = value && typeof value === "object" ? value as { activo?: unknown; rangos?: unknown } : {};
+          const rangos = Array.isArray(item.rangos)
+            ? item.rangos
+                .map((range) => {
+                  const rangeData = range && typeof range === "object" ? range as { inicio?: unknown; fin?: unknown } : {};
+                  return { inicio: String(rangeData.inicio ?? ""), fin: String(rangeData.fin ?? "") };
+                })
+                .filter((range) => range.inicio && range.fin)
+            : [];
+          return [day, { activo: item.activo === true, rangos }];
+        })
+      )
+    : undefined;
 
   return {
     diasAtencion: Array.isArray(data?.diasAtencion) && data.diasAtencion.length ? data.diasAtencion.map(String) : defaultScheduleConfig.diasAtencion,
@@ -112,7 +140,8 @@ export async function getPublicScheduleConfig(negocioId: string): Promise<Public
     horarioFin: typeof data?.horarioFin === "string" ? data.horarioFin : defaultScheduleConfig.horarioFin,
     intervaloMin: Number.isFinite(Number(data?.intervaloMin)) ? Math.max(5, Number(data?.intervaloMin)) : defaultScheduleConfig.intervaloMin,
     diasReservaMax: Number.isFinite(Number(data?.diasReservaMax)) ? Math.max(1, Number(data?.diasReservaMax)) : defaultScheduleConfig.diasReservaMax,
-    anticipacionHoras: Number.isFinite(Number(data?.anticipacionHoras)) ? Math.max(0, Number(data?.anticipacionHoras)) : defaultScheduleConfig.anticipacionHoras
+    anticipacionHoras: Number.isFinite(Number(data?.anticipacionHoras)) ? Math.max(0, Number(data?.anticipacionHoras)) : defaultScheduleConfig.anticipacionHoras,
+    horariosPorDia: horariosPorDia ?? defaultScheduleConfig.horariosPorDia
   };
 }
 

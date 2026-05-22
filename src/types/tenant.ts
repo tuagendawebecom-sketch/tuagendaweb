@@ -35,6 +35,8 @@ export type PublicService = {
   duracionMin: number;
   precio?: number;
   activo: boolean;
+  personalIds?: string[];
+  sucursalIds?: string[];
 };
 
 export type PublicStaff = {
@@ -58,6 +60,10 @@ export type PublicScheduleConfig = {
   intervaloMin: number;
   diasReservaMax: number;
   anticipacionHoras: number;
+  horariosPorDia?: Record<string, {
+    activo: boolean;
+    rangos: Array<{ inicio: string; fin: string }>;
+  }>;
 };
 
 export type LeadInterestPlan = BusinessPlan | "not_sure";

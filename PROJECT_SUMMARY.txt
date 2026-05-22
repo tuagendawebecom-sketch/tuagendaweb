@@ -451,6 +451,27 @@ Qué revisar en Vercel:
 4. Si se cambia cualquier variable, hacer Redeploy en Vercel para que el backend la tome.
 5. Si /superadmin puede crear negocios pero /[slug] no encuentra negocios reales, el problema casi seguro está en FIREBASE_ADMIN_* o falta redeploy.
 
+29. Mejoras de panel, horarios y flujo de reserva
+- Fecha: 2026-05-22.
+- El panel del cliente ahora permite cargar logo desde archivo; se optimiza a 512x512 y queda guardado en el negocio.
+- Al archivar un negocio desde Super Admin se limpia logoUrl para que la imagen no siga activa en el documento archivado.
+- Se agregaron signos de peso y formato de moneda en servicios.
+- Se mejoró el layout de servicios, personal y sucursales para evitar solapamientos visuales.
+- Servicios ahora pueden relacionarse con personal y sucursales.
+- En la agenda pública se elige primero servicio, luego se filtra el personal disponible para ese servicio, y luego las sucursales disponibles para ese servicio.
+- Se reemplazó el selector desplegable de día por un calendario compacto de días disponibles.
+- La configuración de horarios ahora permite rangos por día.
+- Cada día puede tener un rango principal y un rango opcional, por ejemplo sábado de 09:00 a 13:00.
+- Se agregaron configuración de intervalo, días máximos para reservar y anticipación mínima.
+- La disponibilidad pública usa la configuración por día y mantiene compatibilidad con negocios que todavía tengan el horario básico viejo.
+- El guardado de horarios ahora muestra feedback claro de éxito o error.
+
+Validación realizada:
+- npm run lint
+- npm run build
+- npm run test:smoke
+- Smoke test OK: 8 rutas x 2 viewports.
+
 26. Reserva real, consulta y cancelación pública
 - Fecha: 2026-05-21.
 - Se reemplazó la maqueta de /agenda/[slug]/reservar por un flujo real de reserva.

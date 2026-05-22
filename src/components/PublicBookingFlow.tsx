@@ -69,9 +69,24 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
   const [reservations, setReservations] = useState<PublicReservation[]>([]);
 
   const selectedService = useMemo(() => bookingData.services.find((service) => service.id === serviceId), [bookingData.services, serviceId]);
-  const needsStaff = bookingData.staff.length > 0;
-  const needsBranch = bookingData.branches.length > 0;
+  const filteredStaff = useMemo(() => {
+    const allowed = selectedService?.personalIds ?? [];
+    if (!allowed.length) return bookingData.staff;
+    return bookingData.staff.filter((person) => allowed.includes(person.id));
+  }, [bookingData.staff, selectedService]);
+  const filteredBranches = useMemo(() => {
+    const allowed = selectedService?.sucursalIds ?? [];
+    if (!allowed.length) return bookingData.branches;
+    return bookingData.branches.filter((branch) => allowed.includes(branch.id));
+  }, [bookingData.branches, selectedService]);
+  const needsStaff = filteredStaff.length > 0;
+  const needsBranch = filteredBranches.length > 0;
   const readyForTimes = canReserve && serviceId && date && (!needsStaff || personalId) && (!needsBranch || sucursalId);
+
+  useEffect(() => {
+    if (personalId && !filteredStaff.some((person) => person.id === personalId)) setPersonalId("");
+    if (sucursalId && !filteredBranches.some((branch) => branch.id === sucursalId)) setSucursalId("");
+  }, [filteredBranches, filteredStaff, personalId, sucursalId]);
 
   useEffect(() => {
     setTime("");
@@ -209,7 +224,11 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                       className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${serviceId === service.id ? "border-teal bg-mint shadow-soft" : "border-ink/10 bg-cream"}`}
                       disabled={!canReserve}
                       key={service.id}
-                      onClick={() => setServiceId(service.id)}
+                      onClick={() => {
+                        setServiceId(service.id);
+                        setPersonalId("");
+                        setSucursalId("");
+                      }}
                       type="button"
                     >
                       <p className="font-bold text-teal">{service.nombre}</p>
@@ -226,7 +245,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
               <div>
                 <h2 className="font-display text-2xl font-extrabold text-teal">2. Elegí profesional</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {bookingData.staff.map((person) => (
+                  {filteredStaff.map((person) => (
                     <button
                       className={`rounded-2xl border p-4 text-left transition ${personalId === person.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
                       disabled={!canReserve}
@@ -246,7 +265,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
               <div>
                 <h2 className="font-display text-2xl font-extrabold text-teal">{needsStaff ? "3" : "2"}. Elegí sucursal</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {bookingData.branches.map((branch) => (
+                  {filteredBranches.map((branch) => (
                     <button
                       className={`rounded-2xl border p-4 text-left transition ${sucursalId === branch.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
                       disabled={!canReserve}
@@ -265,11 +284,24 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
             <div>
               <h2 className="font-display text-2xl font-extrabold text-teal">{needsStaff && needsBranch ? "4" : needsStaff || needsBranch ? "3" : "2"}. Elegí día y horario</h2>
               <div className="mt-4 grid gap-4 rounded-2xl bg-cream p-4">
-                <select className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 font-bold text-teal" disabled={!canReserve || !bookingData.availableDates.length} onChange={(event) => setDate(event.target.value)} value={date}>
-                  {bookingData.availableDates.map((item) => (
-                    <option key={item.value} value={item.value}>{item.label}</option>
-                  ))}
-                </select>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7" aria-label="Calendario de días disponibles">
+                  {bookingData.availableDates.map((item) => {
+                    const [year, month, day] = item.value.split("-");
+                    return (
+                      <button
+                        className={`rounded-2xl border px-3 py-3 text-left transition ${date === item.value ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal hover:border-teal/40"}`}
+                        disabled={!canReserve}
+                        key={item.value}
+                        onClick={() => setDate(item.value)}
+                        type="button"
+                      >
+                        <span className="block text-xs font-extrabold uppercase tracking-[0.08em] opacity-70">{item.dayName.slice(0, 3)}</span>
+                        <span className="mt-1 block text-lg font-extrabold">{Number(day)}</span>
+                        <span className="block text-xs font-bold opacity-70">{Number(month)}/{year.slice(2)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
                 {!readyForTimes ? <p className="rounded-xl bg-paper p-3 text-sm font-bold text-ink/60">Completá las opciones anteriores para ver horarios.</p> : null}
                 {loadingTimes ? <p className="inline-flex items-center gap-2 rounded-xl bg-paper p-3 text-sm font-bold text-teal"><Loader2 className="animate-spin" size={16} /> Buscando horarios...</p> : null}
@@ -302,8 +334,8 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
               <p><span className="font-bold text-cream">Servicio:</span> {selectedService?.nombre ?? "Pendiente"}</p>
               <p><span className="font-bold text-cream">Día:</span> {date ? friendlyDate(date) : "Pendiente"}</p>
               <p><span className="font-bold text-cream">Horario:</span> {time || "Pendiente"}</p>
-              {personalId ? <p><span className="font-bold text-cream">Profesional:</span> {bookingData.staff.find((item) => item.id === personalId)?.nombre}</p> : null}
-              {sucursalId ? <p><span className="font-bold text-cream">Sucursal:</span> {bookingData.branches.find((item) => item.id === sucursalId)?.nombre}</p> : null}
+              {personalId ? <p><span className="font-bold text-cream">Profesional:</span> {filteredStaff.find((item) => item.id === personalId)?.nombre}</p> : null}
+              {sucursalId ? <p><span className="font-bold text-cream">Sucursal:</span> {filteredBranches.find((item) => item.id === sucursalId)?.nombre}</p> : null}
             </div>
             <button className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-action px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60" disabled={!canReserve || !bookingData.services.length || !time || booking} type="submit">
               {booking ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />} Confirmar turno
