@@ -1,28 +1,14 @@
 "use client";
 
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-  where
-} from "firebase/firestore";
-import { Copy, Download, ExternalLink, Loader2, MessageCircle, PauseCircle, PlayCircle, PlusCircle, Search, ShieldAlert, XCircle } from "lucide-react";
+import { collection, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
+import { Archive, Copy, Download, ExternalLink, Loader2, MessageCircle, PauseCircle, PlayCircle, PlusCircle, Search, ShieldAlert, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { getClientAuth, getClientDb, isFirebaseClientConfigured } from "@/lib/firebase/client";
-import { isValidSlug, normalizeSlug } from "@/lib/slug";
-import { normalizePhone } from "@/lib/phone";
 import { siteUrl } from "@/data/site";
+import { getClientAuth, getClientDb, isFirebaseClientConfigured } from "@/lib/firebase/client";
+import { normalizePhone } from "@/lib/phone";
+import { isValidSlug, normalizeSlug } from "@/lib/slug";
 import type { BillingStatus, BusinessPlan, BusinessStatus } from "@/types/tenant";
 
 type AdminBusiness = {
@@ -39,6 +25,7 @@ type AdminBusiness = {
   ownerEmail?: string;
   whatsapp?: string;
   monthlyPrice?: number;
+  archived?: boolean;
 };
 
 type Lead = {
@@ -89,7 +76,8 @@ function toBusiness(id: string, data: Record<string, unknown>): AdminBusiness {
     ownerTelefono: data.ownerTelefono ? String(data.ownerTelefono) : undefined,
     ownerEmail: data.ownerEmail ? String(data.ownerEmail) : undefined,
     whatsapp: data.whatsapp ? String(data.whatsapp) : undefined,
-    monthlyPrice: typeof data.monthlyPrice === "number" ? data.monthlyPrice : undefined
+    monthlyPrice: typeof data.monthlyPrice === "number" ? data.monthlyPrice : undefined,
+    archived: data.archived === true
   };
 }
 
@@ -132,17 +120,12 @@ export function SuperAdminDashboard() {
   useEffect(() => {
     if (!allowed || !db) return;
 
-    const unsubscribeBusinesses = onSnapshot(query(collection(db, "negocios"), orderBy("createdAt", "desc"), limit(80)), (snapshot) => {
+    const unsubscribeBusinesses = onSnapshot(query(collection(db, "negocios"), orderBy("createdAt", "desc"), limit(100)), (snapshot) => {
       setBusinesses(snapshot.docs.map((item) => toBusiness(item.id, item.data())));
     });
 
     const unsubscribeLeads = onSnapshot(query(collection(db, "leads"), orderBy("createdAt", "desc"), limit(20)), (snapshot) => {
-      setLeads(
-        snapshot.docs.map((item) => ({
-          id: item.id,
-          ...item.data()
-        }))
-      );
+      setLeads(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
     });
 
     return () => {
@@ -153,14 +136,14 @@ export function SuperAdminDashboard() {
 
   async function handleCreateBusiness(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!db) return;
+    if (!auth?.currentUser) return;
 
     const form = event.currentTarget;
     const formData = new FormData(form);
     const nombre = String(formData.get("nombre") ?? "").trim();
     const slug = normalizeSlug(String(formData.get("slug") || nombre));
-    const plan = String(formData.get("plan") ?? "agenda_simple") as BusinessPlan;
-    const monthlyPrice = plan === "agenda_simple" ? 10000 : plan === "agenda_pro" ? 20000 : 0;
+    const ownerEmail = String(formData.get("ownerEmail") ?? "").trim().toLowerCase();
+    const initialPassword = String(formData.get("initialPassword") ?? "");
 
     setError("");
     setMessage("");
@@ -170,67 +153,53 @@ export function SuperAdminDashboard() {
       return;
     }
 
+    if (!ownerEmail || initialPassword.length < 6) {
+      setError("Cargá email del dueño y una contraseña inicial de al menos 6 caracteres.");
+      return;
+    }
+
     setSaving(true);
     try {
-      const duplicate = await getDocs(query(collection(db, "negocios"), where("slug", "==", slug), limit(1)));
-      if (!duplicate.empty) {
-        setError("Ese slug ya existe. Elegí otro.");
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch("/api/superadmin/negocios/crear", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          nombre,
+          slug,
+          plan: String(formData.get("plan") ?? "agenda_simple"),
+          rubro: String(formData.get("rubro") ?? "").trim(),
+          ownerNombre: String(formData.get("ownerNombre") ?? "").trim(),
+          ownerEmail,
+          initialPassword,
+          updateExistingPassword: formData.get("updateExistingPassword") === "on",
+          ownerTelefono: String(formData.get("ownerTelefono") ?? "").trim(),
+          whatsapp: String(formData.get("whatsapp") ?? "").trim(),
+          instagram: String(formData.get("instagram") ?? "").trim(),
+          logoUrl: String(formData.get("logoUrl") ?? "").trim()
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        const messages: Record<string, string> = {
+          firebase_admin_not_configured: "Faltan variables FIREBASE_ADMIN_* en Vercel o el deploy no las tomó.",
+          slug_already_exists: "Ese slug ya existe en un negocio activo. Archivá o cancelá el anterior para liberarlo.",
+          invalid_owner_credentials: "Revisá email y contraseña inicial del dueño.",
+          forbidden: "Tu usuario no tiene permiso de superadmin.",
+          owner_lookup_failed: "No se pudo revisar o crear el usuario dueño en Firebase Auth."
+        };
+        setError(messages[result.error] ?? "No se pudo crear el negocio.");
         return;
       }
 
-      const businessRef = await addDoc(collection(db, "negocios"), {
-        nombre,
-        slug,
-        plan,
-        estado: "trial",
-        activo: true,
-        billingStatus: "manual_active",
-        rubro: String(formData.get("rubro") ?? "").trim(),
-        ownerNombre: String(formData.get("ownerNombre") ?? "").trim(),
-        ownerEmail: String(formData.get("ownerEmail") ?? "").trim(),
-        ownerTelefono: String(formData.get("ownerTelefono") ?? "").trim(),
-        whatsapp: normalizePhone(String(formData.get("whatsapp") ?? "")),
-        instagram: String(formData.get("instagram") ?? "").trim(),
-        logoUrl: String(formData.get("logoUrl") ?? "").trim(),
-        customDomain: String(formData.get("customDomain") ?? "").trim(),
-        initials: nombre
-          .split(/\s+/)
-          .slice(0, 2)
-          .map((part) => part[0])
-          .join("")
-          .toUpperCase(),
-        colorPrimario: "#123D3A",
-        colorSecundario: "#E7B85A",
-        monthlyPrice,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-
-      const ownerUid = String(formData.get("ownerUid") ?? "").trim();
-      if (ownerUid) {
-        await setDoc(doc(db, "businessUsers", ownerUid), {
-          negocioId: businessRef.id,
-          role: "owner",
-          isActive: true,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-      }
-
-      await addDoc(collection(db, "negocios", businessRef.id, "servicios"), {
-        nombre: "Servicio inicial",
-        duracionMin: 60,
-        precio: 0,
-        activo: true,
-        orden: 1,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-
       form.reset();
-      setMessage(`Negocio creado: ${siteUrl}/${slug}`);
+      setMessage(`Negocio creado: ${siteUrl}/${result.slug}. Dueño: ${result.ownerEmail}. Entregá la contraseña inicial y pedile que la cambie desde el panel.`);
     } catch {
-      setError("No se pudo crear el negocio. Revisá reglas, permisos y variables de Firebase.");
+      setError("No se pudo crear el negocio. Revisá variables FIREBASE_ADMIN_* y volvé a desplegar.");
     } finally {
       setSaving(false);
     }
@@ -252,6 +221,28 @@ export function SuperAdminDashboard() {
     }
   }
 
+  async function archiveBusiness(business: AdminBusiness) {
+    if (!db) return;
+    const confirmed = window.confirm(`¿Archivar ${business.nombre}? Se oculta de la lista operativa y se libera el slug.`);
+    if (!confirmed) return;
+
+    setError("");
+    try {
+      await updateDoc(doc(db, "negocios", business.id), {
+        archived: true,
+        archivedAt: serverTimestamp(),
+        estado: "cancelled",
+        activo: false,
+        billingStatus: "manual_suspended",
+        slug: `${business.slug}-archivado-${Date.now()}`,
+        updatedAt: serverTimestamp()
+      });
+      setMessage(`${business.nombre} archivado. El slug quedó liberado para otro negocio.`);
+    } catch {
+      setError("No se pudo archivar el negocio.");
+    }
+  }
+
   async function updateLeadStatus(leadId: string, status: string) {
     if (!db) return;
     setError("");
@@ -262,22 +253,6 @@ export function SuperAdminDashboard() {
       setError("No se pudo actualizar el lead.");
     }
   }
-
-  const filteredBusinesses = businesses.filter((business) => {
-    const value = businessFilter.toLowerCase().trim();
-    if (!value) return true;
-    return [business.nombre, business.slug, business.rubro, business.ownerNombre, business.ownerEmail]
-      .filter(Boolean)
-      .some((item) => item?.toLowerCase().includes(value));
-  });
-
-  const filteredLeads = leads.filter((lead) => leadFilter === "all" || (lead.status ?? "new") === leadFilter);
-  const activeBusinesses = businesses.filter((business) => business.estado === "active" || business.estado === "trial").length;
-  const suspendedBusinesses = businesses.filter((business) => business.estado === "suspended" || business.estado === "cancelled").length;
-  const newLeads = leads.filter((lead) => (lead.status ?? "new") === "new").length;
-  const estimatedMonthlyRevenue = businesses
-    .filter((business) => business.estado === "active" || business.estado === "trial")
-    .reduce((total, business) => total + (business.monthlyPrice ?? 0), 0);
 
   async function copyPublicLink(slug: string) {
     try {
@@ -304,6 +279,22 @@ export function SuperAdminDashboard() {
     URL.revokeObjectURL(url);
   }
 
+  const visibleBusinesses = businesses.filter((business) => !business.archived);
+  const filteredBusinesses = visibleBusinesses.filter((business) => {
+    const value = businessFilter.toLowerCase().trim();
+    if (!value) return true;
+    return [business.nombre, business.slug, business.rubro, business.ownerNombre, business.ownerEmail]
+      .filter(Boolean)
+      .some((item) => item?.toLowerCase().includes(value));
+  });
+  const filteredLeads = leads.filter((lead) => leadFilter === "all" || (lead.status ?? "new") === leadFilter);
+  const activeBusinesses = visibleBusinesses.filter((business) => business.estado === "active" || business.estado === "trial").length;
+  const suspendedBusinesses = visibleBusinesses.filter((business) => business.estado === "suspended" || business.estado === "cancelled").length;
+  const newLeads = leads.filter((lead) => (lead.status ?? "new") === "new").length;
+  const estimatedMonthlyRevenue = visibleBusinesses
+    .filter((business) => business.estado === "active" || business.estado === "trial")
+    .reduce((total, business) => total + (business.monthlyPrice ?? 0), 0);
+
   if (!authReady) {
     return (
       <div className="rounded-[2rem] border border-ink/10 bg-paper p-8 text-center shadow-soft">
@@ -318,7 +309,7 @@ export function SuperAdminDashboard() {
       <div className="rounded-[2rem] border border-ink/10 bg-paper p-8 shadow-soft">
         <ShieldAlert className="text-action" size={30} />
         <h2 className="mt-4 font-display text-2xl font-extrabold text-teal">Firebase no está configurado</h2>
-        <p className="mt-2 leading-7 text-ink/65">Cargá las variables `NEXT_PUBLIC_FIREBASE_*` en Vercel y en `.env.local` para usar este panel.</p>
+        <p className="mt-2 leading-7 text-ink/65">Cargá las variables NEXT_PUBLIC_FIREBASE_* en Vercel y en .env.local para usar este panel.</p>
       </div>
     );
   }
@@ -328,7 +319,7 @@ export function SuperAdminDashboard() {
       <div className="rounded-[2rem] border border-ink/10 bg-paper p-8 shadow-soft">
         <ShieldAlert className="text-action" size={30} />
         <h2 className="mt-4 font-display text-2xl font-extrabold text-teal">Acceso restringido</h2>
-        <p className="mt-2 leading-7 text-ink/65">Ingresá en `/login` con un usuario que tenga `role: "superadmin"` e `isActive: true` en `businessUsers`.</p>
+        <p className="mt-2 leading-7 text-ink/65">Ingresá en /login con un usuario que tenga role superadmin e isActive true en businessUsers.</p>
         <Link className="mt-5 inline-flex rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" href="/login">
           Ir al login
         </Link>
@@ -379,9 +370,7 @@ export function SuperAdminDashboard() {
           Plan
           <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="plan">
             {Object.entries(planLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
+              <option key={value} value={value}>{label}</option>
             ))}
           </select>
         </label>
@@ -391,7 +380,11 @@ export function SuperAdminDashboard() {
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Email dueño
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="ownerEmail" type="email" />
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="ownerEmail" required type="email" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Contraseña inicial
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="initialPassword" required type="text" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Teléfono dueño
@@ -402,10 +395,6 @@ export function SuperAdminDashboard() {
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="whatsapp" placeholder="549381..." />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
-          UID dueño
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="ownerUid" placeholder="Opcional" />
-        </label>
-        <label className="grid gap-2 text-sm font-bold text-ink/70">
           Instagram
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="instagram" placeholder="https://instagram.com/..." />
         </label>
@@ -413,13 +402,13 @@ export function SuperAdminDashboard() {
           Logo URL
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="logoUrl" placeholder="Opcional" />
         </label>
-        <label className="grid gap-2 text-sm font-bold text-ink/70">
-          Dominio propio
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="customDomain" placeholder="cliente.com.ar" />
+        <label className="flex items-center gap-3 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal lg:col-span-2">
+          <input name="updateExistingPassword" type="checkbox" />
+          Si el email ya existe, actualizar su contraseña inicial
         </label>
         <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream transition hover:bg-action disabled:cursor-wait disabled:opacity-70 lg:col-span-4" disabled={saving} type="submit">
           <PlusCircle size={18} />
-          {saving ? "Creando..." : "Crear negocio"}
+          {saving ? "Creando..." : "Crear negocio y usuario"}
         </button>
         <div aria-live="polite" className="lg:col-span-4">
           {message ? <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">{message}</p> : null}
@@ -432,12 +421,7 @@ export function SuperAdminDashboard() {
           <h2 className="font-display text-2xl font-extrabold text-teal">Negocios</h2>
           <label className="relative w-full sm:max-w-sm">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" size={18} />
-            <input
-              className="w-full rounded-2xl border border-ink/10 bg-paper py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action"
-              onChange={(event) => setBusinessFilter(event.target.value)}
-              placeholder="Buscar negocio, slug o dueño"
-              value={businessFilter}
-            />
+            <input className="w-full rounded-2xl border border-ink/10 bg-paper py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setBusinessFilter(event.target.value)} placeholder="Buscar negocio, slug o dueño" value={businessFilter} />
           </label>
         </div>
         {filteredBusinesses.length === 0 ? <p className="rounded-2xl bg-paper p-5 font-semibold text-ink/60">No hay negocios para ese filtro.</p> : null}
@@ -470,6 +454,9 @@ export function SuperAdminDashboard() {
               </button>
               <button className="inline-flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-700" onClick={() => updateBusinessStatus(business, "cancelled")} type="button">
                 <XCircle size={16} /> Cancelar
+              </button>
+              <button className="inline-flex items-center gap-2 rounded-2xl bg-ink px-4 py-3 text-sm font-bold text-cream" onClick={() => archiveBusiness(business)} type="button">
+                <Archive size={16} /> Archivar
               </button>
             </div>
           </article>
@@ -511,15 +498,9 @@ export function SuperAdminDashboard() {
                     <MessageCircle size={14} /> WhatsApp
                   </Link>
                 ) : null}
-                <button className="rounded-xl bg-mint px-3 py-2 text-xs font-bold text-teal" onClick={() => updateLeadStatus(lead.id, "contacted")} type="button">
-                  Contactado
-                </button>
-                <button className="rounded-xl bg-gold/30 px-3 py-2 text-xs font-bold text-teal" onClick={() => updateLeadStatus(lead.id, "won")} type="button">
-                  Ganado
-                </button>
-                <button className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-700" onClick={() => updateLeadStatus(lead.id, "lost")} type="button">
-                  Perdido
-                </button>
+                <button className="rounded-xl bg-mint px-3 py-2 text-xs font-bold text-teal" onClick={() => updateLeadStatus(lead.id, "contacted")} type="button">Contactado</button>
+                <button className="rounded-xl bg-gold/30 px-3 py-2 text-xs font-bold text-teal" onClick={() => updateLeadStatus(lead.id, "won")} type="button">Ganado</button>
+                <button className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-700" onClick={() => updateLeadStatus(lead.id, "lost")} type="button">Perdido</button>
               </div>
             </article>
           ))}

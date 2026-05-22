@@ -1,6 +1,6 @@
 "use client";
 
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { EmailAuthProvider, onAuthStateChanged, reauthenticateWithCredential, signOut, updatePassword } from "firebase/auth";
 import {
   addDoc,
   collection,
@@ -375,6 +375,40 @@ export function PanelDashboard() {
     setMessage("Horarios básicos guardados.");
   }
 
+  async function handlePasswordChange(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const user = auth?.currentUser;
+    if (!user?.email) {
+      setError("No se pudo validar el usuario actual.");
+      return;
+    }
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const currentPassword = String(formData.get("currentPassword") ?? "");
+    const newPassword = String(formData.get("newPassword") ?? "");
+    const repeatPassword = String(formData.get("repeatPassword") ?? "");
+
+    if (newPassword.length < 6 || newPassword !== repeatPassword) {
+      setError("La nueva contraseña debe tener al menos 6 caracteres y coincidir en ambos campos.");
+      return;
+    }
+
+    setSaving("password");
+    setError("");
+    try {
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, newPassword);
+      form.reset();
+      setMessage("Contraseña actualizada correctamente.");
+    } catch {
+      setError("No se pudo cambiar la contraseña. Revisá la contraseña actual e intentá nuevamente.");
+    } finally {
+      setSaving("");
+    }
+  }
+
   return (
     <div className="grid gap-6">
       <section className="rounded-[2rem] bg-teal p-6 text-cream shadow-soft sm:p-8">
@@ -462,6 +496,28 @@ export function PanelDashboard() {
         </label>
         <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60 lg:col-span-2" disabled={!canEdit || saving === "business"} type="submit">
           <Save size={18} /> {saving === "business" ? "Guardando..." : "Guardar datos públicos"}
+        </button>
+      </form>
+
+      <form className="grid gap-4 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-3" onSubmit={handlePasswordChange}>
+        <div className="lg:col-span-3">
+          <h2 className="font-display text-2xl font-extrabold text-teal">Cambiar contraseña</h2>
+          <p className="mt-2 leading-7 text-ink/62">Usá esto después de ingresar con la contraseña inicial que te pasó TuAgendaWeb.</p>
+        </div>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Contraseña actual
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="currentPassword" required type="password" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Nueva contraseña
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="newPassword" required type="password" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Repetir nueva contraseña
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="repeatPassword" required type="password" />
+        </label>
+        <button className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60 lg:col-span-3" disabled={saving === "password"} type="submit">
+          {saving === "password" ? "Actualizando..." : "Actualizar contraseña"}
         </button>
       </form>
 

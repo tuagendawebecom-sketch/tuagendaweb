@@ -425,6 +425,32 @@ Cómo probar:
 4. Desde /superadmin copiar link público y confirmar que usa el formato corto.
 5. Desde /panel copiar link público y confirmar que usa el formato corto.
 
+28. Alta de clientes con usuario y contraseña inicial
+- Fecha: 2026-05-21.
+- Super Admin ya no depende del campo UID manual para crear clientes.
+- Se agregó el endpoint protegido /api/superadmin/negocios/crear.
+- El endpoint verifica el token del usuario actual y confirma que tenga role superadmin en businessUsers.
+- Desde Super Admin ahora se crea:
+  - negocio
+  - usuario dueño en Firebase Auth
+  - asociación businessUsers/{uid}
+  - servicio inicial
+- Se agregó campo "Contraseña inicial" para entregarle al cliente.
+- Si el email ya existe, hay una opción explícita para actualizar esa contraseña inicial.
+- No se guarda la contraseña en Firestore.
+- Se quitó del formulario el campo UID dueño y el campo dominio propio.
+- Se agregó acción "Archivar" para ocultar un negocio de la lista operativa, cancelarlo y liberar el slug.
+- La búsqueda pública ignora negocios archivados.
+- El cliente ahora puede cambiar su contraseña desde /panel.
+- /login permite enviar email de recuperación/cambio de contraseña.
+
+Qué revisar en Vercel:
+1. FIREBASE_ADMIN_PROJECT_ID debe ser el ID real del proyecto Firebase, no el nombre visible.
+2. FIREBASE_ADMIN_CLIENT_EMAIL debe ser el client_email del JSON de service account.
+3. FIREBASE_ADMIN_PRIVATE_KEY debe incluir BEGIN PRIVATE KEY, END PRIVATE KEY y los saltos de línea correctos.
+4. Si se cambia cualquier variable, hacer Redeploy en Vercel para que el backend la tome.
+5. Si /superadmin puede crear negocios pero /[slug] no encuentra negocios reales, el problema casi seguro está en FIREBASE_ADMIN_* o falta redeploy.
+
 26. Reserva real, consulta y cancelación pública
 - Fecha: 2026-05-21.
 - Se reemplazó la maqueta de /agenda/[slug]/reservar por un flujo real de reserva.

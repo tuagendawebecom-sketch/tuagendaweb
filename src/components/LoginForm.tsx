@@ -1,6 +1,6 @@
 "use client";
 
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -10,11 +10,14 @@ import { getClientAuth, getClientDb, isFirebaseClientConfigured } from "@/lib/fi
 export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setMessage("");
 
     if (!isFirebaseClientConfigured()) {
       setError("Firebase todavía no está configurado en este entorno.");
@@ -51,11 +54,34 @@ export function LoginForm() {
     }
   }
 
+  async function handlePasswordReset() {
+    setError("");
+    setMessage("");
+
+    if (!resetEmail) {
+      setError("Escribí tu email arriba para enviarte el cambio de contraseña.");
+      return;
+    }
+
+    const auth = getClientAuth();
+    if (!auth) {
+      setError("No se pudo iniciar Firebase.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      setMessage("Te enviamos un email para cambiar tu contraseña.");
+    } catch {
+      setError("No se pudo enviar el email. Revisá que el correo esté bien escrito.");
+    }
+  }
+
   return (
     <form className="mt-7 grid gap-4" onSubmit={handleSubmit}>
       <label className="grid gap-2 text-sm font-bold text-ink/70">
         Email
-        <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="email" placeholder="admin@tuagendaweb.com.ar" required type="email" />
+        <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="email" onChange={(event) => setResetEmail(event.target.value.trim())} placeholder="admin@tuagendaweb.com.ar" required type="email" />
       </label>
       <label className="grid gap-2 text-sm font-bold text-ink/70">
         Contraseña
@@ -70,6 +96,10 @@ export function LoginForm() {
         {loading ? "Ingresando..." : "Ingresar"}
       </button>
       {error ? <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</p> : null}
+      {message ? <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">{message}</p> : null}
+      <button className="text-sm font-bold text-action hover:text-teal" onClick={handlePasswordReset} type="button">
+        Quiero cambiar o recuperar mi contraseña
+      </button>
     </form>
   );
 }

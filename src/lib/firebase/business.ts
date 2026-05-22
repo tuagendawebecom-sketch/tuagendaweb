@@ -73,6 +73,7 @@ export async function getBusinessBySlug(slug: string) {
 
   const snapshot = await db.collection("negocios").where("slug", "==", slug).limit(1).get();
   const doc = snapshot.docs[0];
+  if (doc?.data().archived === true) return null;
   return doc ? serializeBusiness(doc.id, doc.data()) : null;
 }
 
