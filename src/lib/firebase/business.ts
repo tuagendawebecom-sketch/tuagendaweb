@@ -1,31 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "./admin";
-import type { LeadInterestPlan, PublicBranch, PublicBusiness, PublicScheduleConfig, PublicService, PublicStaff } from "@/types/tenant";
-
-const demoBusiness: PublicBusiness = {
-  id: "demo-victorias-estetica",
-  nombre: "Victoria's Estética",
-  slug: "victorias-estetica",
-  plan: "agenda_simple",
-  estado: "trial",
-  activo: true,
-  billingStatus: "manual_active",
-  ownerNombre: "Victoria",
-  ownerEmail: "demo@tuagendaweb.com.ar",
-  ownerTelefono: "+54 9 381 000 0000",
-  initials: "VE",
-  colorPrimario: "#123D3A",
-  colorSecundario: "#E7B85A",
-  whatsapp: "5493815746066",
-  rubro: "Estética",
-  monthlyPrice: 10000
-};
-
-const demoServices: PublicService[] = [
-  { id: "limpieza-facial", nombre: "Limpieza facial", duracionMin: 60, precio: 12000, activo: true },
-  { id: "perfilado-cejas", nombre: "Perfilado de cejas", duracionMin: 40, precio: 7000, activo: true },
-  { id: "masaje-relax", nombre: "Masaje relax", duracionMin: 60, precio: 15000, activo: true }
-];
+import type { LeadInterestPlan, PublicBranch, PublicBusiness, PublicScheduleConfig, PublicStaff } from "@/types/tenant";
 
 export const defaultScheduleConfig: PublicScheduleConfig = {
   diasAtencion: ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
@@ -66,8 +41,6 @@ function sortByName<T extends { nombre: string }>(items: T[]) {
 }
 
 export async function getBusinessBySlug(slug: string) {
-  if (slug === demoBusiness.slug) return demoBusiness;
-
   const db = getAdminDb();
   if (!db) return null;
 
@@ -78,8 +51,6 @@ export async function getBusinessBySlug(slug: string) {
 }
 
 export async function getPublicServices(negocioId: string) {
-  if (negocioId === demoBusiness.id) return demoServices;
-
   const db = getAdminDb();
   if (!db) return [];
 
@@ -97,8 +68,6 @@ export async function getPublicServices(negocioId: string) {
 }
 
 export async function getPublicStaff(negocioId: string): Promise<PublicStaff[]> {
-  if (negocioId === demoBusiness.id) return [{ id: "victoria", nombre: "Victoria", especialidad: "Estética integral", activo: true }];
-
   const db = getAdminDb();
   if (!db) return [];
 
@@ -115,8 +84,6 @@ export async function getPublicStaff(negocioId: string): Promise<PublicStaff[]> 
 }
 
 export async function getPublicBranches(negocioId: string): Promise<PublicBranch[]> {
-  if (negocioId === demoBusiness.id) return [{ id: "principal", nombre: "Sucursal principal", direccion: "Tucumán", activo: true }];
-
   const db = getAdminDb();
   if (!db) return [];
 
@@ -133,8 +100,6 @@ export async function getPublicBranches(negocioId: string): Promise<PublicBranch
 }
 
 export async function getPublicScheduleConfig(negocioId: string): Promise<PublicScheduleConfig> {
-  if (negocioId === demoBusiness.id) return defaultScheduleConfig;
-
   const db = getAdminDb();
   if (!db) return defaultScheduleConfig;
 

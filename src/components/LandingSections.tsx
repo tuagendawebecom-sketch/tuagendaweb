@@ -2,7 +2,7 @@
 
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, CheckCircle2, Copy, ExternalLink, XCircle, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Copy, XCircle, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import {
   agendaSimpleFeatures,
@@ -319,7 +319,7 @@ export function AgendaSimpleSection() {
         <motion.div className="min-w-0 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft sm:p-7" {...reveal}>
           <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-action">Ejemplo de link</p>
           <div className="mt-4 flex min-w-0 flex-wrap items-center gap-3 break-all rounded-2xl bg-cream p-4 font-display text-base font-extrabold text-teal sm:text-lg">
-            tuagendaweb.com.ar/victorias-estetica
+            tuagendaweb.com.ar/tu-negocio
             <Copy size={18} />
           </div>
           <p className="mt-5 leading-7 text-ink/68">
@@ -537,9 +537,7 @@ export function FinalCTA() {
           <WhatsAppButton eventName={trackingEvents.finalCtaClick} href={createWhatsAppHref(whatsappMessages.agendaSimple)} label="Consultar por Agenda Simple" location="final_cta" />
           <WhatsAppButton eventName={trackingEvents.finalCtaClick} href={createWhatsAppHref(whatsappMessages.webCompleta)} label="Consultar por Web Completa" location="final_cta" variant="ghost" />
         </div>
-        <Link className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-cream/70 hover:text-cream" href="/victorias-estetica">
-          Ver ejemplo de agenda pública <ExternalLink size={16} />
-        </Link>
+        <p className="mt-5 text-sm font-bold text-cream/70">Cada cliente recibe un link corto como tuagendaweb.com.ar/tu-negocio</p>
       </div>
     </Section>
   );

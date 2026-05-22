@@ -360,7 +360,7 @@ export function SuperAdminDashboard() {
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Slug
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="slug" placeholder="victorias-estetica" />
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="slug" placeholder="nombre-del-negocio" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Rubro

@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 const baseUrl = process.env.BASE_URL ?? "http://localhost:3001";
-const routes = ["/", "/login", "/panel", "/superadmin", "/victorias-estetica", "/agenda/victorias-estetica", "/agenda/victorias-estetica/reservar", "/demos/barberia", "/privacidad", "/terminos", "/api/health"];
+const routes = ["/", "/login", "/panel", "/superadmin", "/demos/barberia", "/privacidad", "/terminos", "/api/health"];
 const viewports = [
   { name: "mobile", width: 390, height: 844 },
   { name: "desktop", width: 1440, height: 1000 }
@@ -100,10 +100,6 @@ for (const viewport of viewports) {
       }
     }
 
-    if (route === "/victorias-estetica" || route.endsWith("/reservar")) {
-      await expectVisible(page.getByText("Reservá tu turno").first(), `${viewport.name} booking title`);
-      await expectVisible(page.getByText("Ver o cancelar un turno").first(), `${viewport.name} booking lookup/cancel section`);
-    }
   }
 
   await page.close();
