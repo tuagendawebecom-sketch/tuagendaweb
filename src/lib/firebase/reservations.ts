@@ -197,7 +197,9 @@ export async function getAvailableTimes(input: {
   const [services, schedule] = await Promise.all([getPublicServices(business.id), getPublicScheduleConfig(business.id)]);
   const service = services.find((item) => item.id === input.serviceId && item.activo !== false);
   if (!service) return { ok: false as const, error: "service_not_found" };
+  if (service.personalIds?.length && !input.personalId) return { ok: false as const, error: "staff_not_found" };
   if (service.personalIds?.length && input.personalId && !service.personalIds.includes(input.personalId)) return { ok: false as const, error: "staff_not_found" };
+  if (service.sucursalIds?.length && !input.sucursalId) return { ok: false as const, error: "branch_not_found" };
   if (service.sucursalIds?.length && input.sucursalId && !service.sucursalIds.includes(input.sucursalId)) return { ok: false as const, error: "branch_not_found" };
   if (!isWithinReservableRange(input.date, schedule)) return { ok: true as const, times: [] };
   if (!isBusinessDay(input.date, schedule)) return { ok: true as const, times: [] };
@@ -265,7 +267,9 @@ export async function createReservation(input: {
   const telefonoNormalizado = normalizePhone(input.telefono);
 
   if (!service) return { ok: false as const, error: "service_not_found" };
+  if (service.personalIds?.length && !input.personalId) return { ok: false as const, error: "staff_not_found" };
   if (service.personalIds?.length && input.personalId && !service.personalIds.includes(input.personalId)) return { ok: false as const, error: "staff_not_found" };
+  if (service.sucursalIds?.length && !input.sucursalId) return { ok: false as const, error: "branch_not_found" };
   if (service.sucursalIds?.length && input.sucursalId && !service.sucursalIds.includes(input.sucursalId)) return { ok: false as const, error: "branch_not_found" };
   if (input.personalId && !person) return { ok: false as const, error: "staff_not_found" };
   if (input.sucursalId && !branch) return { ok: false as const, error: "branch_not_found" };

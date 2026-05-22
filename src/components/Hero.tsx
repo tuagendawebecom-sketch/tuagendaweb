@@ -1,17 +1,17 @@
 import { ArrowDown, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { hero, trustSignals, whatsappMessages } from "@/data/site";
 import { createWhatsAppHref } from "@/lib/whatsapp";
-import { DemoMockup } from "./DemoMockup";
 import { WhatsAppButton } from "./WhatsAppButton";
 
 export function Hero() {
   return (
-    <section className="overflow-hidden px-4 pb-12 pt-9 sm:px-6 sm:py-16 lg:py-20">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1fr_0.92fr] lg:gap-12">
-        <div>
+    <section className="overflow-hidden px-4 pb-12 pt-7 sm:px-6 sm:py-16 lg:py-20">
+      <div className="mx-auto grid max-w-7xl items-center gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
+        <div className="min-w-0">
           <p className="mb-4 inline-flex rounded-full bg-gold/25 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.1em] text-teal sm:mb-5 sm:text-sm">{hero.eyebrow}</p>
-          <h1 className="max-w-3xl text-balance font-display text-[2.35rem] font-extrabold leading-[1.05] text-teal sm:text-6xl">{hero.title}</h1>
+          <h1 className="max-w-3xl text-balance font-display text-[2.2rem] font-extrabold leading-[1.05] text-teal sm:text-6xl">{hero.title}</h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-ink/72 sm:mt-6 sm:text-lg sm:leading-8">{hero.subtitle}</p>
           <p className="mt-4 max-w-2xl text-sm font-semibold leading-6 text-ink/60">{hero.support}</p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -35,7 +35,17 @@ export function Hero() {
             ))}
           </div>
         </div>
-        <DemoMockup desktopSrc="/assets/hero/barberia-hero-desktop.png" mobileSrc="/assets/hero/barberia-hero-mobile.png" title="TuAgendaWeb" />
+        <div className="relative min-w-0 overflow-hidden rounded-[2rem] border border-ink/10 bg-paper shadow-soft lg:rounded-[2.25rem]">
+          <Image
+            alt="Vista editorial de TuAgendaWeb con panel de turnos online y reserva desde celular"
+            className="h-auto w-full object-cover"
+            height={1100}
+            priority
+            sizes="(min-width: 1024px) 54vw, 100vw"
+            src="/assets/hero/tuagendaweb-hero.png"
+            width={1400}
+          />
+        </div>
       </div>
     </section>
   );
