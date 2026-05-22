@@ -436,10 +436,10 @@ export const demoCategories: DemoCategory[] = [
 
 export const agendaSimpleFeatures = [
   "Nombre del negocio, logo o iniciales",
-  "Link público: tuagendaweb.com.ar/agenda/victorias-estetica",
+  "Link público: tuagendaweb.com.ar/victorias-estetica",
   "Servicios, horarios, personal y sucursales si aplica",
   "Reserva desde celular",
-  "Consulta y cancelación por celular cuando la lógica migrada esté activa",
+  "Consulta y cancelación por celular desde el mismo link",
   "Panel básico para el dueño",
   "Estado activo o suspendido manejado manualmente"
 ];

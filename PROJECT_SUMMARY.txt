@@ -407,6 +407,24 @@ Validación realizada:
 - npm run test:smoke
 - Smoke test OK: 8 rutas x 2 viewports.
 
+27. Link corto por negocio como reserva principal
+- Fecha: 2026-05-21.
+- Se agregó la ruta pública raíz /[slug] para que cada cliente comparta un link corto, por ejemplo:
+  - https://tuagendaweb.com.ar/matias-barber-shop
+- Ese link abre directamente el flujo de reserva, con consulta y cancelación debajo.
+- Las rutas viejas /agenda/[slug] y /agenda/[slug]/reservar quedan compatibles y redirigen al link corto.
+- Super Admin ahora muestra y copia el link corto.
+- Panel cliente ahora muestra y copia el link corto.
+- La landing, sitemap y textos comerciales usan el formato nuevo.
+- Se ampliaron slugs reservados para evitar choques con rutas internas como privacidad, terminos, sitemap, icon y opengraph-image.
+
+Cómo probar:
+1. Abrir /victorias-estetica y verificar que carga la reserva.
+2. Abrir /agenda/victorias-estetica y verificar que redirige a /victorias-estetica.
+3. Abrir /agenda/victorias-estetica/reservar y verificar que redirige a /victorias-estetica.
+4. Desde /superadmin copiar link público y confirmar que usa el formato corto.
+5. Desde /panel copiar link público y confirmar que usa el formato corto.
+
 26. Reserva real, consulta y cancelación pública
 - Fecha: 2026-05-21.
 - Se reemplazó la maqueta de /agenda/[slug]/reservar por un flujo real de reserva.

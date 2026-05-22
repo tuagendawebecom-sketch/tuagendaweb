@@ -228,7 +228,7 @@ export function SuperAdminDashboard() {
       });
 
       form.reset();
-      setMessage(`Negocio creado: ${siteUrl}/agenda/${slug}`);
+      setMessage(`Negocio creado: ${siteUrl}/${slug}`);
     } catch {
       setError("No se pudo crear el negocio. Revisá reglas, permisos y variables de Firebase.");
     } finally {
@@ -281,7 +281,7 @@ export function SuperAdminDashboard() {
 
   async function copyPublicLink(slug: string) {
     try {
-      await navigator.clipboard?.writeText(`${siteUrl}/agenda/${slug}`);
+      await navigator.clipboard?.writeText(`${siteUrl}/${slug}`);
       setCopiedSlug(slug);
       window.setTimeout(() => setCopiedSlug(""), 1600);
     } catch {
@@ -451,8 +451,8 @@ export function SuperAdminDashboard() {
                 <span className="rounded-full bg-cream px-3 py-1 text-xs font-bold text-ink/60">{formatCurrency(business.monthlyPrice)}</span>
               </div>
               <p className="mt-2 text-sm font-semibold text-ink/62">{business.rubro ?? "Sin rubro"} · {business.ownerNombre ?? "Sin dueño asignado"}</p>
-              <Link className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-action" href={`/agenda/${business.slug}`} rel="noopener noreferrer" target="_blank">
-                {siteUrl}/agenda/{business.slug} <ExternalLink size={16} />
+              <Link className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-action" href={`/${business.slug}`} rel="noopener noreferrer" target="_blank">
+                {siteUrl}/{business.slug} <ExternalLink size={16} />
               </Link>
             </div>
             <div className="flex flex-wrap gap-2 lg:justify-end">
