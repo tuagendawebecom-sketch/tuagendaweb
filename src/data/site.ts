@@ -41,9 +41,9 @@ export const trackingEvents = {
 } as const;
 
 export const whatsappMessages = {
-  heroAgenda: "Hola, quiero consultar por Agenda Simple promocional de $10.000 al mes para recibir turnos online desde un link.",
+  heroAgenda: "Hola, quiero consultar por Agenda Online promocional de $10.000 al mes para recibir turnos online desde un link.",
   heroWeb: "Hola, quiero consultar por la Web Completa con sistema de turnos.",
-  agendaSimple: "Hola, quiero consultar por Agenda Simple promocional de $10.000 al mes para recibir turnos online desde un link.",
+  agendaSimple: "Hola, quiero consultar por Agenda Online promocional de $10.000 al mes para recibir turnos online desde un link.",
   agendaPro: "Hola, quiero consultar por Agenda Pro de $20.000 al mes para mi negocio.",
   webCompleta: "Hola, quiero consultar por la Web Completa con sistema de turnos.",
   pricing: "Hola, quiero consultar por los planes de TuAgendaWeb.",
@@ -66,13 +66,13 @@ export const navigation = [
 ];
 
 export const solutionNavigation = [
-  { label: "Agenda Simple", href: "#agenda-simple", description: "Link de reservas dentro de TuAgendaWeb" },
+  { label: "Agenda Online", href: "#agenda-simple", description: "Link de reservas dentro de TuAgendaWeb" },
   { label: "Agenda Pro", href: "#planes", description: "Agenda preparada para crecer por etapas" },
   { label: "Web Completa", href: "#web-completa", description: "Web propia con dominio y turnos online" }
 ];
 
 export const planOverviewNavigation = [
-  { label: "Agenda Simple", href: "#plan-agenda-simple" },
+  { label: "Agenda Online", href: "#plan-agenda-simple" },
   { label: "Agenda Pro", href: "#plan-agenda-pro" },
   { label: "Web Completa", href: "#plan-web-completa" },
   { label: "Comparativa", href: "#comparativa" }
@@ -82,7 +82,7 @@ export const hero = {
   eyebrow: "Turnos online para negocios locales",
   title: "Turnos online para tu negocio, con o sin web propia.",
   subtitle:
-    "Elegí entre una agenda simple para recibir turnos desde un link, o una web completa con dominio, landing personalizada y panel de administración.",
+    "Elegí entre una Agenda Online para recibir turnos desde un link, o una web completa con dominio, landing personalizada y panel de administración.",
   support:
     "Para negocios que trabajan con turnos en Tucumán y quieren ordenar su agenda sin depender de coordinar todo por WhatsApp.",
   price: "Promo: Agenda desde $10.000/mes",
@@ -100,7 +100,7 @@ export const trustSignals = [
 export const launchOfferHighlights = [
   {
     title: "Empezás con bajo costo",
-    text: "Agenda Simple queda desde $10.000 al mes para validar rápido si tu negocio recibe más reservas ordenadas.",
+    text: "Agenda Online queda desde $10.000 al mes para validar rápido si tu negocio recibe más reservas ordenadas.",
     icon: CalendarCheck
   },
   {
@@ -144,14 +144,14 @@ export const startRequirements = [
 ] as const;
 
 export const decisionGuide = [
-  ["Elegí Agenda Simple", "Si querés empezar rápido con un link de reservas dentro de TuAgendaWeb."],
+  ["Elegí Agenda Online", "Si querés empezar rápido con un link de reservas dentro de TuAgendaWeb."],
   ["Elegí Agenda Pro", "Si necesitás una base más preparada para crecer, sin prometer extras no activos."],
   ["Elegí Web Completa", "Si querés presencia propia con dominio, landing, reservas y panel."]
 ] as const;
 
 export const nextSteps = [
   "Me mostrás tu negocio, rubro y cómo tomás turnos hoy.",
-  "Definimos si conviene Agenda Simple, Agenda Pro o Web Completa.",
+  "Definimos si conviene Agenda Online, Agenda Pro o Web Completa.",
   "Se cargan servicios, horarios, WhatsApp y datos básicos.",
   "Probamos el link o la web antes de compartirlo con tus clientes."
 ] as const;
@@ -165,7 +165,7 @@ export const credibilityNotes = [
 
 export const urgencyStrip = {
   title: "Precio promocional de lanzamiento",
-  text: "Agenda Simple desde $10.000 al mes y Agenda Pro desde $20.000 al mes para empezar a ordenar turnos sin hacer una web completa desde el primer día.",
+  text: "Agenda Online desde $10.000 al mes y Agenda Pro desde $20.000 al mes para empezar a ordenar turnos sin hacer una web completa desde el primer día.",
   cta: "Ver precio promocional"
 };
 
@@ -181,12 +181,12 @@ export const leadForm = {
 export const plans = [
   {
     id: "agenda_simple",
-    name: "Agenda Simple",
+    name: "Agenda Online",
     badge: "Promo lanzamiento",
     previousPrice: "Antes $15.000 / mes",
     price: "Desde $10.000 / mes",
     description: "Un link de reservas para que tus clientes elijan servicio, día y horario desde el celular.",
-    cta: "Consultar Agenda Simple",
+    cta: "Consultar Agenda Online",
     message: whatsappMessages.agendaSimple,
     href: "#agenda-simple",
     featured: false,
@@ -212,7 +212,7 @@ export const plans = [
     featured: false,
     note: "Base mensual más completa, sin prometer extras que todavía no estén activos.",
     features: [
-      "Todo lo de Agenda Simple",
+      "Todo lo de Agenda Online",
       "Panel con módulos extra preparados",
       "Recordatorios y reportes marcados como próximos si no están activos",
       "Mejoras mensuales según alcance definido"
@@ -521,15 +521,15 @@ export const faq = [
     answer: "Sí. La reserva está pensada para celular: elegir servicio, día, horario y confirmar."
   },
   {
-    question: "¿Qué diferencia hay entre Agenda Simple y Web Completa?",
-    answer: "Agenda Simple es un link de reserva dentro de TuAgendaWeb desde $10.000 al mes. Web Completa es una web propia con dominio, landing personalizada y sistema de turnos."
+    question: "¿Qué diferencia hay entre Agenda Online y Web Completa?",
+    answer: "Agenda Online es un link de reserva dentro de TuAgendaWeb desde $10.000 al mes. Web Completa es una web propia con dominio, landing personalizada y sistema de turnos."
   },
   {
     question: "¿El precio promocional es por tiempo limitado?",
     answer: "Es un precio de lanzamiento para empezar a sumar negocios. Mientras esté publicado, se respeta para nuevas consultas. Si cambia más adelante, se informa antes de contratar."
   },
   {
-    question: "¿Puedo empezar con Agenda Simple y después pasar a Web Completa?",
+    question: "¿Puedo empezar con Agenda Online y después pasar a Web Completa?",
     answer: "Sí. Podés empezar simple y después dar el salto a una web completa."
   },
   {
@@ -537,7 +537,7 @@ export const faq = [
     answer: "No. La Web Completa se vende como pago único. Las mejoras posteriores se cobran por separado."
   },
   {
-    question: "¿Qué pasa si dejo de pagar Agenda Simple?",
+    question: "¿Qué pasa si dejo de pagar Agenda Online?",
     answer: "La agenda se puede pausar o suspender hasta regularizar el pago. No se borran los datos del negocio."
   },
   {
@@ -546,7 +546,7 @@ export const faq = [
   },
   {
     question: "¿Necesito tener dominio para empezar?",
-    answer: "No. Con Agenda Simple podés empezar con un link dentro de TuAgendaWeb. El dominio propio aplica para Web Completa."
+    answer: "No. Con Agenda Online podés empezar con un link dentro de TuAgendaWeb. El dominio propio aplica para Web Completa."
   },
   {
     question: "¿Qué necesito pasar para arrancar?",

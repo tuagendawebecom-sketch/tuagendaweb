@@ -10,7 +10,7 @@ import { WhatsAppButton } from "./WhatsAppButton";
 import { Section } from "./Section";
 
 const planOptions: Array<{ value: LeadInterestPlan; label: string }> = [
-  { value: "agenda_simple", label: "Agenda Simple - desde $10.000/mes" },
+  { value: "agenda_simple", label: "Agenda Online - desde $10.000/mes" },
   { value: "agenda_pro", label: "Agenda Pro - desde $20.000/mes" },
   { value: "web_completa", label: "Web Completa - $100.000 pago único" },
   { value: "not_sure", label: "No sé todavía" }

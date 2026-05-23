@@ -46,7 +46,7 @@ type Lead = {
 };
 
 const planLabels: Record<BusinessPlan, string> = {
-  agenda_simple: "Agenda Simple",
+  agenda_simple: "Agenda Online",
   agenda_pro: "Agenda Pro",
   web_completa: "Web Completa"
 };

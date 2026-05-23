@@ -407,6 +407,13 @@ Validación realizada:
 - npm run test:smoke
 - Smoke test OK: 8 rutas x 2 viewports.
 
+Actualizacion panel cliente y naming - 2026-05-23:
+- "Agenda Simple" pasa a mostrarse comercialmente como "Agenda Online" sin cambiar el id interno `agenda_simple`, para no romper negocios ni leads existentes.
+- El panel cliente ahora tiene pestanas: Dashboard, Turnos y Configuracion.
+- Dashboard calcula estadisticas desde reservas reales: turnos confirmados, turnos de hoy, proximos 7 dias, clientes unicos, facturacion estimada, cancelados, servicio ganador, profesional con mas turnos y sucursal ganadora.
+- La pestana Turnos muestra proximos turnos confirmados y mantiene acceso directo a WhatsApp del cliente.
+- La pestana Configuracion concentra datos publicos, contrasena, servicios, personal, sucursales y horarios.
+
 27. Link corto por negocio como reserva principal
 - Fecha: 2026-05-21.
 - Se agregó la ruta pública raíz /[slug] para que cada cliente comparta un link corto, por ejemplo:

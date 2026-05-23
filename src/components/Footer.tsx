@@ -29,7 +29,7 @@ export function Footer() {
         <div>
           <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.14em] text-gold">Planes y demos</p>
           <div className="mb-5 grid gap-2 text-sm font-bold text-cream/80">
-            <Link href="#plan-agenda-simple">Agenda Simple desde $10.000</Link>
+            <Link href="#plan-agenda-simple">Agenda Online desde $10.000</Link>
             <Link href="#plan-agenda-pro">Agenda Pro desde $20.000</Link>
             <Link href="#plan-web-completa">Web Completa $100.000</Link>
           </div>

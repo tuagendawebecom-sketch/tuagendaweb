@@ -21,7 +21,7 @@ export default function TermsPage() {
           Los precios publicados son referencias comerciales actuales. La Web Completa se plantea como pago único inicial; mejoras posteriores se cotizan por separado.
         </p>
         <p className="mt-4 leading-7 text-ink/70">
-          Agenda Simple y Agenda Pro son servicios mensuales dentro de TuAgendaWeb. Si un negocio se suspende, no se eliminan sus datos por defecto.
+          Agenda Online y Agenda Pro son servicios mensuales dentro de TuAgendaWeb. Si un negocio se suspende, no se eliminan sus datos por defecto.
         </p>
       </article>
     </main>

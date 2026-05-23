@@ -15,7 +15,7 @@ import {
   setDoc,
   updateDoc
 } from "firebase/firestore";
-import { Building2, CalendarCheck, Copy, ExternalLink, Loader2, MapPin, MessageCircle, PlusCircle, Save, Settings2, ShieldAlert, Trash2, Users } from "lucide-react";
+import { BarChart3, Building2, CalendarCheck, Copy, ExternalLink, Loader2, MapPin, MessageCircle, PlusCircle, Save, Settings2, ShieldAlert, Trash2, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { siteUrl } from "@/data/site";
@@ -75,6 +75,7 @@ type ReservationItem = {
   clienteNombre?: string;
   telefono?: string;
   servicioNombre?: string;
+  precio?: number;
   fecha?: string;
   hora?: string;
   estado?: string;
@@ -112,7 +113,7 @@ const defaultSchedule: ScheduleConfig = {
 };
 
 const planLabels: Record<string, string> = {
-  agenda_simple: "Agenda Simple",
+  agenda_simple: "Agenda Online",
   agenda_pro: "Agenda Pro",
   web_completa: "Web Completa"
 };
@@ -142,6 +143,34 @@ function initialsFromName(name: string) {
 
 function formatCurrency(value?: number) {
   return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(value ?? 0);
+}
+
+function dateKeyInArgentina(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone: "America/Argentina/Buenos_Aires",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value ?? "1970";
+  const month = parts.find((part) => part.type === "month")?.value ?? "01";
+  const day = parts.find((part) => part.type === "day")?.value ?? "01";
+  return `${year}-${month}-${day}`;
+}
+
+function reservationDateTimeValue(reservation: ReservationItem) {
+  return new Date(`${reservation.fecha ?? "1970-01-01"}T${reservation.hora ?? "00:00"}:00`).getTime();
+}
+
+function topBy(reservations: ReservationItem[], key: keyof ReservationItem) {
+  const counts = new Map<string, number>();
+  reservations.forEach((reservation) => {
+    const value = reservation[key];
+    if (typeof value !== "string" || !value.trim()) return;
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  });
+  const [name, count] = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0] ?? ["Sin datos", 0];
+  return { name, count };
 }
 
 function readSchedule(data: Record<string, unknown> | undefined): ScheduleConfig {
@@ -216,6 +245,7 @@ export function PanelDashboard() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState("");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "turnos" | "configuracion">("dashboard");
 
   useEffect(() => {
     if (!isFirebaseClientConfigured() || !auth || !db) {
@@ -278,7 +308,7 @@ export function PanelDashboard() {
           })
         );
         unsubscribers.push(
-          onSnapshot(query(collection(activeDb, "negocios", userData.negocioId, "reservas"), orderBy("fechaHora", "asc"), limit(20)), (snapshot) => {
+          onSnapshot(query(collection(activeDb, "negocios", userData.negocioId, "reservas"), orderBy("fechaHora", "desc"), limit(200)), (snapshot) => {
             setReservations(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
           })
         );
@@ -324,6 +354,26 @@ export function PanelDashboard() {
   const activeDb = db;
   const publicLink = `${siteUrl}/${business.slug}`;
   const canEdit = business.estado !== "suspended" && business.estado !== "cancelled";
+  const todayKey = dateKeyInArgentina();
+  const confirmedReservations = reservations.filter((reservation) => reservation.estado !== "cancelada");
+  const cancelledReservations = reservations.filter((reservation) => reservation.estado === "cancelada");
+  const upcomingReservations = confirmedReservations
+    .filter((reservation) => (reservation.fecha ?? "") >= todayKey)
+    .sort((a, b) => reservationDateTimeValue(a) - reservationDateTimeValue(b))
+    .slice(0, 20);
+  const todayReservations = confirmedReservations.filter((reservation) => reservation.fecha === todayKey);
+  const nextSevenDaysLimit = new Date();
+  nextSevenDaysLimit.setDate(nextSevenDaysLimit.getDate() + 7);
+  const nextSevenDaysKey = dateKeyInArgentina(nextSevenDaysLimit);
+  const nextSevenDaysReservations = confirmedReservations.filter((reservation) => {
+    const date = reservation.fecha ?? "";
+    return date >= todayKey && date <= nextSevenDaysKey;
+  });
+  const estimatedRevenue = confirmedReservations.reduce((total, reservation) => total + (typeof reservation.precio === "number" ? reservation.precio : 0), 0);
+  const topService = topBy(confirmedReservations, "servicioNombre");
+  const topStaff = topBy(confirmedReservations, "personalNombre");
+  const topBranch = topBy(confirmedReservations, "sucursalNombre");
+  const uniqueClients = new Set(confirmedReservations.map((reservation) => normalizePhone(reservation.telefono ?? "")).filter(Boolean)).size;
 
   async function copyPublicLink() {
     try {
@@ -590,6 +640,90 @@ export function PanelDashboard() {
         {error ? <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</p> : null}
       </div>
 
+      <nav className="grid gap-2 rounded-[1.5rem] border border-ink/10 bg-paper p-2 shadow-soft sm:grid-cols-3" aria-label="Secciones del panel">
+        {[
+          ["dashboard", "Dashboard", BarChart3],
+          ["turnos", "Turnos", CalendarCheck],
+          ["configuracion", "Configuracion", Settings2]
+        ].map(([tab, label, Icon]) => (
+          <button
+            className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold transition ${activeTab === tab ? "bg-teal text-cream" : "text-teal hover:bg-mint"}`}
+            key={String(tab)}
+            onClick={() => setActiveTab(tab as "dashboard" | "turnos" | "configuracion")}
+            type="button"
+          >
+            <Icon size={17} /> {String(label)}
+          </button>
+        ))}
+      </nav>
+
+      {activeTab === "dashboard" ? (
+        <section className="grid gap-6">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              ["Turnos confirmados", confirmedReservations.length],
+              ["Turnos de hoy", todayReservations.length],
+              ["Proximos 7 dias", nextSevenDaysReservations.length],
+              ["Clientes unicos", uniqueClients]
+            ].map(([label, value]) => (
+              <article className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={String(label)}>
+                <p className="text-sm font-bold text-ink/55">{String(label)}</p>
+                <p className="mt-2 font-display text-4xl font-extrabold text-teal">{value}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
+            <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+              <div className="flex items-center gap-3">
+                <Trophy className="text-action" />
+                <h2 className="font-display text-2xl font-extrabold text-teal">Ganadores del negocio</h2>
+              </div>
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                {[
+                  ["Servicio ganador", topService.name, topService.count],
+                  ["Profesional con mas turnos", topStaff.name, topStaff.count],
+                  ["Sucursal ganadora", topBranch.name, topBranch.count]
+                ].map(([label, name, count]) => (
+                  <article className="rounded-2xl bg-cream p-4" key={String(label)}>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-ink/45">{String(label)}</p>
+                    <p className="mt-3 font-display text-2xl font-extrabold text-teal">{String(name)}</p>
+                    <p className="mt-2 text-sm font-bold text-ink/55">{Number(count)} turnos</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+              <h2 className="font-display text-2xl font-extrabold text-teal">Resumen rapido</h2>
+              <div className="mt-5 grid gap-3">
+                <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">Facturacion estimada por turnos: {formatCurrency(estimatedRevenue)}</p>
+                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Cancelados registrados: {cancelledReservations.length}</p>
+                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Servicios activos: {services.filter((service) => service.activo !== false).length}</p>
+                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Personal activo: {staff.filter((person) => person.activo !== false).length}</p>
+              </div>
+            </section>
+          </div>
+
+          <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+            <h2 className="font-display text-2xl font-extrabold text-teal">Proximos turnos</h2>
+            <div className="mt-5 grid gap-3">
+              {upcomingReservations.slice(0, 5).map((reservation) => (
+                <article className="grid gap-3 rounded-2xl bg-cream p-4 sm:grid-cols-[1fr_auto] sm:items-center" key={reservation.id}>
+                  <div>
+                    <p className="font-extrabold text-teal">{reservation.servicioNombre ?? "Servicio"}</p>
+                    <p className="mt-1 text-sm text-ink/65">{reservation.clienteNombre ?? "Cliente"} - {reservation.fecha} {reservation.hora}</p>
+                  </div>
+                  <span className="rounded-full bg-mint px-4 py-2 text-xs font-extrabold text-teal">{reservation.personalNombre ?? "Sin profesional"}</span>
+                </article>
+              ))}
+              {!upcomingReservations.length ? <p className="rounded-2xl bg-cream p-4 font-semibold text-ink/65">Todavia no hay turnos proximos.</p> : null}
+            </div>
+          </section>
+        </section>
+      ) : null}
+
+      {activeTab === "turnos" ? (
       <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
         <div className="flex items-center gap-3">
           <CalendarCheck className="text-action" />
@@ -597,7 +731,7 @@ export function PanelDashboard() {
         </div>
         <p className="mt-2 leading-7 text-ink/62">Acá ves los turnos que entran desde tu agenda pública. Para cancelar un turno, el cliente puede hacerlo desde la sección de consulta con su WhatsApp.</p>
         <div className="mt-5 grid gap-3">
-          {reservations.length ? reservations.map((reservation) => (
+          {upcomingReservations.length ? upcomingReservations.map((reservation) => (
             <article className="grid gap-3 rounded-2xl bg-cream p-4 sm:grid-cols-[1fr_auto] sm:items-center" key={reservation.id}>
               <div>
                 <p className="font-extrabold text-teal">{reservation.servicioNombre ?? "Servicio"}</p>
@@ -626,7 +760,10 @@ export function PanelDashboard() {
           )}
         </div>
       </section>
+      ) : null}
 
+      {activeTab === "configuracion" ? (
+      <>
       <form className="grid gap-5 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-2" onSubmit={handleBusinessSettings}>
         <div className="lg:col-span-2">
           <h2 className="font-display text-2xl font-extrabold text-teal">Datos públicos del negocio</h2>
@@ -886,6 +1023,8 @@ export function PanelDashboard() {
           Con datos, servicios, personal, sucursales y horarios cargados, la agenda pública ya puede recibir reservas reales. Los turnos se bloquean para evitar duplicados y el cliente puede consultar o cancelar desde su celular.
         </p>
       </section>
+      </>
+      ) : null}
     </div>
   );
 }
