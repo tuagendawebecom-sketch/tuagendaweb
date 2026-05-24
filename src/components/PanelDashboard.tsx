@@ -15,7 +15,7 @@ import {
   setDoc,
   updateDoc
 } from "firebase/firestore";
-import { BarChart3, Building2, CalendarCheck, Copy, ExternalLink, Loader2, MapPin, MessageCircle, PlusCircle, Save, Settings2, ShieldAlert, Trash2, Trophy, Users } from "lucide-react";
+import { BarChart3, Building2, CalendarCheck, Copy, Download, ExternalLink, Loader2, MapPin, MessageCircle, PlusCircle, Save, Search, Settings2, ShieldAlert, Trash2, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { siteUrl } from "@/data/site";
@@ -81,6 +81,7 @@ type ReservationItem = {
   estado?: string;
   personalNombre?: string;
   sucursalNombre?: string;
+  horarioOcupadoIds?: string[];
 };
 
 type DaySchedule = {
@@ -113,8 +114,8 @@ const defaultSchedule: ScheduleConfig = {
 };
 
 const planLabels: Record<string, string> = {
-  agenda_simple: "Agenda Online",
-  agenda_pro: "Agenda Pro",
+  agenda_simple: "Agenda Full",
+  agenda_pro: "Agenda Full interno",
   web_completa: "Web Completa"
 };
 
@@ -171,6 +172,31 @@ function topBy(reservations: ReservationItem[], key: keyof ReservationItem) {
   });
   const [name, count] = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0] ?? ["Sin datos", 0];
   return { name, count };
+}
+
+function topListBy(reservations: ReservationItem[], key: keyof ReservationItem, limit = 5) {
+  const counts = new Map<string, number>();
+  reservations.forEach((reservation) => {
+    const value = reservation[key];
+    if (typeof value !== "string" || !value.trim()) return;
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  });
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([name, count]) => ({ name, count }));
+}
+
+function groupReservationsByDate(reservations: ReservationItem[], limit = 7) {
+  const counts = new Map<string, number>();
+  reservations.forEach((reservation) => {
+    if (!reservation.fecha) return;
+    counts.set(reservation.fecha, (counts.get(reservation.fecha) ?? 0) + 1);
+  });
+  return Array.from(counts.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-limit)
+    .map(([name, count]) => ({ name, count }));
 }
 
 function readSchedule(data: Record<string, unknown> | undefined): ScheduleConfig {
@@ -246,6 +272,9 @@ export function PanelDashboard() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState("");
   const [activeTab, setActiveTab] = useState<"dashboard" | "turnos" | "configuracion">("dashboard");
+  const [dashboardRange, setDashboardRange] = useState<"today" | "7d" | "30d" | "all">("30d");
+  const [turnSearch, setTurnSearch] = useState("");
+  const [turnStatusFilter, setTurnStatusFilter] = useState<"upcoming" | "all" | "cancelled">("upcoming");
 
   useEffect(() => {
     if (!isFirebaseClientConfigured() || !auth || !db) {
@@ -370,10 +399,40 @@ export function PanelDashboard() {
     return date >= todayKey && date <= nextSevenDaysKey;
   });
   const estimatedRevenue = confirmedReservations.reduce((total, reservation) => total + (typeof reservation.precio === "number" ? reservation.precio : 0), 0);
-  const topService = topBy(confirmedReservations, "servicioNombre");
-  const topStaff = topBy(confirmedReservations, "personalNombre");
-  const topBranch = topBy(confirmedReservations, "sucursalNombre");
+  const rangeStartKey = (() => {
+    if (dashboardRange === "all") return "";
+    const date = new Date();
+    if (dashboardRange === "today") return todayKey;
+    date.setDate(date.getDate() - (dashboardRange === "7d" ? 7 : 30));
+    return dateKeyInArgentina(date);
+  })();
+  const rangeReservations = confirmedReservations.filter((reservation) => !rangeStartKey || (reservation.fecha ?? "") >= rangeStartKey);
+  const rangeRevenue = rangeReservations.reduce((total, reservation) => total + (typeof reservation.precio === "number" ? reservation.precio : 0), 0);
+  const topService = topBy(rangeReservations, "servicioNombre");
+  const topStaff = topBy(rangeReservations, "personalNombre");
+  const topBranch = topBy(rangeReservations, "sucursalNombre");
+  const topServices = topListBy(rangeReservations, "servicioNombre");
+  const dailyReservations = groupReservationsByDate(rangeReservations);
+  const maxDailyReservations = Math.max(1, ...dailyReservations.map((item) => item.count));
   const uniqueClients = new Set(confirmedReservations.map((reservation) => normalizePhone(reservation.telefono ?? "")).filter(Boolean)).size;
+  const visibleReservations = (turnStatusFilter === "cancelled" ? cancelledReservations : turnStatusFilter === "all" ? reservations : upcomingReservations)
+    .filter((reservation) => {
+      const value = turnSearch.toLowerCase().trim();
+      if (!value) return true;
+      return [reservation.clienteNombre, reservation.telefono, reservation.servicioNombre, reservation.personalNombre, reservation.sucursalNombre, reservation.fecha, reservation.hora]
+        .filter(Boolean)
+        .some((item) => String(item).toLowerCase().includes(value));
+    })
+    .sort((a, b) => reservationDateTimeValue(a) - reservationDateTimeValue(b));
+  const setupChecklist = [
+    { label: "Datos públicos", done: Boolean(business.nombre && business.whatsapp) },
+    { label: "Logo o iniciales", done: Boolean(business.logoUrl || business.initials) },
+    { label: "Servicios", done: services.some((service) => service.activo !== false) },
+    { label: "Personal", done: staff.some((person) => person.activo !== false) },
+    { label: "Sucursales", done: branches.some((branch) => branch.activo !== false) },
+    { label: "Horarios", done: Object.values(schedule.horariosPorDia).some((day) => day.activo && day.rangos.length) }
+  ];
+  const setupProgress = Math.round((setupChecklist.filter((item) => item.done).length / setupChecklist.length) * 100);
 
   async function copyPublicLink() {
     try {
@@ -419,6 +478,51 @@ export function PanelDashboard() {
       setMessage("Datos públicos actualizados.");
     } catch {
       setError("No se pudieron guardar los datos del negocio.");
+    } finally {
+      setSaving("");
+    }
+  }
+
+  function exportReservationsCsv() {
+    const headers = ["cliente", "telefono", "servicio", "fecha", "hora", "profesional", "sucursal", "estado", "precio"];
+    const csv = [headers, ...visibleReservations.map((reservation) => [
+      reservation.clienteNombre,
+      reservation.telefono,
+      reservation.servicioNombre,
+      reservation.fecha,
+      reservation.hora,
+      reservation.personalNombre,
+      reservation.sucursalNombre,
+      reservation.estado ?? "confirmada",
+      reservation.precio ?? 0
+    ])]
+      .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${business?.slug ?? "tuagendaweb"}-turnos.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function cancelReservationFromPanel(reservation: ReservationItem) {
+    if (!canEdit) return;
+    const confirmed = window.confirm(`¿Cancelar el turno de ${reservation.clienteNombre ?? "este cliente"}?`);
+    if (!confirmed) return;
+    setSaving(`cancel-${reservation.id}`);
+    setError("");
+    try {
+      await updateDoc(doc(activeDb, "negocios", businessId, "reservas", reservation.id), {
+        estado: "cancelada",
+        cancelledAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      await Promise.all((reservation.horarioOcupadoIds ?? []).map((occupiedId) => deleteDoc(doc(activeDb, "negocios", businessId, "horariosOcupados", occupiedId))));
+      setMessage("Turno cancelado y horario liberado.");
+    } catch {
+      setError("No se pudo cancelar el turno desde el panel.");
     } finally {
       setSaving("");
     }
@@ -659,6 +763,18 @@ export function PanelDashboard() {
 
       {activeTab === "dashboard" ? (
         <section className="grid gap-6">
+          <div className="flex flex-col gap-3 rounded-[1.5rem] border border-ink/10 bg-paper p-4 shadow-soft sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-extrabold text-teal">Dashboard del negocio</h2>
+              <p className="mt-1 text-sm font-semibold text-ink/55">Resumen para entender qué se está reservando y qué falta configurar.</p>
+            </div>
+            <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setDashboardRange(event.target.value as typeof dashboardRange)} value={dashboardRange}>
+              <option value="today">Hoy</option>
+              <option value="7d">Últimos 7 días</option>
+              <option value="30d">Últimos 30 días</option>
+              <option value="all">Todo</option>
+            </select>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
               ["Turnos confirmados", confirmedReservations.length],
@@ -697,13 +813,60 @@ export function PanelDashboard() {
             <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
               <h2 className="font-display text-2xl font-extrabold text-teal">Resumen rapido</h2>
               <div className="mt-5 grid gap-3">
-                <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">Facturacion estimada por turnos: {formatCurrency(estimatedRevenue)}</p>
+                <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">Facturacion estimada del rango: {formatCurrency(rangeRevenue)}</p>
+                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Facturacion estimada total: {formatCurrency(estimatedRevenue)}</p>
                 <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Cancelados registrados: {cancelledReservations.length}</p>
                 <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Servicios activos: {services.filter((service) => service.activo !== false).length}</p>
                 <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Personal activo: {staff.filter((person) => person.activo !== false).length}</p>
               </div>
             </section>
           </div>
+
+          <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
+            <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+              <h2 className="font-display text-2xl font-extrabold text-teal">Turnos por día</h2>
+              <div className="mt-5 grid gap-3">
+                {dailyReservations.length ? dailyReservations.map((item) => (
+                  <div className="grid gap-2" key={item.name}>
+                    <div className="flex items-center justify-between text-sm font-bold text-ink/62">
+                      <span>{item.name}</span>
+                      <span>{item.count}</span>
+                    </div>
+                    <div className="h-3 overflow-hidden rounded-full bg-cream">
+                      <div className="h-full rounded-full bg-action" style={{ width: `${Math.max(8, (item.count / maxDailyReservations) * 100)}%` }} />
+                    </div>
+                  </div>
+                )) : <p className="rounded-2xl bg-cream p-4 font-semibold text-ink/65">Todavía no hay datos en este rango.</p>}
+              </div>
+            </section>
+
+            <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+              <h2 className="font-display text-2xl font-extrabold text-teal">Configuración inicial</h2>
+              <p className="mt-2 text-sm font-bold text-ink/55">{setupProgress}% listo</p>
+              <div className="mt-3 h-3 overflow-hidden rounded-full bg-cream">
+                <div className="h-full rounded-full bg-action" style={{ width: `${setupProgress}%` }} />
+              </div>
+              <div className="mt-5 grid gap-2">
+                {setupChecklist.map((item) => (
+                  <p className={`rounded-2xl px-4 py-3 text-sm font-bold ${item.done ? "bg-mint text-teal" : "bg-cream text-ink/55"}`} key={item.label}>
+                    {item.done ? "Listo" : "Pendiente"} · {item.label}
+                  </p>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+            <h2 className="font-display text-2xl font-extrabold text-teal">Servicios más reservados</h2>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {topServices.length ? topServices.map((item) => (
+                <article className="rounded-2xl bg-cream p-4" key={item.name}>
+                  <p className="font-extrabold text-teal">{item.name}</p>
+                  <p className="mt-2 text-sm font-bold text-ink/55">{item.count} turnos</p>
+                </article>
+              )) : <p className="rounded-2xl bg-cream p-4 font-semibold text-ink/65 sm:col-span-2 lg:col-span-5">Todavía no hay servicios reservados.</p>}
+            </div>
+          </section>
 
           <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
             <h2 className="font-display text-2xl font-extrabold text-teal">Proximos turnos</h2>
@@ -725,23 +888,41 @@ export function PanelDashboard() {
 
       {activeTab === "turnos" ? (
       <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
-        <div className="flex items-center gap-3">
-          <CalendarCheck className="text-action" />
-          <h2 className="font-display text-2xl font-extrabold text-teal">Próximos turnos</h2>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <CalendarCheck className="text-action" />
+              <h2 className="font-display text-2xl font-extrabold text-teal">Turnos</h2>
+            </div>
+            <p className="mt-2 leading-7 text-ink/62">Busca, filtra, exporta o cancela turnos desde el panel del negocio.</p>
+          </div>
+          <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-4 py-3 text-sm font-bold text-cream" onClick={exportReservationsCsv} type="button">
+            <Download size={16} /> Exportar CSV
+          </button>
         </div>
-        <p className="mt-2 leading-7 text-ink/62">Acá ves los turnos que entran desde tu agenda pública. Para cancelar un turno, el cliente puede hacerlo desde la sección de consulta con su WhatsApp.</p>
+        <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto]">
+          <label className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" size={18} />
+            <input className="w-full rounded-2xl border border-ink/10 bg-cream py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setTurnSearch(event.target.value)} placeholder="Buscar cliente, telefono, servicio o fecha" value={turnSearch} />
+          </label>
+          <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setTurnStatusFilter(event.target.value as typeof turnStatusFilter)} value={turnStatusFilter}>
+            <option value="upcoming">Proximos</option>
+            <option value="all">Todos</option>
+            <option value="cancelled">Cancelados</option>
+          </select>
+        </div>
         <div className="mt-5 grid gap-3">
-          {upcomingReservations.length ? upcomingReservations.map((reservation) => (
+          {visibleReservations.length ? visibleReservations.map((reservation) => (
             <article className="grid gap-3 rounded-2xl bg-cream p-4 sm:grid-cols-[1fr_auto] sm:items-center" key={reservation.id}>
               <div>
                 <p className="font-extrabold text-teal">{reservation.servicioNombre ?? "Servicio"}</p>
                 <p className="mt-1 text-sm text-ink/65">
-                  {reservation.clienteNombre ?? "Cliente"} · {reservation.telefono ?? "Sin teléfono"}
+                  {reservation.clienteNombre ?? "Cliente"} - {reservation.telefono ?? "Sin telefono"}
                 </p>
                 <p className="mt-1 text-sm font-bold text-ink/70">
-                  {reservation.fecha ?? "Sin fecha"} · {reservation.hora ?? "Sin horario"}
-                  {reservation.personalNombre ? ` · ${reservation.personalNombre}` : ""}
-                  {reservation.sucursalNombre ? ` · ${reservation.sucursalNombre}` : ""}
+                  {reservation.fecha ?? "Sin fecha"} - {reservation.hora ?? "Sin horario"}
+                  {reservation.personalNombre ? " - " + reservation.personalNombre : ""}
+                  {reservation.sucursalNombre ? " - " + reservation.sucursalNombre : ""}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 sm:justify-end">
@@ -750,13 +931,18 @@ export function PanelDashboard() {
                     <MessageCircle size={14} /> WhatsApp
                   </Link>
                 ) : null}
+                {reservation.estado !== "cancelada" ? (
+                  <button className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-xs font-extrabold text-red-700 disabled:opacity-50" disabled={!canEdit || saving === "cancel-" + reservation.id} onClick={() => cancelReservationFromPanel(reservation)} type="button">
+                    <Trash2 size={14} /> Cancelar
+                  </button>
+                ) : null}
                 <span className={`rounded-full px-4 py-2 text-xs font-extrabold ${reservation.estado === "cancelada" ? "bg-red-50 text-red-700" : "bg-mint text-teal"}`}>
                   {reservation.estado ?? "confirmada"}
                 </span>
               </div>
             </article>
           )) : (
-            <p className="rounded-2xl bg-cream p-4 font-semibold text-ink/65">Todavía no hay turnos cargados.</p>
+            <p className="rounded-2xl bg-cream p-4 font-semibold text-ink/65">No hay turnos para ese filtro.</p>
           )}
         </div>
       </section>

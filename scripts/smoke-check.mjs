@@ -59,11 +59,11 @@ for (const viewport of viewports) {
       }
 
       if ((await page.getByText("Desde $10.000 / mes").count()) < 1) {
-        issues.push(`${viewport.name} home is missing Agenda Simple promotional price`);
+        issues.push(`${viewport.name} home is missing Agenda Full promotional price`);
       }
 
-      if ((await page.getByText("Desde $20.000 / mes").count()) < 1) {
-        issues.push(`${viewport.name} home is missing Agenda Pro promotional price`);
+      if ((await page.getByText("Agenda Full").count()) < 1) {
+        issues.push(`${viewport.name} home is missing Agenda Full copy`);
       }
 
       if ((await page.getByText("Promo para empezar a recibir reservas online este mes").count()) < 1) {

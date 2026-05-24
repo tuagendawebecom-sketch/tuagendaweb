@@ -19,10 +19,10 @@
 - TuAgendaWeb no se vende como SaaS genérico.
 - TuAgendaWeb no se vende como solo una página web.
 - Vender como solución para ordenar turnos, mejorar imagen y facilitar reservas desde celular.
-- Planes:
-  - Agenda Simple: desde $15.000 ARS / mes.
-  - Agenda Pro: desde $30.000 ARS / mes.
+- Planes visibles actuales:
+  - Agenda Full: desde $10.000 ARS / mes.
   - Web Completa: $100.000 ARS pago único.
+- `agenda_pro` puede existir como compatibilidad interna, pero no se muestra como oferta pública activa.
 
 ## Infraestructura
 

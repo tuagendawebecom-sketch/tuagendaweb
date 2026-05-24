@@ -852,3 +852,48 @@ Validación realizada:
 - npm run build
 - npm run test:smoke
 - Smoke test OK: 8 rutas x 2 viewports.
+Tanda de 30 mejoras - Agenda Full, panel y operacion
+
+Fecha: 2026-05-23
+
+Mejoras aplicadas:
+1. Se simplifico la oferta publica a dos caminos claros: Agenda Full y Web Completa.
+2. Agenda Pro queda solo como compatibilidad interna para datos anteriores.
+3. La landing ya no muestra precio ni CTA publico de Agenda Pro.
+4. Agenda Simple/Online pasa a comunicarse como Agenda Full.
+5. Mensajes de WhatsApp actualizados para Agenda Full.
+6. Navegacion de soluciones compactada a Agenda Full y Web Completa.
+7. Tarjetas de planes reducidas a dos opciones para bajar friccion.
+8. Comparativa actualizada a Agenda Full vs Web Completa.
+9. FAQ ajustado al nuevo posicionamiento.
+10. JSON-LD actualizado con dos ofertas publicas.
+11. Formulario de leads solo ofrece Agenda Full, Web Completa o "no se todavia".
+12. Footer ajustado a los planes activos.
+13. Smoke test actualizado para el nuevo modelo comercial.
+14. Super Admin muestra Agenda Full como plan comercial.
+15. Super Admin mantiene agenda_pro como etiqueta interna para no romper historico.
+16. Super Admin ahora filtra negocios por plan.
+17. Super Admin ahora filtra negocios por estado.
+18. Alta de negocio ahora explica que la contrasena inicial se cambia desde panel.
+19. Alta de negocio puede precargarse desde un lead.
+20. Leads pueden marcarse como reunion agendada.
+21. Leads pueden tener nota interna.
+22. Leads muestran etiqueta comercial legible del plan.
+23. Panel cliente muestra Agenda Full como plan visible.
+24. Dashboard del cliente agrega filtro por rango: hoy, 7 dias, 30 dias o todo.
+25. Dashboard diferencia facturacion estimada del rango y total.
+26. Dashboard agrega barras simples de turnos por dia.
+27. Dashboard agrega ranking de servicios mas reservados.
+28. Dashboard agrega checklist de configuracion inicial.
+29. Turnos del panel cliente ahora tienen busqueda y filtro.
+30. Turnos del panel cliente pueden exportarse a CSV.
+31. El cliente puede cancelar turnos desde su panel y liberar horarios ocupados cuando existen ids asociados.
+32. Se mantuvo el foco comercial sin prometer mejoras pagas futuras como incluidas.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+- npm run test:smoke en localhost:3001: OK, 8 rutas x 2 viewports.
+
+Nota operativa:
+- Para nuevos clientes, crear el negocio desde Super Admin como Agenda Full, definir email y contrasena inicial, y pedirle al cliente que ingrese a /login para cambiar su contrasena y completar su configuracion.

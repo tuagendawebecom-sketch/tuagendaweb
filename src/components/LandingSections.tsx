@@ -85,7 +85,7 @@ export function LaunchOfferSection() {
     <Section eyebrow="Oferta de lanzamiento" text="La prioridad ahora es que puedas probar turnos online con una inversión baja y una conversación clara antes de contratar." title="Promo para empezar a recibir reservas online este mes">
       <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
         <motion.div className="rounded-[1.75rem] border border-teal/15 bg-paper p-6 shadow-soft sm:p-8" {...reveal}>
-          <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-action">Agenda Online</p>
+          <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-action">Agenda Full</p>
           <div className="mt-4 flex flex-wrap items-end gap-3">
             <p className="font-display text-5xl font-extrabold text-teal">$10.000</p>
             <p className="pb-2 text-lg font-bold text-ink/58">/ mes</p>
@@ -175,7 +175,7 @@ export function ProblemSolution() {
 export function PlanSelector() {
   return (
     <Section id="planes" eyebrow="Planes" text="Podés empezar simple con un link de reserva mensual o pasar directo a una web completa con dominio propio." title="Elegí cómo querés empezar">
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-2">
         {plans.map((plan) => (
           <motion.article
             className={`relative flex scroll-mt-28 flex-col rounded-[1.5rem] border p-6 shadow-soft ${
@@ -314,7 +314,7 @@ export function CredibilityNotesSection() {
 
 export function AgendaSimpleSection() {
   return (
-    <Section id="agenda-simple" eyebrow="Agenda Online" title="Tu negocio puede tener su propio link de reservas." tone="mint">
+    <Section id="agenda-simple" eyebrow="Agenda Full" title="Tu negocio puede tener su propio link de reservas." tone="mint">
       <div className="grid min-w-0 gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <motion.div className="min-w-0 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft sm:p-7" {...reveal}>
           <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-action">Ejemplo de link</p>
@@ -325,7 +325,7 @@ export function AgendaSimpleSection() {
           <p className="mt-5 leading-7 text-ink/68">
             Es una opción mensual para negocios que quieren empezar rápido: tus clientes entran, eligen servicio, profesional si corresponde, día y horario, cargan sus datos y confirman el turno.
           </p>
-          <WhatsAppButton className="mt-6 w-full sm:w-auto" href={createWhatsAppHref(whatsappMessages.agendaSimple)} label="Consultar Agenda Online" location="agenda_simple" />
+          <WhatsAppButton className="mt-6 w-full sm:w-auto" href={createWhatsAppHref(whatsappMessages.agendaSimple)} label="Consultar Agenda Full" location="agenda_simple" />
         </motion.div>
         <div className="grid min-w-0 gap-3 sm:grid-cols-2">
           {agendaSimpleFeatures.map((feature) => (
@@ -342,7 +342,7 @@ export function AgendaSimpleSection() {
 
 export function WebCompletaSection() {
   return (
-    <Section id="web-completa" eyebrow="Web Completa" text="No compite con Agenda Online: es la opción premium cuando querés que tu negocio tenga presencia propia y más profesional." title="Cuando querés verte más profesional, te preparo una web completa.">
+    <Section id="web-completa" eyebrow="Web Completa" text="No compite con Agenda Full: es la opción premium cuando querés que tu negocio tenga presencia propia y más profesional." title="Cuando querés verte más profesional, te preparo una web completa.">
       <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <DemoMockup desktopSrc="/assets/hero/barberia-hero-desktop.png" mobileSrc="/assets/hero/barberia-hero-mobile.png" title="Web Completa" />
         <motion.div className="rounded-[1.5rem] bg-teal p-7 text-cream shadow-soft" {...reveal}>
@@ -418,17 +418,16 @@ export function DemoCarousel() {
 
 export function Comparison() {
   return (
-    <Section id="comparativa" eyebrow="Comparativa" title="Agenda Online, Agenda Pro o Web Completa" tone="mint">
+    <Section id="comparativa" eyebrow="Comparativa" title="Agenda Full o Web Completa" tone="mint">
       <div className="overflow-x-auto rounded-[1.5rem] border border-ink/10 bg-paper shadow-soft">
-        <div className="min-w-[720px]">
-          <div className="grid grid-cols-[1.2fr_repeat(3,1fr)] border-b border-ink/10 bg-teal px-4 py-4 text-sm font-extrabold text-cream">
+        <div className="min-w-[620px]">
+          <div className="grid grid-cols-[1.2fr_repeat(2,1fr)] border-b border-ink/10 bg-teal px-4 py-4 text-sm font-extrabold text-cream">
             <span>Incluye</span>
-            <span>Agenda Online</span>
-            <span>Agenda Pro</span>
+            <span>Agenda Full</span>
             <span>Web Completa</span>
           </div>
           {comparisonRows.map((row) => (
-            <div className="grid grid-cols-[1.2fr_repeat(3,1fr)] gap-2 border-b border-ink/10 px-4 py-4 text-sm last:border-b-0" key={row[0]}>
+            <div className="grid grid-cols-[1.2fr_repeat(2,1fr)] gap-2 border-b border-ink/10 px-4 py-4 text-sm last:border-b-0" key={row[0]}>
               {row.map((cell, index) => (
                 <span className={index === 0 ? "font-bold text-teal" : "text-ink/68"} key={cell}>
                   {cell}
@@ -534,7 +533,7 @@ export function FinalCTA() {
           Empezá a recibir turnos online de una forma más ordenada.
         </p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <WhatsAppButton eventName={trackingEvents.finalCtaClick} href={createWhatsAppHref(whatsappMessages.agendaSimple)} label="Consultar por Agenda Online" location="final_cta" />
+          <WhatsAppButton eventName={trackingEvents.finalCtaClick} href={createWhatsAppHref(whatsappMessages.agendaSimple)} label="Consultar por Agenda Full" location="final_cta" />
           <WhatsAppButton eventName={trackingEvents.finalCtaClick} href={createWhatsAppHref(whatsappMessages.webCompleta)} label="Consultar por Web Completa" location="final_cta" variant="ghost" />
         </div>
         <p className="mt-5 text-sm font-bold text-cream/70">Cada cliente recibe un link corto como tuagendaweb.com.ar/tu-negocio</p>

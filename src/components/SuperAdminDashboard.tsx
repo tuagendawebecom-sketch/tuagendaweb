@@ -42,13 +42,26 @@ type Lead = {
   utmCampaign?: string;
   status?: string;
   priority?: string;
+  internalNote?: string;
   createdAt?: { toDate?: () => Date };
 };
 
 const planLabels: Record<BusinessPlan, string> = {
-  agenda_simple: "Agenda Online",
-  agenda_pro: "Agenda Pro",
+  agenda_simple: "Agenda Full",
+  agenda_pro: "Agenda Full interno",
   web_completa: "Web Completa"
+};
+
+const businessPlanOptions: Array<{ value: BusinessPlan; label: string }> = [
+  { value: "agenda_simple", label: "Agenda Full" },
+  { value: "web_completa", label: "Web Completa" }
+];
+
+const leadPlanLabels: Record<string, string> = {
+  agenda_simple: "Agenda Full",
+  agenda_pro: "Agenda Full",
+  web_completa: "Web Completa",
+  not_sure: "No sabe todavia"
 };
 
 const statusLabels: Record<BusinessStatus, string> = {
@@ -102,8 +115,12 @@ export function SuperAdminDashboard() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [businessFilter, setBusinessFilter] = useState("");
+  const [businessPlanFilter, setBusinessPlanFilter] = useState("all");
+  const [businessStatusFilter, setBusinessStatusFilter] = useState("all");
   const [leadFilter, setLeadFilter] = useState("all");
   const [copiedSlug, setCopiedSlug] = useState("");
+  const [leadDraft, setLeadDraft] = useState<Lead | null>(null);
+  const [formKey, setFormKey] = useState(0);
   const db = useMemo(() => getClientDb(), []);
   const auth = useMemo(() => getClientAuth(), []);
 
@@ -209,6 +226,8 @@ export function SuperAdminDashboard() {
       }
 
       form.reset();
+      setLeadDraft(null);
+      setFormKey((current) => current + 1);
       setMessage(`Negocio creado: ${siteUrl}/${result.slug}. Dueño: ${result.ownerEmail}. Entregá la contraseña inicial y pedile que la cambie desde el panel.`);
     } catch {
       setError("No se pudo crear el negocio. Revisá variables FIREBASE_ADMIN_* y volvé a desplegar.");
@@ -267,6 +286,26 @@ export function SuperAdminDashboard() {
     }
   }
 
+  async function updateLeadNote(lead: Lead) {
+    if (!db) return;
+    const nextNote = window.prompt("Nota interna para este lead", lead.internalNote ?? "");
+    if (nextNote === null) return;
+    setError("");
+    try {
+      await updateDoc(doc(db, "leads", lead.id), { internalNote: nextNote.trim(), updatedAt: serverTimestamp() });
+      setMessage("Nota interna guardada.");
+    } catch {
+      setError("No se pudo guardar la nota interna.");
+    }
+  }
+
+  function fillLeadAsBusinessDraft(lead: Lead) {
+    setLeadDraft(lead);
+    setFormKey((current) => current + 1);
+    setMessage(`Datos de ${lead.businessName ?? "lead"} cargados en el formulario de negocio.`);
+    window.setTimeout(() => document.getElementById("crear-negocio")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  }
+
   async function copyPublicLink(slug: string) {
     try {
       await navigator.clipboard?.writeText(`${siteUrl}/${slug}`);
@@ -295,6 +334,8 @@ export function SuperAdminDashboard() {
   const visibleBusinesses = businesses.filter((business) => !business.archived);
   const filteredBusinesses = visibleBusinesses.filter((business) => {
     const value = businessFilter.toLowerCase().trim();
+    if (businessPlanFilter !== "all" && business.plan !== businessPlanFilter) return false;
+    if (businessStatusFilter !== "all" && business.estado !== businessStatusFilter) return false;
     if (!value) return true;
     return [business.nombre, business.slug, business.rubro, business.ownerNombre, business.ownerEmail]
       .filter(Boolean)
@@ -366,10 +407,15 @@ export function SuperAdminDashboard() {
         ))}
       </div>
 
-      <form className="grid gap-4 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-4" onSubmit={handleCreateBusiness}>
+      <form className="grid scroll-mt-24 gap-4 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-4" id="crear-negocio" key={formKey} onSubmit={handleCreateBusiness}>
+        <div className="lg:col-span-4">
+          <h2 className="font-display text-2xl font-extrabold text-teal">Crear negocio y acceso del cliente</h2>
+          <p className="mt-2 text-sm font-semibold text-ink/60">Elegi una contrasena inicial. El cliente puede cambiarla desde su panel cuando ingresa.</p>
+          {leadDraft ? <p className="mt-3 rounded-2xl bg-mint p-3 text-sm font-bold text-teal">Formulario precargado desde lead: {leadDraft.businessName ?? leadDraft.name}</p> : null}
+        </div>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Negocio
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nombre" required />
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={leadDraft?.businessName ?? ""} name="nombre" required />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Slug
@@ -377,35 +423,35 @@ export function SuperAdminDashboard() {
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Rubro
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="rubro" />
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={leadDraft?.businessType ?? ""} name="rubro" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Plan
-          <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="plan">
-            {Object.entries(planLabels).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+          <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue="agenda_simple" name="plan">
+            {businessPlanOptions.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
             ))}
           </select>
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
-          Dueño
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="ownerNombre" />
+          Dueno
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={leadDraft?.name ?? ""} name="ownerNombre" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
-          Email dueño
+          Email dueno
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="ownerEmail" required type="email" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
-          Contraseña inicial
+          Contrasena inicial
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="initialPassword" required type="text" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
-          Teléfono dueño
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="ownerTelefono" />
+          Telefono dueno
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={leadDraft?.phone ?? ""} name="ownerTelefono" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           WhatsApp visible
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="whatsapp" placeholder="549381..." />
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={leadDraft?.phone ?? ""} name="whatsapp" placeholder="549381..." />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Instagram
@@ -417,7 +463,7 @@ export function SuperAdminDashboard() {
         </label>
         <label className="flex items-center gap-3 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal lg:col-span-2">
           <input name="updateExistingPassword" type="checkbox" />
-          Si el email ya existe, actualizar su contraseña inicial
+          Si el email ya existe, actualizar su contrasena inicial
         </label>
         <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream transition hover:bg-action disabled:cursor-wait disabled:opacity-70 lg:col-span-4" disabled={saving} type="submit">
           <PlusCircle size={18} />
@@ -432,10 +478,20 @@ export function SuperAdminDashboard() {
       <section className="grid gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <h2 className="font-display text-2xl font-extrabold text-teal">Negocios</h2>
-          <label className="relative w-full sm:max-w-sm">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" size={18} />
-            <input className="w-full rounded-2xl border border-ink/10 bg-paper py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setBusinessFilter(event.target.value)} placeholder="Buscar negocio, slug o dueño" value={businessFilter} />
-          </label>
+          <div className="grid w-full gap-2 sm:max-w-3xl sm:grid-cols-[1fr_auto_auto]">
+            <label className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" size={18} />
+              <input className="w-full rounded-2xl border border-ink/10 bg-paper py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setBusinessFilter(event.target.value)} placeholder="Buscar negocio, slug o dueno" value={businessFilter} />
+            </label>
+            <select className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setBusinessPlanFilter(event.target.value)} value={businessPlanFilter}>
+              <option value="all">Todos los planes</option>
+              {businessPlanOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+            <select className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setBusinessStatusFilter(event.target.value)} value={businessStatusFilter}>
+              <option value="all">Todos los estados</option>
+              {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+          </div>
         </div>
         {filteredBusinesses.length === 0 ? <p className="rounded-2xl bg-paper p-5 font-semibold text-ink/60">No hay negocios para ese filtro.</p> : null}
         {filteredBusinesses.map((business) => (
@@ -484,6 +540,7 @@ export function SuperAdminDashboard() {
               <option value="all">Todos</option>
               <option value="new">Nuevos</option>
               <option value="contacted">Contactados</option>
+              <option value="meeting_scheduled">Reunión agendada</option>
               <option value="won">Ganados</option>
               <option value="lost">Perdidos</option>
             </select>
@@ -504,8 +561,9 @@ export function SuperAdminDashboard() {
                 </div>
               </div>
               <p className="mt-1 text-sm font-semibold text-ink/62">{lead.name} · {lead.phone}</p>
-              <p className="mt-2 text-sm text-ink/62">{lead.businessType} · {lead.interestedPlan}</p>
+              <p className="mt-2 text-sm text-ink/62">{lead.businessType} - {leadPlanLabels[lead.interestedPlan ?? ""] ?? lead.interestedPlan}</p>
               {lead.message ? <p className="mt-3 rounded-2xl bg-cream p-3 text-sm leading-6 text-ink/70">{lead.message}</p> : null}
+              {lead.internalNote ? <p className="mt-3 rounded-2xl bg-mint p-3 text-sm font-semibold leading-6 text-teal">Nota interna: {lead.internalNote}</p> : null}
               <p className="mt-3 text-xs font-semibold text-ink/45">
                 {[formatLeadDate(lead.createdAt), lead.source, lead.utmCampaign ? `campana: ${lead.utmCampaign}` : "", lead.path].filter(Boolean).join(" | ")}
               </p>
@@ -516,6 +574,9 @@ export function SuperAdminDashboard() {
                   </Link>
                 ) : null}
                 <button className="rounded-xl bg-mint px-3 py-2 text-xs font-bold text-teal" onClick={() => updateLeadStatus(lead.id, "contacted")} type="button">Contactado</button>
+                <button className="rounded-xl bg-cream px-3 py-2 text-xs font-bold text-teal ring-1 ring-ink/10" onClick={() => updateLeadStatus(lead.id, "meeting_scheduled")} type="button">Reunion</button>
+                <button className="rounded-xl bg-cream px-3 py-2 text-xs font-bold text-teal ring-1 ring-ink/10" onClick={() => fillLeadAsBusinessDraft(lead)} type="button">Crear negocio</button>
+                <button className="rounded-xl bg-cream px-3 py-2 text-xs font-bold text-teal ring-1 ring-ink/10" onClick={() => updateLeadNote(lead)} type="button">Nota</button>
                 <button className="rounded-xl bg-gold/30 px-3 py-2 text-xs font-bold text-teal" onClick={() => updateLeadStatus(lead.id, "won")} type="button">Ganado</button>
                 <button className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-700" onClick={() => updateLeadStatus(lead.id, "lost")} type="button">Perdido</button>
               </div>

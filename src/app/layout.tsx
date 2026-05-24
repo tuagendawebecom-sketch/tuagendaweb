@@ -89,8 +89,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     email: "tuagendaweb.ecom@gmail.com",
     description: "Agenda online y webs completas con sistema de turnos para negocios locales.",
     offers: [
-      { "@type": "Offer", name: "Agenda Online", price: "10000", priceCurrency: "ARS" },
-      { "@type": "Offer", name: "Agenda Pro", price: "20000", priceCurrency: "ARS" },
+      { "@type": "Offer", name: "Agenda Full", price: "10000", priceCurrency: "ARS" },
       { "@type": "Offer", name: "Web Completa", price: "100000", priceCurrency: "ARS" }
     ]
   };
