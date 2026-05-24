@@ -6,8 +6,10 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Copy, XCircle, type LucideIcon } f
 import Link from "next/link";
 import {
   agendaSimpleFeatures,
+  agendaFullHighlights,
   benefits,
   comparisonRows,
+  conversionProof,
   credibilityNotes,
   decisionGuide,
   demoCategories,
@@ -131,6 +133,22 @@ export function ReassuranceSection() {
           <motion.article className="rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft" key={item} {...reveal}>
             <CheckCircle2 className="text-action" size={26} />
             <p className="mt-4 font-semibold leading-7 text-ink/70">{item}</p>
+          </motion.article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+export function ConversionProofSection() {
+  return (
+    <Section eyebrow="Por qué funciona" title="El cliente reserva fácil y vos dejás de ordenar todo a mano">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {conversionProof.map(([title, text]) => (
+          <motion.article className="rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft" key={title} {...reveal}>
+            <CheckCircle2 className="text-action" size={24} />
+            <h3 className="mt-4 font-display text-xl font-extrabold text-teal">{title}</h3>
+            <p className="mt-3 text-sm font-semibold leading-6 text-ink/64">{text}</p>
           </motion.article>
         ))}
       </div>
@@ -335,6 +353,21 @@ export function AgendaSimpleSection() {
             </div>
           ))}
         </div>
+      </div>
+    </Section>
+  );
+}
+
+export function AgendaFullDetailSection() {
+  return (
+    <Section eyebrow="Agenda Full" title="La agenda mensual ya nace completa" text="La idea es competir con herramientas gratis mostrando una experiencia más cuidada, con panel y datos útiles para cada negocio.">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {agendaFullHighlights.map(([title, text]) => (
+          <motion.article className="rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft" key={title} {...reveal}>
+            <h3 className="font-display text-xl font-extrabold text-teal">{title}</h3>
+            <p className="mt-3 text-sm font-semibold leading-6 text-ink/64">{text}</p>
+          </motion.article>
+        ))}
       </div>
     </Section>
   );

@@ -6,10 +6,12 @@ import { StickyMobileCTA } from "@/components/StickyMobileCTA";
 import { LeadCaptureForm } from "@/components/LeadCaptureForm";
 import {
   Benefits,
+  AgendaFullDetailSection,
   AgendaSimpleSection,
   AudienceFitSection,
   CampaignReadinessStrip,
   Comparison,
+  ConversionProofSection,
   CredibilityNotesSection,
   DemoCarousel,
   DecisionGuideSection,
@@ -38,12 +40,14 @@ export default function Home() {
         <CampaignReadinessStrip />
         <LaunchOfferSection />
         <QuickExplanation />
+        <ConversionProofSection />
         <ProblemSolution />
         <AudienceFitSection />
         <PlanSelector />
         <DecisionGuideSection />
         <ReassuranceSection />
         <AgendaSimpleSection />
+        <AgendaFullDetailSection />
         <WebCompletaSection />
         <DemoCarousel />
         <Comparison />

@@ -274,7 +274,7 @@ export function PanelDashboard() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "turnos" | "configuracion">("dashboard");
   const [dashboardRange, setDashboardRange] = useState<"today" | "7d" | "30d" | "all">("30d");
   const [turnSearch, setTurnSearch] = useState("");
-  const [turnStatusFilter, setTurnStatusFilter] = useState<"upcoming" | "all" | "cancelled">("upcoming");
+  const [turnStatusFilter, setTurnStatusFilter] = useState<"upcoming" | "all" | "cancelled" | "done">("upcoming");
 
   useEffect(() => {
     if (!isFirebaseClientConfigured() || !auth || !db) {
@@ -386,6 +386,8 @@ export function PanelDashboard() {
   const todayKey = dateKeyInArgentina();
   const confirmedReservations = reservations.filter((reservation) => reservation.estado !== "cancelada");
   const cancelledReservations = reservations.filter((reservation) => reservation.estado === "cancelada");
+  const attendedReservations = reservations.filter((reservation) => reservation.estado === "atendida");
+  const noShowReservations = reservations.filter((reservation) => reservation.estado === "ausente");
   const upcomingReservations = confirmedReservations
     .filter((reservation) => (reservation.fecha ?? "") >= todayKey)
     .sort((a, b) => reservationDateTimeValue(a) - reservationDateTimeValue(b))
@@ -415,7 +417,7 @@ export function PanelDashboard() {
   const dailyReservations = groupReservationsByDate(rangeReservations);
   const maxDailyReservations = Math.max(1, ...dailyReservations.map((item) => item.count));
   const uniqueClients = new Set(confirmedReservations.map((reservation) => normalizePhone(reservation.telefono ?? "")).filter(Boolean)).size;
-  const visibleReservations = (turnStatusFilter === "cancelled" ? cancelledReservations : turnStatusFilter === "all" ? reservations : upcomingReservations)
+  const visibleReservations = (turnStatusFilter === "cancelled" ? cancelledReservations : turnStatusFilter === "done" ? [...attendedReservations, ...noShowReservations] : turnStatusFilter === "all" ? reservations : upcomingReservations)
     .filter((reservation) => {
       const value = turnSearch.toLowerCase().trim();
       if (!value) return true;
@@ -523,6 +525,23 @@ export function PanelDashboard() {
       setMessage("Turno cancelado y horario liberado.");
     } catch {
       setError("No se pudo cancelar el turno desde el panel.");
+    } finally {
+      setSaving("");
+    }
+  }
+
+  async function updateReservationStatus(reservation: ReservationItem, estado: "confirmada" | "atendida" | "ausente") {
+    if (!canEdit) return;
+    setSaving(`${estado}-${reservation.id}`);
+    setError("");
+    try {
+      await updateDoc(doc(activeDb, "negocios", businessId, "reservas", reservation.id), {
+        estado,
+        updatedAt: serverTimestamp()
+      });
+      setMessage(`Turno actualizado a ${estado}.`);
+    } catch {
+      setError("No se pudo actualizar el estado del turno.");
     } finally {
       setSaving("");
     }
@@ -816,6 +835,8 @@ export function PanelDashboard() {
                 <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">Facturacion estimada del rango: {formatCurrency(rangeRevenue)}</p>
                 <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Facturacion estimada total: {formatCurrency(estimatedRevenue)}</p>
                 <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Cancelados registrados: {cancelledReservations.length}</p>
+                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Atendidos: {attendedReservations.length}</p>
+                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Ausentes: {noShowReservations.length}</p>
                 <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Servicios activos: {services.filter((service) => service.activo !== false).length}</p>
                 <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Personal activo: {staff.filter((person) => person.activo !== false).length}</p>
               </div>
@@ -909,6 +930,7 @@ export function PanelDashboard() {
             <option value="upcoming">Proximos</option>
             <option value="all">Todos</option>
             <option value="cancelled">Cancelados</option>
+            <option value="done">Atendidos/ausentes</option>
           </select>
         </div>
         <div className="mt-5 grid gap-3">
@@ -932,9 +954,22 @@ export function PanelDashboard() {
                   </Link>
                 ) : null}
                 {reservation.estado !== "cancelada" ? (
+                  <>
+                  <button className="inline-flex items-center gap-2 rounded-full bg-mint px-4 py-2 text-xs font-extrabold text-teal disabled:opacity-50" disabled={!canEdit || saving === "atendida-" + reservation.id} onClick={() => updateReservationStatus(reservation, "atendida")} type="button">
+                    Atendido
+                  </button>
+                  <button className="inline-flex items-center gap-2 rounded-full bg-gold/25 px-4 py-2 text-xs font-extrabold text-teal disabled:opacity-50" disabled={!canEdit || saving === "ausente-" + reservation.id} onClick={() => updateReservationStatus(reservation, "ausente")} type="button">
+                    Ausente
+                  </button>
+                  {reservation.estado === "atendida" || reservation.estado === "ausente" ? (
+                    <button className="inline-flex items-center gap-2 rounded-full bg-paper px-4 py-2 text-xs font-extrabold text-teal ring-1 ring-ink/10 disabled:opacity-50" disabled={!canEdit || saving === "confirmada-" + reservation.id} onClick={() => updateReservationStatus(reservation, "confirmada")} type="button">
+                      Reabrir
+                    </button>
+                  ) : null}
                   <button className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-xs font-extrabold text-red-700 disabled:opacity-50" disabled={!canEdit || saving === "cancel-" + reservation.id} onClick={() => cancelReservationFromPanel(reservation)} type="button">
                     <Trash2 size={14} /> Cancelar
                   </button>
+                  </>
                 ) : null}
                 <span className={`rounded-full px-4 py-2 text-xs font-extrabold ${reservation.estado === "cancelada" ? "bg-red-50 text-red-700" : "bg-mint text-teal"}`}>
                   {reservation.estado ?? "confirmada"}

@@ -5,7 +5,7 @@ import type { LeadInterestPlan } from "@/types/tenant";
 
 export const dynamic = "force-dynamic";
 
-const allowedPlans = new Set<LeadInterestPlan>(["agenda_simple", "agenda_pro", "web_completa", "not_sure"]);
+const allowedPlans = new Set<LeadInterestPlan>(["agenda_simple", "web_completa", "not_sure"]);
 const leadHits = new Map<string, { count: number; resetAt: number }>();
 
 function clean(value: unknown, maxLength: number) {
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
   const phone = normalizePhone(clean(body.phone, 40));
   const businessName = clean(body.businessName, 100);
   const businessType = clean(body.businessType, 80);
-  const priority = interestedPlan === "web_completa" ? "high" : interestedPlan === "agenda_pro" ? "medium" : "normal";
+  const priority = interestedPlan === "web_completa" ? "high" : interestedPlan === "not_sure" ? "medium" : "normal";
 
   if (name.length < 2 || phone.length < 10 || businessName.length < 2 || businessType.length < 2) {
     return NextResponse.json({ ok: false, error: "invalid_fields" }, { status: 400 });

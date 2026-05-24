@@ -897,3 +897,45 @@ Validacion:
 
 Nota operativa:
 - Para nuevos clientes, crear el negocio desde Super Admin como Agenda Full, definir email y contrasena inicial, y pedirle al cliente que ingrese a /login para cambiar su contrasena y completar su configuracion.
+Tanda de 30 mejoras - conversion, paneles y operacion
+
+Fecha: 2026-05-24
+
+Mejoras aplicadas:
+1. Nueva seccion "Por que funciona" en la landing.
+2. La landing explica el beneficio para el cliente final.
+3. La landing explica el beneficio operativo para el negocio.
+4. La landing aclara que el link sirve en Instagram, WhatsApp, bio y anuncios.
+5. Nueva seccion de detalle "Agenda Full".
+6. Agenda Full se comunica como agenda completa, no como plan basico.
+7. Agenda Full destaca reserva con servicio, profesional, sucursal, calendario y horario.
+8. Agenda Full destaca panel del dueno.
+9. Agenda Full destaca consulta/cancelacion desde el link.
+10. Agenda Full aclara activacion/suspension manual sin borrar datos.
+11. Formulario de leads agrega beneficios de confianza.
+12. Formulario de leads ahora controla el plan seleccionado.
+13. Formulario de leads muestra ayuda contextual segun plan.
+14. Formulario de leads agrega contador de caracteres.
+15. Formulario de leads reinicia plan y contador al enviar correctamente.
+16. API de leads ya no acepta agenda_pro como plan nuevo publico.
+17. API de leads marca "no se todavia" como prioridad media.
+18. Panel cliente suma estado "atendida" para turnos.
+19. Panel cliente suma estado "ausente" para turnos.
+20. Panel cliente permite reabrir turnos atendidos o ausentes.
+21. Dashboard cliente muestra cantidad de turnos atendidos.
+22. Dashboard cliente muestra cantidad de ausentes.
+23. Filtro de turnos suma vista de atendidos/ausentes.
+24. CSV de turnos conserva los estados nuevos.
+25. Super Admin suma busqueda de leads.
+26. Super Admin muestra conteo de leads nuevos.
+27. Super Admin muestra conteo de leads contactados.
+28. Super Admin muestra conteo de leads ganados.
+29. Super Admin exporta negocios a CSV.
+30. Super Admin copia mensaje de acceso para entregar al cliente.
+31. Super Admin muestra aviso de negocios con pago pendiente.
+32. Smoke test sigue validando rutas, overflow mobile y textos internos.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+- npm run test:smoke en localhost:3001: OK.

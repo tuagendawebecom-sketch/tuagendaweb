@@ -2,7 +2,7 @@
 
 import { Send } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
-import { leadForm, plans, trackingEvents, whatsappMessages } from "@/data/site";
+import { leadForm, leadFormBenefits, plans, trackingEvents, whatsappMessages } from "@/data/site";
 import type { LeadInterestPlan } from "@/types/tenant";
 import { trackEvent } from "@/lib/tracking";
 import { createWhatsAppHref } from "@/lib/whatsapp";
@@ -21,6 +21,8 @@ export function LeadCaptureForm() {
   const [state, setState] = useState<FormState>("idle");
   const [error, setError] = useState("");
   const [lastPlan, setLastPlan] = useState<LeadInterestPlan>("agenda_simple");
+  const [selectedPlan, setSelectedPlan] = useState<LeadInterestPlan>("agenda_simple");
+  const [messageLength, setMessageLength] = useState(0);
   const [sourceData, setSourceData] = useState({
     path: "",
     referrer: "",
@@ -104,6 +106,8 @@ export function LeadCaptureForm() {
       setLastPlan(payload.interestedPlan as LeadInterestPlan);
       setState("success");
       form.reset();
+      setSelectedPlan("agenda_simple");
+      setMessageLength(0);
     } catch {
       setState("error");
       setError("No se pudo enviar. Probá por WhatsApp y lo vemos directo.");
@@ -118,6 +122,11 @@ export function LeadCaptureForm() {
           <p className="mt-4 leading-7 text-cream/78">
             Te conviene mandar datos concretos: rubro, cantidad de servicios, si tenés personal y si querés solo agenda o web completa.
           </p>
+          <div className="mt-5 grid gap-2">
+            {leadFormBenefits.map((benefit) => (
+              <p className="rounded-2xl bg-cream/10 px-4 py-3 text-sm font-bold text-cream/82" key={benefit}>{benefit}</p>
+            ))}
+          </div>
           <div className="mt-6 grid gap-3">
             {plans.map((plan) => (
               <div className="rounded-2xl bg-cream/10 p-4" key={plan.id}>
@@ -158,17 +167,21 @@ export function LeadCaptureForm() {
           </div>
           <label className="grid gap-2 text-sm font-bold text-ink/70">
             Plan que te interesa
-            <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue="agenda_simple" name="interestedPlan" required>
+            <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="interestedPlan" onChange={(event) => setSelectedPlan(event.target.value as LeadInterestPlan)} required value={selectedPlan}>
               {planOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </select>
+            <span className="rounded-2xl bg-mint px-4 py-3 text-xs font-bold text-teal">
+              {selectedPlan === "web_completa" ? "Ideal si queres dominio propio y presencia de marca." : selectedPlan === "not_sure" ? "Te recomiendo la opcion segun tu rubro y forma de trabajar." : "Ideal para empezar rapido con link de reservas completo."}
+            </span>
           </label>
           <label className="grid gap-2 text-sm font-bold text-ink/70">
             Mensaje opcional
-            <textarea className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" maxLength={600} name="message" placeholder="Contame si ya tenés logo, dominio, servicios o cantidad de personas que atienden." />
+            <textarea className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" maxLength={600} name="message" onChange={(event) => setMessageLength(event.target.value.length)} placeholder="Contame si ya tenes logo, dominio, servicios o cantidad de personas que atienden." />
+            <span className="text-right text-xs font-semibold text-ink/45">{messageLength}/600</span>
           </label>
           <button
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream shadow-lift transition hover:bg-action disabled:cursor-wait disabled:opacity-70"

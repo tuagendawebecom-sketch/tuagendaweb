@@ -118,6 +118,7 @@ export function SuperAdminDashboard() {
   const [businessPlanFilter, setBusinessPlanFilter] = useState("all");
   const [businessStatusFilter, setBusinessStatusFilter] = useState("all");
   const [leadFilter, setLeadFilter] = useState("all");
+  const [leadSearch, setLeadSearch] = useState("");
   const [copiedSlug, setCopiedSlug] = useState("");
   const [leadDraft, setLeadDraft] = useState<Lead | null>(null);
   const [formKey, setFormKey] = useState(0);
@@ -331,6 +332,39 @@ export function SuperAdminDashboard() {
     URL.revokeObjectURL(url);
   }
 
+  function exportBusinessesCsv() {
+    const headers = ["negocio", "slug", "plan", "estado", "dueno", "email", "telefono", "whatsapp", "mensual"];
+    const rows = filteredBusinesses.map((business) => [
+      business.nombre,
+      business.slug,
+      planLabels[business.plan],
+      statusLabels[business.estado],
+      business.ownerNombre ?? "",
+      business.ownerEmail ?? "",
+      business.ownerTelefono ?? "",
+      business.whatsapp ?? "",
+      business.monthlyPrice ?? 0
+    ]);
+    const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "tuagendaweb-negocios.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function copyClientAccessMessage(business: AdminBusiness) {
+    const text = `Hola ${business.ownerNombre ?? ""}, ya tenes tu acceso a TuAgendaWeb.\n\nPanel: ${siteUrl}/login\nAgenda: ${siteUrl}/${business.slug}\nEmail: ${business.ownerEmail ?? "tu email"}\n\nIngresas con la contrasena inicial que te pase y despues podes cambiarla desde el panel.`;
+    try {
+      await navigator.clipboard?.writeText(text);
+      setMessage("Mensaje de acceso copiado.");
+    } catch {
+      setError("No se pudo copiar el mensaje de acceso.");
+    }
+  }
+
   const visibleBusinesses = businesses.filter((business) => !business.archived);
   const filteredBusinesses = visibleBusinesses.filter((business) => {
     const value = businessFilter.toLowerCase().trim();
@@ -341,10 +375,20 @@ export function SuperAdminDashboard() {
       .filter(Boolean)
       .some((item) => item?.toLowerCase().includes(value));
   });
-  const filteredLeads = leads.filter((lead) => leadFilter === "all" || (lead.status ?? "new") === leadFilter);
+  const filteredLeads = leads.filter((lead) => {
+    if (leadFilter !== "all" && (lead.status ?? "new") !== leadFilter) return false;
+    const value = leadSearch.toLowerCase().trim();
+    if (!value) return true;
+    return [lead.name, lead.phone, lead.businessName, lead.businessType, lead.interestedPlan, lead.message]
+      .filter(Boolean)
+      .some((item) => String(item).toLowerCase().includes(value));
+  });
   const activeBusinesses = visibleBusinesses.filter((business) => business.estado === "active" || business.estado === "trial").length;
   const suspendedBusinesses = visibleBusinesses.filter((business) => business.estado === "suspended" || business.estado === "cancelled").length;
   const newLeads = leads.filter((lead) => (lead.status ?? "new") === "new").length;
+  const contactedLeads = leads.filter((lead) => (lead.status ?? "new") === "contacted").length;
+  const wonLeads = leads.filter((lead) => (lead.status ?? "new") === "won").length;
+  const pastDueBusinesses = visibleBusinesses.filter((business) => business.estado === "past_due").length;
   const estimatedMonthlyRevenue = visibleBusinesses
     .filter((business) => business.estado === "active" || business.estado === "trial")
     .reduce((total, business) => total + (business.monthlyPrice ?? 0), 0);
@@ -396,7 +440,7 @@ export function SuperAdminDashboard() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           ["Negocios activos", activeBusinesses],
-          ["Suspendidos/cancelados", suspendedBusinesses],
+          ["Pausados/cancelados", suspendedBusinesses],
           ["Leads nuevos", newLeads],
           ["Mensual estimado", formatCurrency(estimatedMonthlyRevenue)]
         ].map(([label, value]) => (
@@ -406,6 +450,7 @@ export function SuperAdminDashboard() {
           </div>
         ))}
       </div>
+      {pastDueBusinesses ? <p className="rounded-2xl bg-gold/20 p-4 text-sm font-bold text-teal">Negocios con pago pendiente: {pastDueBusinesses}</p> : null}
 
       <form className="grid scroll-mt-24 gap-4 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-4" id="crear-negocio" key={formKey} onSubmit={handleCreateBusiness}>
         <div className="lg:col-span-4">
@@ -478,7 +523,7 @@ export function SuperAdminDashboard() {
       <section className="grid gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <h2 className="font-display text-2xl font-extrabold text-teal">Negocios</h2>
-          <div className="grid w-full gap-2 sm:max-w-3xl sm:grid-cols-[1fr_auto_auto]">
+          <div className="grid w-full gap-2 sm:max-w-4xl sm:grid-cols-[1fr_auto_auto_auto]">
             <label className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" size={18} />
               <input className="w-full rounded-2xl border border-ink/10 bg-paper py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setBusinessFilter(event.target.value)} placeholder="Buscar negocio, slug o dueno" value={businessFilter} />
@@ -491,6 +536,9 @@ export function SuperAdminDashboard() {
               <option value="all">Todos los estados</option>
               {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
+            <button className="rounded-2xl bg-teal px-4 py-3 text-sm font-bold text-cream" onClick={exportBusinessesCsv} type="button">
+              CSV
+            </button>
           </div>
         </div>
         {filteredBusinesses.length === 0 ? <p className="rounded-2xl bg-paper p-5 font-semibold text-ink/60">No hay negocios para ese filtro.</p> : null}
@@ -511,6 +559,9 @@ export function SuperAdminDashboard() {
             <div className="flex flex-wrap gap-2 lg:justify-end">
               <button className="inline-flex items-center gap-2 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal" onClick={() => copyPublicLink(business.slug)} type="button">
                 <Copy size={16} /> {copiedSlug === business.slug ? "Copiado" : "Copiar"}
+              </button>
+              <button className="inline-flex items-center gap-2 rounded-2xl bg-paper px-4 py-3 text-sm font-bold text-teal ring-1 ring-ink/10" onClick={() => copyClientAccessMessage(business)} type="button">
+                Acceso
               </button>
               <button className="inline-flex items-center gap-2 rounded-2xl bg-teal px-4 py-3 text-sm font-bold text-cream" onClick={() => updateBusinessStatus(business, "active")} type="button">
                 <PlayCircle size={16} /> Activar
@@ -535,7 +586,11 @@ export function SuperAdminDashboard() {
       <section className="grid gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <h2 className="font-display text-2xl font-extrabold text-teal">Últimos leads</h2>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="grid w-full gap-2 sm:max-w-3xl sm:grid-cols-[1fr_auto_auto]">
+            <label className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" size={18} />
+              <input className="w-full rounded-2xl border border-ink/10 bg-paper py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setLeadSearch(event.target.value)} placeholder="Buscar lead, telefono o rubro" value={leadSearch} />
+            </label>
             <select className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setLeadFilter(event.target.value)} value={leadFilter}>
               <option value="all">Todos</option>
               <option value="new">Nuevos</option>
@@ -548,6 +603,11 @@ export function SuperAdminDashboard() {
               <Download size={16} /> Exportar CSV
             </button>
           </div>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-3">
+          <p className="rounded-2xl bg-paper p-4 text-sm font-bold text-ink/65">Nuevos: {newLeads}</p>
+          <p className="rounded-2xl bg-paper p-4 text-sm font-bold text-ink/65">Contactados: {contactedLeads}</p>
+          <p className="rounded-2xl bg-paper p-4 text-sm font-bold text-ink/65">Ganados: {wonLeads}</p>
         </div>
         <div className="grid gap-3 lg:grid-cols-2">
           {filteredLeads.length === 0 ? <p className="rounded-2xl bg-paper p-5 font-semibold text-ink/60 lg:col-span-2">No hay leads para ese filtro.</p> : null}

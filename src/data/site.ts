@@ -120,6 +120,26 @@ export const quickTrustNotes = [
   "Se puede empezar simple y crecer después."
 ] as const;
 
+export const conversionProof = [
+  ["Para el cliente", "Reserva desde el celular sin esperar una respuesta manual."],
+  ["Para el negocio", "Turnos, servicios, personal y sucursales quedan en un panel propio."],
+  ["Para vender mejor", "El link se puede pegar en Instagram, WhatsApp, historias, bio o anuncios."],
+  ["Para empezar rápido", "Agenda Full no exige dominio propio ni una web completa desde el día uno."]
+] as const;
+
+export const leadFormBenefits = [
+  "Respuesta personalizada por WhatsApp.",
+  "Recomendación según tu rubro.",
+  "Sin compromiso de contratación."
+] as const;
+
+export const agendaFullHighlights = [
+  ["Reserva completa", "Servicio, profesional, sucursal, calendario y horarios disponibles."],
+  ["Panel para el dueño", "Dashboard, próximos turnos, configuración, servicios, personal y sucursales."],
+  ["Cliente con control", "Puede consultar o cancelar su turno desde el mismo link."],
+  ["Activación manual", "Si hay deuda o pausa, la agenda se suspende sin borrar datos."]
+] as const;
+
 export const reassuranceItems = [
   "No hace falta dejar WhatsApp: el link ordena la reserva y la conversación sigue ahí.",
   "La reserva está pensada para celular, con pasos simples y textos claros.",
