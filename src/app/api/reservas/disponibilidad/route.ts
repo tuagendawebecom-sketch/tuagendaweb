@@ -1,30 +1,32 @@
 import { NextResponse } from "next/server";
+import { cleanText, isIsoDate, readJsonRequest } from "@/lib/api/request";
 import { getAvailableTimes } from "@/lib/firebase/reservations";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const contentLength = Number(request.headers.get("content-length") ?? "0");
-  if (contentLength > 4_000) {
-    return NextResponse.json({ ok: false, error: "payload_too_large" }, { status: 413 });
+  const parsed = await readJsonRequest(request);
+  if (!parsed.ok) {
+    return parsed.response;
   }
 
-  const contentType = request.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/json")) {
-    return NextResponse.json({ ok: false, error: "invalid_content_type" }, { status: 415 });
-  }
+  const body = parsed.body;
+  const slug = cleanText(body.slug, 80);
+  const serviceId = cleanText(body.serviceId, 100);
+  const date = cleanText(body.date, 10);
+  const personalId = cleanText(body.personalId, 100);
+  const sucursalId = cleanText(body.sucursalId, 100);
 
-  const body = await request.json().catch(() => null);
-  if (!body) {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+  if (!slug || !serviceId || !isIsoDate(date)) {
+    return NextResponse.json({ ok: false, error: "invalid_fields" }, { status: 400 });
   }
 
   const result = await getAvailableTimes({
-    slug: String(body?.slug ?? ""),
-    serviceId: String(body?.serviceId ?? ""),
-    date: String(body?.date ?? ""),
-    personalId: body?.personalId ? String(body.personalId) : undefined,
-    sucursalId: body?.sucursalId ? String(body.sucursalId) : undefined
+    slug,
+    serviceId,
+    date,
+    personalId: personalId || undefined,
+    sucursalId: sucursalId || undefined
   });
 
   if (!result.ok) {

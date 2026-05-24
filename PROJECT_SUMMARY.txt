@@ -939,3 +939,58 @@ Validacion:
 - npm run lint: OK.
 - npm run build: OK.
 - npm run test:smoke en localhost:3001: OK.
+
+Tanda de 30 mejoras - reserva, panel cliente y Super Admin
+
+Fecha: 2026-05-24
+
+Alcance:
+- No se modifico la landing publica.
+- Se trabajo sobre pagina de reservas, panel del cliente, Super Admin y validaciones de APIs.
+
+Mejoras aplicadas:
+1. Se creo un helper compartido para validar requests JSON de APIs.
+2. /api/reservas/crear rechaza payloads demasiado grandes desde helper compartido.
+3. /api/reservas/crear valida slug, servicio, fecha, hora, nombre y telefono antes de Firestore.
+4. /api/reservas/disponibilidad valida slug, servicio y fecha antes de consultar horarios.
+5. /api/reservas/consultar valida telefono minimo antes de buscar turnos.
+6. /api/reservas/cancelar valida slug, reserva y telefono antes de cancelar.
+7. La reserva publica muestra progreso del flujo.
+8. La reserva publica muestra pasos pendientes/listos.
+9. La reserva publica valida nombre y WhatsApp antes de enviar.
+10. La reserva publica bloquea confirmar hasta tener datos completos.
+11. La reserva publica muestra cantidad de horarios disponibles.
+12. La reserva publica permite elegir rapidamente el primer horario disponible.
+13. La reserva publica permite limpiar datos guardados del cliente.
+14. La confirmacion permite copiar el detalle del turno.
+15. La confirmacion ofrece escribir al negocio por WhatsApp si hay numero cargado.
+16. La consulta de turnos muestra cantidad de resultados encontrados.
+17. La consulta de turnos muestra estado legible del turno.
+18. El panel cliente agrega filtro de turnos de hoy.
+19. El panel cliente calcula ticket promedio del rango.
+20. El panel cliente calcula tasa de asistencia sobre atendidos/ausentes.
+21. El panel cliente destaca el proximo turno en resumen rapido.
+22. El panel cliente muestra advertencias accionables de configuracion pendiente.
+23. El panel cliente exporta CSV con BOM para mejor compatibilidad con Excel.
+24. El panel cliente agrega fecha al nombre del CSV exportado.
+25. El panel cliente abre WhatsApp con mensaje prellenado por turno.
+26. El panel cliente permite copiar resumen de cada turno.
+27. El panel cliente muestra estados de turnos con etiquetas legibles y colores.
+28. Super Admin agrega estado de lead "Seguimiento".
+29. Super Admin muestra leads en seguimiento como KPI y filtro.
+30. Super Admin muestra negocios sin email de dueno como KPI operativo.
+31. Super Admin permite copiar email del dueno.
+32. Super Admin permite copiar mensaje de recordatorio de pago.
+33. Super Admin permite pasar negocios a Trial desde la lista.
+34. Super Admin permite limpiar un lead precargado del formulario.
+35. Super Admin exporta leads con nota interna y fecha.
+36. Super Admin exporta negocios con link publico incluido.
+37. CSVs de Super Admin usan BOM para Excel.
+38. Leads muestran etiqueta de estado legible.
+39. Leads muestran antiguedad aproximada.
+40. Leads pueden marcarse como seguimiento desde la tarjeta.
+
+Validacion pendiente al aplicar:
+- npm run lint
+- npm run build
+- npm run test:smoke con localhost:3001

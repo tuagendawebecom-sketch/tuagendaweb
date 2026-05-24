@@ -127,6 +127,20 @@ const statusLabels: Record<string, string> = {
   cancelled: "Cancelado"
 };
 
+const reservationStatusLabels: Record<string, string> = {
+  confirmada: "Confirmado",
+  atendida: "Atendido",
+  ausente: "Ausente",
+  cancelada: "Cancelado"
+};
+
+function reservationStatusClass(status?: string) {
+  if (status === "cancelada") return "bg-red-50 text-red-700";
+  if (status === "ausente") return "bg-gold/25 text-teal";
+  if (status === "atendida") return "bg-mint text-teal";
+  return "bg-paper text-teal ring-1 ring-ink/10";
+}
+
 function toNumber(value: FormDataEntryValue | null, fallback = 0) {
   const parsed = Number(String(value ?? "").replace(",", "."));
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -224,6 +238,17 @@ function readSchedule(data: Record<string, unknown> | undefined): ScheduleConfig
   };
 }
 
+function setupWarnings(business: PanelBusiness, servicesCount: number, staffCount: number, branchesCount: number, schedule: ScheduleConfig) {
+  const warnings: string[] = [];
+  if (!business.whatsapp) warnings.push("Cargar WhatsApp visible");
+  if (!business.logoUrl && !business.initials) warnings.push("Cargar logo o iniciales");
+  if (!servicesCount) warnings.push("Agregar al menos un servicio");
+  if (!staffCount) warnings.push("Agregar personal");
+  if (!branchesCount) warnings.push("Agregar sucursal");
+  if (!Object.values(schedule.horariosPorDia).some((day) => day.activo && day.rangos.length)) warnings.push("Configurar horarios");
+  return warnings;
+}
+
 function resizeLogo(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -274,7 +299,7 @@ export function PanelDashboard() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "turnos" | "configuracion">("dashboard");
   const [dashboardRange, setDashboardRange] = useState<"today" | "7d" | "30d" | "all">("30d");
   const [turnSearch, setTurnSearch] = useState("");
-  const [turnStatusFilter, setTurnStatusFilter] = useState<"upcoming" | "all" | "cancelled" | "done">("upcoming");
+  const [turnStatusFilter, setTurnStatusFilter] = useState<"today" | "upcoming" | "all" | "cancelled" | "done">("upcoming");
 
   useEffect(() => {
     if (!isFirebaseClientConfigured() || !auth || !db) {
@@ -417,7 +442,15 @@ export function PanelDashboard() {
   const dailyReservations = groupReservationsByDate(rangeReservations);
   const maxDailyReservations = Math.max(1, ...dailyReservations.map((item) => item.count));
   const uniqueClients = new Set(confirmedReservations.map((reservation) => normalizePhone(reservation.telefono ?? "")).filter(Boolean)).size;
-  const visibleReservations = (turnStatusFilter === "cancelled" ? cancelledReservations : turnStatusFilter === "done" ? [...attendedReservations, ...noShowReservations] : turnStatusFilter === "all" ? reservations : upcomingReservations)
+  const completedTotal = attendedReservations.length + noShowReservations.length;
+  const attendanceRate = completedTotal ? Math.round((attendedReservations.length / completedTotal) * 100) : 0;
+  const nextReservation = upcomingReservations[0];
+  const averageTicket = rangeReservations.length ? Math.round(rangeRevenue / rangeReservations.length) : 0;
+  const activeServices = services.filter((service) => service.activo !== false);
+  const activeStaff = staff.filter((person) => person.activo !== false);
+  const activeBranches = branches.filter((branch) => branch.activo !== false);
+  const pendingSetup = setupWarnings(business, activeServices.length, activeStaff.length, activeBranches.length, schedule);
+  const visibleReservations = (turnStatusFilter === "cancelled" ? cancelledReservations : turnStatusFilter === "done" ? [...attendedReservations, ...noShowReservations] : turnStatusFilter === "today" ? todayReservations : turnStatusFilter === "all" ? reservations : upcomingReservations)
     .filter((reservation) => {
       const value = turnSearch.toLowerCase().trim();
       if (!value) return true;
@@ -444,6 +477,22 @@ export function PanelDashboard() {
     } catch {
       setError("No se pudo copiar el link.");
     }
+  }
+
+  async function copyReservationSummary(reservation: ReservationItem) {
+    const text = `${reservation.clienteNombre ?? "Cliente"} - ${reservation.servicioNombre ?? "Servicio"} - ${reservation.fecha ?? "Sin fecha"} ${reservation.hora ?? ""}`;
+    try {
+      await navigator.clipboard?.writeText(text);
+      setMessage("Resumen del turno copiado.");
+    } catch {
+      setError("No se pudo copiar el resumen del turno.");
+    }
+  }
+
+  function reservationWhatsAppHref(reservation: ReservationItem) {
+    const phone = normalizePhone(reservation.telefono ?? "");
+    const text = `Hola ${reservation.clienteNombre ?? ""}, te escribo por tu turno de ${reservation.servicioNombre ?? "servicio"} para el ${reservation.fecha ?? ""} a las ${reservation.hora ?? ""} en ${business?.nombre ?? "el negocio"}.`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
   }
 
   async function handleBusinessSettings(event: FormEvent<HTMLFormElement>) {
@@ -500,11 +549,11 @@ export function PanelDashboard() {
     ])]
       .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
       .join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${business?.slug ?? "tuagendaweb"}-turnos.csv`;
+    link.download = `${business?.slug ?? "tuagendaweb"}-turnos-${dateKeyInArgentina()}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -799,7 +848,9 @@ export function PanelDashboard() {
               ["Turnos confirmados", confirmedReservations.length],
               ["Turnos de hoy", todayReservations.length],
               ["Proximos 7 dias", nextSevenDaysReservations.length],
-              ["Clientes unicos", uniqueClients]
+              ["Clientes unicos", uniqueClients],
+              ["Ticket promedio", formatCurrency(averageTicket)],
+              ["Asistencia", completedTotal ? `${attendanceRate}%` : "Sin datos"]
             ].map(([label, value]) => (
               <article className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={String(label)}>
                 <p className="text-sm font-bold text-ink/55">{String(label)}</p>
@@ -837,8 +888,9 @@ export function PanelDashboard() {
                 <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Cancelados registrados: {cancelledReservations.length}</p>
                 <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Atendidos: {attendedReservations.length}</p>
                 <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Ausentes: {noShowReservations.length}</p>
-                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Servicios activos: {services.filter((service) => service.activo !== false).length}</p>
-                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Personal activo: {staff.filter((person) => person.activo !== false).length}</p>
+                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Servicios activos: {activeServices.length}</p>
+                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Personal activo: {activeStaff.length}</p>
+                {nextReservation ? <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Proximo turno: {nextReservation.clienteNombre ?? "Cliente"} - {nextReservation.fecha} {nextReservation.hora}</p> : null}
               </div>
             </section>
           </div>
@@ -874,6 +926,14 @@ export function PanelDashboard() {
                   </p>
                 ))}
               </div>
+              {pendingSetup.length ? (
+                <div className="mt-4 rounded-2xl bg-gold/20 p-4">
+                  <p className="text-sm font-extrabold text-teal">Para dejar la agenda lista:</p>
+                  <ul className="mt-2 grid gap-1 text-sm font-semibold text-ink/65">
+                    {pendingSetup.slice(0, 4).map((item) => <li key={item}>- {item}</li>)}
+                  </ul>
+                </div>
+              ) : null}
             </section>
           </div>
 
@@ -927,6 +987,7 @@ export function PanelDashboard() {
             <input className="w-full rounded-2xl border border-ink/10 bg-cream py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setTurnSearch(event.target.value)} placeholder="Buscar cliente, telefono, servicio o fecha" value={turnSearch} />
           </label>
           <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setTurnStatusFilter(event.target.value as typeof turnStatusFilter)} value={turnStatusFilter}>
+            <option value="today">Hoy</option>
             <option value="upcoming">Proximos</option>
             <option value="all">Todos</option>
             <option value="cancelled">Cancelados</option>
@@ -949,10 +1010,13 @@ export function PanelDashboard() {
               </div>
               <div className="flex flex-wrap gap-2 sm:justify-end">
                 {reservation.telefono ? (
-                  <Link className="inline-flex items-center gap-2 rounded-full bg-teal px-4 py-2 text-xs font-extrabold text-cream" href={`https://wa.me/${normalizePhone(reservation.telefono)}`} rel="noopener noreferrer" target="_blank">
+                  <Link className="inline-flex items-center gap-2 rounded-full bg-teal px-4 py-2 text-xs font-extrabold text-cream" href={reservationWhatsAppHref(reservation)} rel="noopener noreferrer" target="_blank">
                     <MessageCircle size={14} /> WhatsApp
                   </Link>
                 ) : null}
+                <button className="inline-flex items-center gap-2 rounded-full bg-paper px-4 py-2 text-xs font-extrabold text-teal ring-1 ring-ink/10" onClick={() => copyReservationSummary(reservation)} type="button">
+                  <Copy size={14} /> Copiar
+                </button>
                 {reservation.estado !== "cancelada" ? (
                   <>
                   <button className="inline-flex items-center gap-2 rounded-full bg-mint px-4 py-2 text-xs font-extrabold text-teal disabled:opacity-50" disabled={!canEdit || saving === "atendida-" + reservation.id} onClick={() => updateReservationStatus(reservation, "atendida")} type="button">
@@ -971,8 +1035,8 @@ export function PanelDashboard() {
                   </button>
                   </>
                 ) : null}
-                <span className={`rounded-full px-4 py-2 text-xs font-extrabold ${reservation.estado === "cancelada" ? "bg-red-50 text-red-700" : "bg-mint text-teal"}`}>
-                  {reservation.estado ?? "confirmada"}
+                <span className={`rounded-full px-4 py-2 text-xs font-extrabold ${reservationStatusClass(reservation.estado)}`}>
+                  {reservationStatusLabels[reservation.estado ?? "confirmada"] ?? "Confirmado"}
                 </span>
               </div>
             </article>

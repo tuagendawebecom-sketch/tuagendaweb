@@ -1,27 +1,26 @@
 import { NextResponse } from "next/server";
+import { cleanText, digitsOnly, readJsonRequest } from "@/lib/api/request";
 import { findReservationsByPhone } from "@/lib/firebase/reservations";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const contentLength = Number(request.headers.get("content-length") ?? "0");
-  if (contentLength > 4_000) {
-    return NextResponse.json({ ok: false, error: "payload_too_large" }, { status: 413 });
+  const parsed = await readJsonRequest(request);
+  if (!parsed.ok) {
+    return parsed.response;
   }
 
-  const contentType = request.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/json")) {
-    return NextResponse.json({ ok: false, error: "invalid_content_type" }, { status: 415 });
-  }
+  const body = parsed.body;
+  const slug = cleanText(body.slug, 80);
+  const telefono = cleanText(body.telefono, 30);
 
-  const body = await request.json().catch(() => null);
-  if (!body) {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+  if (!slug || digitsOnly(telefono).length < 8) {
+    return NextResponse.json({ ok: false, error: "invalid_fields" }, { status: 400 });
   }
 
   const result = await findReservationsByPhone({
-    slug: String(body?.slug ?? ""),
-    telefono: String(body?.telefono ?? "")
+    slug,
+    telefono
   });
 
   if (!result.ok) {

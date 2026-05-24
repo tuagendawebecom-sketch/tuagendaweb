@@ -72,6 +72,15 @@ const statusLabels: Record<BusinessStatus, string> = {
   cancelled: "Cancelado"
 };
 
+const leadStatusLabels: Record<string, string> = {
+  new: "Nuevo",
+  contacted: "Contactado",
+  follow_up: "Seguimiento",
+  meeting_scheduled: "Reunion agendada",
+  won: "Ganado",
+  lost: "Perdido"
+};
+
 function formatCurrency(value?: number) {
   if (typeof value !== "number") return "Sin precio";
   return new Intl.NumberFormat("es-AR", {
@@ -85,6 +94,14 @@ function formatLeadDate(value?: Lead["createdAt"]) {
   const date = value?.toDate?.();
   if (!date) return "";
   return new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle: "short" }).format(date);
+}
+
+function formatLeadAge(value?: Lead["createdAt"]) {
+  const date = value?.toDate?.();
+  if (!date) return "Sin fecha";
+  const diffHours = Math.max(0, Math.round((Date.now() - date.getTime()) / 36e5));
+  if (diffHours < 24) return `Hace ${diffHours || 1} h`;
+  return `Hace ${Math.round(diffHours / 24)} d`;
 }
 
 function toBusiness(id: string, data: Record<string, unknown>): AdminBusiness {
@@ -318,12 +335,12 @@ export function SuperAdminDashboard() {
   }
 
   function exportLeadsCsv() {
-    const headers = ["nombre", "telefono", "negocio", "rubro", "plan", "estado", "mensaje", "origen", "campana"];
-    const rows = filteredLeads.map((lead) => [lead.name, lead.phone, lead.businessName, lead.businessType, lead.interestedPlan, lead.status ?? "new", lead.message ?? "", lead.source ?? "", lead.utmCampaign ?? ""]);
+    const headers = ["nombre", "telefono", "negocio", "rubro", "plan", "estado", "mensaje", "origen", "campana", "nota", "fecha"];
+    const rows = filteredLeads.map((lead) => [lead.name, lead.phone, lead.businessName, lead.businessType, lead.interestedPlan, lead.status ?? "new", lead.message ?? "", lead.source ?? "", lead.utmCampaign ?? "", lead.internalNote ?? "", formatLeadDate(lead.createdAt)]);
     const csv = [headers, ...rows]
       .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
       .join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -333,10 +350,11 @@ export function SuperAdminDashboard() {
   }
 
   function exportBusinessesCsv() {
-    const headers = ["negocio", "slug", "plan", "estado", "dueno", "email", "telefono", "whatsapp", "mensual"];
+    const headers = ["negocio", "slug", "link", "plan", "estado", "dueno", "email", "telefono", "whatsapp", "mensual"];
     const rows = filteredBusinesses.map((business) => [
       business.nombre,
       business.slug,
+      `${siteUrl}/${business.slug}`,
       planLabels[business.plan],
       statusLabels[business.estado],
       business.ownerNombre ?? "",
@@ -346,7 +364,7 @@ export function SuperAdminDashboard() {
       business.monthlyPrice ?? 0
     ]);
     const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -362,6 +380,29 @@ export function SuperAdminDashboard() {
       setMessage("Mensaje de acceso copiado.");
     } catch {
       setError("No se pudo copiar el mensaje de acceso.");
+    }
+  }
+
+  async function copyPaymentReminder(business: AdminBusiness) {
+    const text = `Hola ${business.ownerNombre ?? ""}, te escribo por el estado de TuAgendaWeb para ${business.nombre}. Cuando regularices el pago, te activo la agenda nuevamente. Link: ${siteUrl}/${business.slug}`;
+    try {
+      await navigator.clipboard?.writeText(text);
+      setMessage("Recordatorio de pago copiado.");
+    } catch {
+      setError("No se pudo copiar el recordatorio.");
+    }
+  }
+
+  async function copyOwnerEmail(email?: string) {
+    if (!email) {
+      setError("Este negocio no tiene email de dueno cargado.");
+      return;
+    }
+    try {
+      await navigator.clipboard?.writeText(email);
+      setMessage("Email del dueno copiado.");
+    } catch {
+      setError("No se pudo copiar el email.");
     }
   }
 
@@ -388,6 +429,8 @@ export function SuperAdminDashboard() {
   const newLeads = leads.filter((lead) => (lead.status ?? "new") === "new").length;
   const contactedLeads = leads.filter((lead) => (lead.status ?? "new") === "contacted").length;
   const wonLeads = leads.filter((lead) => (lead.status ?? "new") === "won").length;
+  const followUpLeads = leads.filter((lead) => (lead.status ?? "new") === "follow_up").length;
+  const businessesWithoutOwner = visibleBusinesses.filter((business) => !business.ownerEmail).length;
   const pastDueBusinesses = visibleBusinesses.filter((business) => business.estado === "past_due").length;
   const estimatedMonthlyRevenue = visibleBusinesses
     .filter((business) => business.estado === "active" || business.estado === "trial")
@@ -437,11 +480,13 @@ export function SuperAdminDashboard() {
         </button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {[
           ["Negocios activos", activeBusinesses],
           ["Pausados/cancelados", suspendedBusinesses],
           ["Leads nuevos", newLeads],
+          ["Seguimientos", followUpLeads],
+          ["Sin email owner", businessesWithoutOwner],
           ["Mensual estimado", formatCurrency(estimatedMonthlyRevenue)]
         ].map(([label, value]) => (
           <div className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={label as string}>
@@ -457,6 +502,7 @@ export function SuperAdminDashboard() {
           <h2 className="font-display text-2xl font-extrabold text-teal">Crear negocio y acceso del cliente</h2>
           <p className="mt-2 text-sm font-semibold text-ink/60">Elegi una contrasena inicial. El cliente puede cambiarla desde su panel cuando ingresa.</p>
           {leadDraft ? <p className="mt-3 rounded-2xl bg-mint p-3 text-sm font-bold text-teal">Formulario precargado desde lead: {leadDraft.businessName ?? leadDraft.name}</p> : null}
+          {leadDraft ? <button className="mt-3 rounded-full bg-cream px-4 py-2 text-xs font-extrabold text-teal ring-1 ring-ink/10" onClick={() => { setLeadDraft(null); setFormKey((current) => current + 1); }} type="button">Limpiar lead precargado</button> : null}
         </div>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Negocio
@@ -563,6 +609,15 @@ export function SuperAdminDashboard() {
               <button className="inline-flex items-center gap-2 rounded-2xl bg-paper px-4 py-3 text-sm font-bold text-teal ring-1 ring-ink/10" onClick={() => copyClientAccessMessage(business)} type="button">
                 Acceso
               </button>
+              <button className="inline-flex items-center gap-2 rounded-2xl bg-paper px-4 py-3 text-sm font-bold text-teal ring-1 ring-ink/10" onClick={() => copyOwnerEmail(business.ownerEmail)} type="button">
+                Email
+              </button>
+              <button className="inline-flex items-center gap-2 rounded-2xl bg-paper px-4 py-3 text-sm font-bold text-teal ring-1 ring-ink/10" onClick={() => copyPaymentReminder(business)} type="button">
+                Cobro
+              </button>
+              <button className="inline-flex items-center gap-2 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal" onClick={() => updateBusinessStatus(business, "trial")} type="button">
+                Trial
+              </button>
               <button className="inline-flex items-center gap-2 rounded-2xl bg-teal px-4 py-3 text-sm font-bold text-cream" onClick={() => updateBusinessStatus(business, "active")} type="button">
                 <PlayCircle size={16} /> Activar
               </button>
@@ -595,6 +650,7 @@ export function SuperAdminDashboard() {
               <option value="all">Todos</option>
               <option value="new">Nuevos</option>
               <option value="contacted">Contactados</option>
+              <option value="follow_up">Seguimiento</option>
               <option value="meeting_scheduled">Reunión agendada</option>
               <option value="won">Ganados</option>
               <option value="lost">Perdidos</option>
@@ -604,9 +660,10 @@ export function SuperAdminDashboard() {
             </button>
           </div>
         </div>
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-4">
           <p className="rounded-2xl bg-paper p-4 text-sm font-bold text-ink/65">Nuevos: {newLeads}</p>
           <p className="rounded-2xl bg-paper p-4 text-sm font-bold text-ink/65">Contactados: {contactedLeads}</p>
+          <p className="rounded-2xl bg-paper p-4 text-sm font-bold text-ink/65">Seguimiento: {followUpLeads}</p>
           <p className="rounded-2xl bg-paper p-4 text-sm font-bold text-ink/65">Ganados: {wonLeads}</p>
         </div>
         <div className="grid gap-3 lg:grid-cols-2">
@@ -617,7 +674,8 @@ export function SuperAdminDashboard() {
                 <p className="font-display text-xl font-extrabold text-teal">{lead.businessName ?? "Negocio"}</p>
                 <div className="flex flex-wrap gap-2">
                   {lead.priority ? <span className="rounded-full bg-gold/25 px-3 py-1 text-xs font-bold text-teal">{lead.priority}</span> : null}
-                  <span className="rounded-full bg-mint px-3 py-1 text-xs font-bold text-teal">{lead.status ?? "new"}</span>
+                  <span className="rounded-full bg-mint px-3 py-1 text-xs font-bold text-teal">{leadStatusLabels[lead.status ?? "new"] ?? "Nuevo"}</span>
+                  <span className="rounded-full bg-cream px-3 py-1 text-xs font-bold text-ink/55">{formatLeadAge(lead.createdAt)}</span>
                 </div>
               </div>
               <p className="mt-1 text-sm font-semibold text-ink/62">{lead.name} · {lead.phone}</p>
@@ -634,6 +692,7 @@ export function SuperAdminDashboard() {
                   </Link>
                 ) : null}
                 <button className="rounded-xl bg-mint px-3 py-2 text-xs font-bold text-teal" onClick={() => updateLeadStatus(lead.id, "contacted")} type="button">Contactado</button>
+                <button className="rounded-xl bg-cream px-3 py-2 text-xs font-bold text-teal ring-1 ring-ink/10" onClick={() => updateLeadStatus(lead.id, "follow_up")} type="button">Seguimiento</button>
                 <button className="rounded-xl bg-cream px-3 py-2 text-xs font-bold text-teal ring-1 ring-ink/10" onClick={() => updateLeadStatus(lead.id, "meeting_scheduled")} type="button">Reunion</button>
                 <button className="rounded-xl bg-cream px-3 py-2 text-xs font-bold text-teal ring-1 ring-ink/10" onClick={() => fillLeadAsBusinessDraft(lead)} type="button">Crear negocio</button>
                 <button className="rounded-xl bg-cream px-3 py-2 text-xs font-bold text-teal ring-1 ring-ink/10" onClick={() => updateLeadNote(lead)} type="button">Nota</button>
