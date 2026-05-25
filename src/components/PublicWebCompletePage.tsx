@@ -8,9 +8,11 @@ import type { PublicBusiness, PublicWebContent } from "@/types/tenant";
 type PublicWebCompletePageProps = {
   business: PublicBusiness;
   webContent: PublicWebContent;
-  bookingData: PublicBookingData;
-  canReserve: boolean;
+  bookingData?: PublicBookingData;
+  canReserve?: boolean;
   showBackLink?: boolean;
+  reservationHref?: string;
+  showBookingSection?: boolean;
 };
 
 function contactHref(phone?: string) {
@@ -18,7 +20,15 @@ function contactHref(phone?: string) {
   return `https://wa.me/${phone}`;
 }
 
-export function PublicWebCompletePage({ business, webContent, bookingData, canReserve, showBackLink = true }: PublicWebCompletePageProps) {
+export function PublicWebCompletePage({
+  business,
+  webContent,
+  bookingData,
+  canReserve = false,
+  showBackLink = true,
+  reservationHref = "#reservar",
+  showBookingSection = true
+}: PublicWebCompletePageProps) {
   const primary = business.colorPrimario || "#123D3A";
   const secondary = business.colorSecundario || "#E7B85A";
   const benefits = [
@@ -46,7 +56,7 @@ export function PublicWebCompletePage({ business, webContent, bookingData, canRe
             <Link className="hover:text-teal" href="#reservar">Reservar</Link>
             <Link className="hover:text-teal" href="#contacto">Contacto</Link>
           </nav>
-          <Link className="inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-3 text-sm font-extrabold text-white" href="#reservar" style={{ backgroundColor: primary }}>
+          <Link className="inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-3 text-sm font-extrabold text-white" href={reservationHref} style={{ backgroundColor: primary }}>
             Reservar
           </Link>
         </div>
@@ -66,7 +76,7 @@ export function PublicWebCompletePage({ business, webContent, bookingData, canRe
             <h1 className="mt-5 text-balance font-display text-4xl font-extrabold leading-tight sm:text-6xl" style={{ color: primary }}>{webContent.heroTitulo}</h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-ink/68">{webContent.heroSubtitulo}</p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-extrabold text-white" href="#reservar" style={{ backgroundColor: primary }}>
+              <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-extrabold text-white" href={reservationHref} style={{ backgroundColor: primary }}>
                 <CalendarCheck size={18} /> {webContent.ctaPrincipalTexto}
               </Link>
               {business.whatsapp ? (
@@ -98,7 +108,7 @@ export function PublicWebCompletePage({ business, webContent, bookingData, canRe
             <p className="mt-4 leading-8 text-ink/68">{webContent.sobreTexto}</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {bookingData.services.slice(0, 6).map((service) => (
+            {(bookingData?.services ?? []).slice(0, 6).map((service) => (
               <article className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={service.id}>
                 <p className="font-display text-xl font-extrabold" style={{ color: primary }}>{service.nombre}</p>
                 <p className="mt-2 text-sm font-bold text-ink/55">{service.duracionMin} min {typeof service.precio === "number" ? `- $ ${service.precio.toLocaleString("es-AR")}` : ""}</p>
@@ -123,6 +133,7 @@ export function PublicWebCompletePage({ business, webContent, bookingData, canRe
         </div>
       </section>
 
+      {showBookingSection && bookingData ? (
       <section className="px-4 py-10 sm:px-6" id="reservar">
         <div className="mx-auto max-w-6xl">
           <div className="mb-6 rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft">
@@ -132,6 +143,17 @@ export function PublicWebCompletePage({ business, webContent, bookingData, canRe
           <PublicBookingFlow bookingData={bookingData} business={business} canReserve={canReserve} />
         </div>
       </section>
+      ) : (
+      <section className="px-4 py-10 sm:px-6" id="reservar">
+        <div className="mx-auto max-w-6xl rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft sm:p-8">
+          <h2 className="font-display text-4xl font-extrabold" style={{ color: primary }}>{webContent.finalCtaTitulo}</h2>
+          <p className="mt-3 max-w-3xl leading-8 text-ink/68">{webContent.finalCtaTexto}</p>
+          <Link className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-extrabold text-white" href={reservationHref} style={{ backgroundColor: primary }}>
+            <CalendarCheck size={18} /> Ir a reservas
+          </Link>
+        </div>
+      </section>
+      )}
 
       <footer className="px-4 py-10 sm:px-6" id="contacto">
         <div className="mx-auto flex max-w-6xl flex-col gap-5 rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft md:flex-row md:items-center md:justify-between">

@@ -986,6 +986,41 @@ Validacion:
 - npm run test:smoke en localhost:3001: OK.
 - npm run build: OK.
 
+Web Completa con dominio propio y ruta /reservas
+
+Fecha: 2026-05-25
+
+Implementacion:
+- Se agrego la ruta dinamica `/reservas` para dominios propios.
+- En `tuagendaweb.com.ar/reservas` no se abre una agenda generica.
+- En un dominio de cliente, por ejemplo `exoticlenceria.com.ar/reservas`, la app resuelve el negocio por `customDomain`.
+- La home del dominio propio queda como web comercial editable.
+- Los botones de reserva de la home del dominio propio apuntan a `/reservas`.
+- La ruta `/reservas` usa el mismo `PublicBookingFlow`, la misma disponibilidad, los mismos horarios ocupados y las mismas reglas de reserva.
+
+Paso a paso para demo Web Completa con `exoticlenceria.com.ar`:
+1. En Vercel, proyecto `tuagendaweb`, agregar dominios `exoticlenceria.com.ar` y `www.exoticlenceria.com.ar`.
+2. En Cloudflare del dominio, crear/ajustar DNS:
+   - `A` para `@` apuntando a `76.76.21.21`.
+   - `CNAME` para `www` apuntando a `cname.vercel-dns.com`.
+3. Esperar que Vercel marque ambos dominios como validos.
+4. En Super Admin, crear o editar el negocio demo.
+5. Usar plan `Web Completa`.
+6. Usar slug recomendado `exotic-lenceria`.
+7. Cargar `customDomain` exactamente como `exoticlenceria.com.ar`, sin `https://` ni barra final.
+8. Activar el negocio.
+9. Crear/asignar usuario dueño con contraseña temporal.
+10. Entrar como dueño a `/login`, cambiar contraseña y editar datos, colores, servicios, personal, sucursales, horarios y secciones de Web Completa.
+
+URLs esperadas:
+- `https://exoticlenceria.com.ar`: web comercial completa del negocio.
+- `https://exoticlenceria.com.ar/reservas`: flujo de reserva del negocio.
+- `https://tuagendaweb.com.ar/exotic-lenceria`: acceso interno/fallback del negocio dentro de TuAgendaWeb.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+
 Tanda de 30 mejoras - reserva, panel cliente y Super Admin
 
 Fecha: 2026-05-24

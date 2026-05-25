@@ -58,7 +58,17 @@ export default async function Home() {
         })),
         getPublicWebContent(business.id)
       ]);
-      return <PublicWebCompletePage bookingData={bookingData} business={business} canReserve={canReserveBusiness(business)} showBackLink={false} webContent={webContent} />;
+      return (
+        <PublicWebCompletePage
+          bookingData={bookingData}
+          business={business}
+          canReserve={canReserveBusiness(business)}
+          reservationHref="/reservas"
+          showBackLink={false}
+          showBookingSection={false}
+          webContent={webContent}
+        />
+      );
     }
   }
 
