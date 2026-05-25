@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, LogIn, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
@@ -95,7 +95,10 @@ export function Header() {
           )}
         </nav>
 
-        <div className="hidden lg:block">
+        <div className="hidden items-center gap-2 lg:flex">
+          <Link className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-ink/10 bg-paper px-4 py-2 text-sm font-extrabold text-teal shadow-soft transition hover:border-action hover:text-action" href="/login">
+            <LogIn size={16} /> Acceso
+          </Link>
           <WhatsAppButton className="min-h-11 rounded-xl px-4 py-2 shadow-soft xl:min-h-12 xl:rounded-2xl xl:px-5 xl:py-3" href={createWhatsAppHref(whatsappMessages.heroAgenda)} label="WhatsApp" location="header" />
         </div>
 
@@ -134,6 +137,9 @@ export function Header() {
               ))}
             </div>
             <WhatsAppButton className="w-full" href={createWhatsAppHref(whatsappMessages.heroAgenda)} label="Consultar por WhatsApp" location="header" />
+            <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm font-extrabold text-teal" href="/login" onClick={() => setOpen(false)}>
+              <LogIn size={17} /> Acceso clientes
+            </Link>
           </nav>
         </div>
       ) : null}

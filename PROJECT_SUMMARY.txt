@@ -1045,3 +1045,55 @@ Validacion:
 - npm run build: OK.
 - npm run test:smoke en localhost:3001: OK.
 - Nota: se limpio `.next` y se rebuildio porque un primer smoke local levanto chunks viejos con MIME incorrecto.
+
+Tanda de mejoras grandes - login, reserva segura y reportes comerciales
+
+Fecha: 2026-05-25
+
+Alcance:
+- Se ajusto la landing solo en el header para agregar acceso al panel.
+- Se mejoraron login, reserva publica y panel cliente.
+- No se agregaron dependencias nuevas para reportes; se genera Excel multi-hoja con SpreadsheetML.
+
+Mejoras aplicadas:
+1. Header desktop agrega boton "Acceso" a /login.
+2. Header mobile agrega "Acceso clientes".
+3. Login ahora incluye bloque vendedor para personas sin cuenta.
+4. Login explica Agenda Full y Web Completa como salida comercial.
+5. Login incluye CTA a WhatsApp para pedir acceso o consultar.
+6. La pagina de reserva muestra logo del negocio si existe.
+7. La pagina de reserva muestra iniciales si no hay logo.
+8. Tras confirmar un turno, el formulario queda bloqueado para evitar doble reserva accidental.
+9. Tras confirmar, se muestra una tarjeta clara de turno confirmado.
+10. Para sacar otro turno se requiere tocar "Reservar otro turno".
+11. El flujo reinicia servicio, profesional, sucursal, dia y horario al reservar otro turno.
+12. Se mantiene copiar detalle del turno confirmado.
+13. Se mantiene contacto al negocio por WhatsApp tras confirmar.
+14. Panel cliente agrega reporte profesional por rango de fechas.
+15. El reporte se descarga como archivo Excel `.xls`.
+16. El archivo contiene hoja "Resumen".
+17. El archivo contiene hoja "Turnos".
+18. El archivo contiene hoja "Servicios ganadores".
+19. El archivo contiene hoja "Personal ganador".
+20. El archivo contiene hoja "Sucursales ganadoras".
+21. El archivo contiene hoja "Clientes".
+22. El archivo contiene hoja "Turnos por dia".
+23. El resumen incluye facturacion estimada.
+24. El resumen incluye ticket promedio.
+25. El resumen incluye cancelados, atendidos y ausentes.
+26. Rankings incluyen cantidad de turnos y facturacion.
+27. Clientes incluye telefono, cantidad de turnos, facturacion y ultimo turno.
+28. No se agrego `xlsx` porque tenia vulnerabilidades sin fix.
+29. No se dejo `exceljs` porque agregaba dependencias deprecadas innecesarias.
+30. Configuracion del panel muestra bloque "Estado de configuracion".
+31. Los guardados de configuracion muestran "Valido" si salieron bien.
+32. Los errores de configuracion muestran "Invalido" si fallan.
+33. Cambiar datos publicos confirma guardado correctamente.
+34. Subir logo avisa que ya se puede ver en la agenda publica.
+35. Agregar servicios, personal, sucursales y horarios muestra feedback claro.
+36. Editar servicios muestra feedback de exito o error.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+- npm run test:smoke en localhost:3001: OK.

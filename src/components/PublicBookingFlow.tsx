@@ -267,11 +267,30 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
     setMessage("Datos guardados borrados.");
   }
 
+  function resetReservationFlow() {
+    setConfirmed(null);
+    setMessage("");
+    setError("");
+    setServiceId(firstService);
+    setPersonalId("");
+    setSucursalId("");
+    setDate(firstDate);
+    setTime("");
+    setTimes([]);
+  }
+
   return (
     <div className="grid gap-6">
       <section className="rounded-[2rem] border border-ink/10 bg-paper p-5 shadow-soft sm:p-8">
-        <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-action">{business.nombre}</p>
-        <h1 className="mt-3 font-display text-4xl font-extrabold text-teal">Reservá tu turno</h1>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-3xl bg-cream text-xl font-extrabold text-teal ring-1 ring-ink/10">
+            {business.logoUrl ? <img alt={`Logo de ${business.nombre}`} className="h-full w-full object-contain p-2" src={business.logoUrl} /> : business.initials ?? business.nombre.slice(0, 2).toUpperCase()}
+          </div>
+          <div>
+            <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-action">{business.nombre}</p>
+            <h1 className="mt-2 font-display text-4xl font-extrabold text-teal">Reservá tu turno</h1>
+          </div>
+        </div>
         <p className="mt-3 max-w-2xl leading-7 text-ink/65">Elegí servicio, profesional o sucursal si corresponde, día y horario. Después confirmás con tu nombre y WhatsApp.</p>
 
         <div className="mt-6 rounded-2xl bg-cream p-4">
@@ -297,6 +316,27 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
           </div>
         ) : null}
 
+        {confirmed ? (
+          <div className="mt-8 rounded-[1.5rem] border border-teal/20 bg-mint p-5 text-teal">
+            <CheckCircle2 size={30} />
+            <h2 className="mt-3 font-display text-3xl font-extrabold">Tu turno quedó confirmado</h2>
+            <p className="mt-2 font-bold">{confirmed.servicioNombre} · {friendlyDate(confirmed.fecha)} · {confirmed.hora}</p>
+            <p className="mt-2 text-sm font-semibold text-teal/75">Para evitar reservas duplicadas, el formulario quedó bloqueado. Si querés sacar otro turno, tocá el botón de abajo.</p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button className="inline-flex items-center gap-2 rounded-full bg-paper px-4 py-2 text-xs font-extrabold text-teal" onClick={copyConfirmedReservation} type="button">
+                <Copy size={14} /> Copiar detalle
+              </button>
+              {businessWhatsappHref ? (
+                <a className="inline-flex items-center gap-2 rounded-full bg-teal px-4 py-2 text-xs font-extrabold text-cream" href={businessWhatsappHref} rel="noopener noreferrer" target="_blank">
+                  <MessageCircle size={14} /> Escribir al negocio
+                </a>
+              ) : null}
+              <button className="inline-flex items-center gap-2 rounded-full bg-action px-4 py-2 text-xs font-extrabold text-white" onClick={resetReservationFlow} type="button">
+                Reservar otro turno
+              </button>
+            </div>
+          </div>
+        ) : (
         <form className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]" onSubmit={submitBooking}>
           <div className="grid gap-7">
             <div>
@@ -444,26 +484,11 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
             {!customerReady ? <p className="mt-3 text-xs font-bold text-cream/65">Completá nombre y WhatsApp para habilitar la confirmación.</p> : null}
           </aside>
         </form>
+        )}
 
         <div className="mt-6" aria-live="polite">
           {error ? <p className="inline-flex items-center gap-2 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700"><AlertCircle size={18} /> {error}</p> : null}
           {message ? <p className="inline-flex items-center gap-2 rounded-2xl bg-mint p-4 text-sm font-bold text-teal"><CheckCircle2 size={18} /> {message}</p> : null}
-          {confirmed ? (
-            <div className="mt-4 rounded-2xl border border-teal/20 bg-mint p-4 text-sm text-teal">
-              <p className="font-extrabold">Turno confirmado para {confirmed.clienteNombre}</p>
-              <p className="mt-1">{confirmed.servicioNombre} · {friendlyDate(confirmed.fecha)} · {confirmed.hora}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button className="inline-flex items-center gap-2 rounded-full bg-paper px-4 py-2 text-xs font-extrabold text-teal" onClick={copyConfirmedReservation} type="button">
-                  <Copy size={14} /> Copiar detalle
-                </button>
-                {businessWhatsappHref ? (
-                  <a className="inline-flex items-center gap-2 rounded-full bg-teal px-4 py-2 text-xs font-extrabold text-cream" href={businessWhatsappHref} rel="noopener noreferrer" target="_blank">
-                    <MessageCircle size={14} /> Escribir al negocio
-                  </a>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
         </div>
       </section>
 
@@ -498,3 +523,4 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
     </div>
   );
 }
+

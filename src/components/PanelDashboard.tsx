@@ -230,6 +230,51 @@ function groupReservationsByDate(reservations: ReservationItem[], limit = 7) {
     .map(([name, count]) => ({ name, count }));
 }
 
+function groupReport(reservations: ReservationItem[], key: keyof ReservationItem) {
+  const grouped = new Map<string, { count: number; revenue: number }>();
+  reservations.forEach((reservation) => {
+    const raw = reservation[key];
+    const name = typeof raw === "string" && raw.trim() ? raw : "Sin datos";
+    const current = grouped.get(name) ?? { count: 0, revenue: 0 };
+    current.count += 1;
+    current.revenue += typeof reservation.precio === "number" ? reservation.precio : 0;
+    grouped.set(name, current);
+  });
+  return Array.from(grouped.entries())
+    .map(([name, data]) => ({ name, ...data }))
+    .sort((a, b) => b.count - a.count || b.revenue - a.revenue);
+}
+
+function uniqueClientReport(reservations: ReservationItem[]) {
+  const clients = new Map<string, { name: string; phone: string; count: number; revenue: number; lastDate: string }>();
+  reservations.forEach((reservation) => {
+    const phone = normalizePhone(reservation.telefono ?? "") || "sin-telefono";
+    const current = clients.get(phone) ?? { name: reservation.clienteNombre ?? "Cliente", phone, count: 0, revenue: 0, lastDate: "" };
+    current.count += 1;
+    current.revenue += typeof reservation.precio === "number" ? reservation.precio : 0;
+    current.lastDate = [current.lastDate, reservation.fecha ?? ""].sort().at(-1) ?? current.lastDate;
+    clients.set(phone, current);
+  });
+  return Array.from(clients.values()).sort((a, b) => b.count - a.count);
+}
+
+function xmlCell(value: string | number) {
+  const isNumber = typeof value === "number" && Number.isFinite(value);
+  const text = String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+  return `<Cell><Data ss:Type="${isNumber ? "Number" : "String"}">${text}</Data></Cell>`;
+}
+
+function xmlSheet(name: string, headers: string[], rows: Array<Array<string | number>>) {
+  const safeName = name.replace(/[\\/?*[\]:]/g, " ").slice(0, 31);
+  const headerRow = `<Row ss:StyleID="Header">${headers.map(xmlCell).join("")}</Row>`;
+  const bodyRows = rows.map((row) => `<Row>${row.map(xmlCell).join("")}</Row>`).join("");
+  return `<Worksheet ss:Name="${safeName}"><Table>${headerRow}${bodyRows}</Table></Worksheet>`;
+}
+
 function readSchedule(data: Record<string, unknown> | undefined): ScheduleConfig {
   if (!data) return defaultSchedule;
   const rawDays = data.horariosPorDia && typeof data.horariosPorDia === "object" ? data.horariosPorDia as Record<string, unknown> : null;
@@ -317,6 +362,8 @@ export function PanelDashboard() {
   const [dashboardRange, setDashboardRange] = useState<"today" | "7d" | "30d" | "all">("30d");
   const [turnSearch, setTurnSearch] = useState("");
   const [turnStatusFilter, setTurnStatusFilter] = useState<"today" | "upcoming" | "all" | "cancelled" | "done">("upcoming");
+  const [reportStart, setReportStart] = useState("");
+  const [reportEnd, setReportEnd] = useState("");
 
   useEffect(() => {
     if (!isFirebaseClientConfigured() || !auth || !db) {
@@ -487,6 +534,16 @@ export function PanelDashboard() {
   ];
   const setupProgress = Math.round((setupChecklist.filter((item) => item.done).length / setupChecklist.length) * 100);
 
+  function showSuccess(text: string) {
+    setError("");
+    setMessage(text);
+  }
+
+  function showError(text: string) {
+    setMessage("");
+    setError(text);
+  }
+
   async function copyPublicLink() {
     try {
       await navigator.clipboard?.writeText(publicLink);
@@ -544,9 +601,9 @@ export function PanelDashboard() {
         ownerTelefono: normalizePhone(String(formData.get("ownerTelefono") ?? "")),
         updatedAt: serverTimestamp()
       });
-      setMessage("Datos públicos actualizados.");
+      showSuccess("Datos públicos actualizados correctamente.");
     } catch {
-      setError("No se pudieron guardar los datos del negocio.");
+      showError("No se pudieron guardar los datos del negocio.");
     } finally {
       setSaving("");
     }
@@ -576,6 +633,87 @@ export function PanelDashboard() {
     URL.revokeObjectURL(url);
   }
 
+  function exportBusinessReportXlsx() {
+    const start = reportStart || "0000-01-01";
+    const end = reportEnd || "9999-12-31";
+    const reportReservations = reservations
+      .filter((reservation) => {
+        const date = reservation.fecha ?? "";
+        return date >= start && date <= end;
+      })
+      .sort((a, b) => reservationDateTimeValue(a) - reservationDateTimeValue(b));
+    const activeReportReservations = reportReservations.filter((reservation) => reservation.estado !== "cancelada");
+    const cancelledReportReservations = reportReservations.filter((reservation) => reservation.estado === "cancelada");
+    const revenue = activeReportReservations.reduce((total, reservation) => total + (typeof reservation.precio === "number" ? reservation.precio : 0), 0);
+
+    setSaving("report");
+    setError("");
+    try {
+      const sheets = [
+        xmlSheet(
+          "Resumen",
+          ["Metrica", "Valor"],
+        [
+          ["Negocio", business?.nombre ?? "Negocio"],
+          ["Periodo desde", reportStart || "Sin limite"],
+          ["Periodo hasta", reportEnd || "Sin limite"],
+          ["Turnos totales", reportReservations.length],
+          ["Turnos activos", activeReportReservations.length],
+          ["Cancelados", cancelledReportReservations.length],
+          ["Atendidos", activeReportReservations.filter((reservation) => reservation.estado === "atendida").length],
+          ["Ausentes", activeReportReservations.filter((reservation) => reservation.estado === "ausente").length],
+          ["Facturacion estimada", revenue],
+          ["Ticket promedio", activeReportReservations.length ? Math.round(revenue / activeReportReservations.length) : 0],
+          ["Clientes unicos", uniqueClientReport(activeReportReservations).length]
+        ]
+        ),
+        xmlSheet(
+          "Turnos",
+          ["Fecha", "Hora", "Cliente", "Telefono", "Servicio", "Profesional", "Sucursal", "Estado", "Precio"],
+          reportReservations.map((reservation) => [
+            reservation.fecha ?? "",
+            reservation.hora ?? "",
+            reservation.clienteNombre ?? "",
+            reservation.telefono ?? "",
+            reservation.servicioNombre ?? "",
+            reservation.personalNombre ?? "",
+            reservation.sucursalNombre ?? "",
+            reservationStatusLabels[reservation.estado ?? "confirmada"] ?? "Confirmado",
+            reservation.precio ?? 0
+          ])
+        ),
+        xmlSheet("Servicios ganadores", ["Nombre", "Turnos", "Facturacion"], groupReport(activeReportReservations, "servicioNombre").map((item) => [item.name, item.count, item.revenue])),
+        xmlSheet("Personal ganador", ["Nombre", "Turnos", "Facturacion"], groupReport(activeReportReservations, "personalNombre").map((item) => [item.name, item.count, item.revenue])),
+        xmlSheet("Sucursales ganadoras", ["Nombre", "Turnos", "Facturacion"], groupReport(activeReportReservations, "sucursalNombre").map((item) => [item.name, item.count, item.revenue])),
+        xmlSheet("Clientes", ["Cliente", "Telefono", "Turnos", "Facturacion", "Ultimo turno"], uniqueClientReport(activeReportReservations).map((item) => [item.name, item.phone, item.count, item.revenue, item.lastDate])),
+        xmlSheet("Turnos por dia", ["Fecha", "Turnos"], groupReservationsByDate(activeReportReservations, 999).map((item) => [item.name, item.count]))
+      ];
+      const workbook = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Header"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#123D3A" ss:Pattern="Solid"/></Style>
+ </Styles>
+ ${sheets.join("")}
+</Workbook>`;
+      const blob = new Blob([workbook], { type: "application/vnd.ms-excel;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${business?.slug ?? "tuagendaweb"}-reporte-${reportStart || "inicio"}-${reportEnd || dateKeyInArgentina()}.xls`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showSuccess("Reporte Excel generado correctamente.");
+    } catch {
+      showError("No se pudo generar el reporte Excel.");
+    } finally {
+      setSaving("");
+    }
+  }
+
   async function cancelReservationFromPanel(reservation: ReservationItem) {
     if (!canEdit) return;
     const confirmed = window.confirm(`¿Cancelar el turno de ${reservation.clienteNombre ?? "este cliente"}?`);
@@ -589,9 +727,9 @@ export function PanelDashboard() {
         updatedAt: serverTimestamp()
       });
       await Promise.all((reservation.horarioOcupadoIds ?? []).map((occupiedId) => deleteDoc(doc(activeDb, "negocios", businessId, "horariosOcupados", occupiedId))));
-      setMessage("Turno cancelado y horario liberado.");
+      showSuccess("Turno cancelado y horario liberado.");
     } catch {
-      setError("No se pudo cancelar el turno desde el panel.");
+      showError("No se pudo cancelar el turno desde el panel.");
     } finally {
       setSaving("");
     }
@@ -606,9 +744,9 @@ export function PanelDashboard() {
         estado,
         updatedAt: serverTimestamp()
       });
-      setMessage(`Turno actualizado a ${estado}.`);
+      showSuccess(`Turno actualizado a ${estado}.`);
     } catch {
-      setError("No se pudo actualizar el estado del turno.");
+      showError("No se pudo actualizar el estado del turno.");
     } finally {
       setSaving("");
     }
@@ -634,9 +772,9 @@ export function PanelDashboard() {
         logoUrl,
         updatedAt: serverTimestamp()
       });
-      setMessage("Logo cargado correctamente.");
+      showSuccess("Logo cargado correctamente. Ya se puede ver en la agenda pública.");
     } catch {
-      setError("No se pudo cargar el logo.");
+      showError("No se pudo cargar el logo.");
     } finally {
       setSaving("");
       event.target.value = "";
@@ -670,9 +808,9 @@ export function PanelDashboard() {
         updatedAt: serverTimestamp()
       });
       form.reset();
-      setMessage("Servicio agregado.");
+      showSuccess("Servicio agregado correctamente.");
     } catch {
-      setError("No se pudo agregar el servicio.");
+      showError("No se pudo agregar el servicio.");
     } finally {
       setSaving("");
     }
@@ -680,7 +818,15 @@ export function PanelDashboard() {
 
   async function updateService(service: ServiceItem, patch: Partial<ServiceItem>) {
     if (!canEdit) return;
-    await updateDoc(doc(activeDb, "negocios", businessId, "servicios", service.id), { ...patch, updatedAt: serverTimestamp() });
+    setSaving(`service-${service.id}`);
+    try {
+      await updateDoc(doc(activeDb, "negocios", businessId, "servicios", service.id), { ...patch, updatedAt: serverTimestamp() });
+      showSuccess("Servicio actualizado correctamente.");
+    } catch {
+      showError("No se pudo actualizar el servicio.");
+    } finally {
+      setSaving("");
+    }
   }
 
   async function toggleServiceRelation(service: ServiceItem, field: "personalIds" | "sucursalIds", value: string) {
@@ -699,15 +845,23 @@ export function PanelDashboard() {
     const nombre = String(formData.get("nombre") ?? "").trim();
     if (nombre.length < 2) return;
 
-    await addDoc(collection(activeDb, "negocios", businessId, "personal"), {
-      nombre,
-      especialidad: String(formData.get("especialidad") ?? "").trim(),
-      activo: true,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    form.reset();
-    setMessage("Persona agregada.");
+    setSaving("staff");
+    setError("");
+    try {
+      await addDoc(collection(activeDb, "negocios", businessId, "personal"), {
+        nombre,
+        especialidad: String(formData.get("especialidad") ?? "").trim(),
+        activo: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      form.reset();
+      showSuccess("Persona agregada correctamente.");
+    } catch {
+      showError("No se pudo agregar la persona.");
+    } finally {
+      setSaving("");
+    }
   }
 
   async function handleBranch(event: FormEvent<HTMLFormElement>) {
@@ -719,15 +873,23 @@ export function PanelDashboard() {
     const nombre = String(formData.get("nombre") ?? "").trim();
     if (nombre.length < 2) return;
 
-    await addDoc(collection(activeDb, "negocios", businessId, "sucursales"), {
-      nombre,
-      direccion: String(formData.get("direccion") ?? "").trim(),
-      activo: true,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    form.reset();
-    setMessage("Sucursal agregada.");
+    setSaving("branch");
+    setError("");
+    try {
+      await addDoc(collection(activeDb, "negocios", businessId, "sucursales"), {
+        nombre,
+        direccion: String(formData.get("direccion") ?? "").trim(),
+        activo: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      form.reset();
+      showSuccess("Sucursal agregada correctamente.");
+    } catch {
+      showError("No se pudo agregar la sucursal.");
+    } finally {
+      setSaving("");
+    }
   }
 
   async function saveBasicSchedule(event: FormEvent<HTMLFormElement>) {
@@ -761,9 +923,9 @@ export function PanelDashboard() {
         },
         { merge: true }
       );
-      setMessage("Horarios guardados correctamente.");
+      showSuccess("Horarios guardados correctamente.");
     } catch {
-      setError("No se pudieron guardar los horarios.");
+      showError("No se pudieron guardar los horarios.");
     } finally {
       setSaving("");
     }
@@ -974,6 +1136,24 @@ export function PanelDashboard() {
           </section>
 
           <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <h2 className="font-display text-2xl font-extrabold text-teal">Reporte profesional</h2>
+                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-ink/60">
+                  Exporta un Excel con resumen economico, turnos, servicios ganadores, personal, sucursales, clientes y turnos por dia.
+                </p>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-[150px_150px_auto]">
+                <input aria-label="Desde" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold outline-none focus:border-action" onChange={(event) => setReportStart(event.target.value)} type="date" value={reportStart} />
+                <input aria-label="Hasta" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold outline-none focus:border-action" onChange={(event) => setReportEnd(event.target.value)} type="date" value={reportEnd} />
+                <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-4 py-3 text-sm font-bold text-cream disabled:opacity-60" disabled={saving === "report"} onClick={exportBusinessReportXlsx} type="button">
+                  <Download size={16} /> {saving === "report" ? "Generando..." : "Exportar reporte"}
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
             <h2 className="font-display text-2xl font-extrabold text-teal">Proximos turnos</h2>
             <div className="mt-5 grid gap-3">
               {upcomingReservations.slice(0, 5).map((reservation) => (
@@ -1073,6 +1253,15 @@ export function PanelDashboard() {
 
       {activeTab === "configuracion" ? (
       <>
+      <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+        <h2 className="font-display text-2xl font-extrabold text-teal">Estado de configuracion</h2>
+        <p className="mt-2 text-sm font-semibold text-ink/60">Cada cambio importante del panel confirma si se guardo correctamente o si necesita revision.</p>
+        <div className="mt-4" aria-live="polite">
+          {saving ? <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Guardando cambios...</p> : null}
+          {message ? <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">Valido: {message}</p> : null}
+          {error ? <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">Invalido: {error}</p> : null}
+        </div>
+      </section>
       <form className="grid gap-5 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-2" onSubmit={handleBusinessSettings}>
         <div className="lg:col-span-2">
           <h2 className="font-display text-2xl font-extrabold text-teal">Datos públicos del negocio</h2>
