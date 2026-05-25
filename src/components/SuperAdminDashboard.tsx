@@ -24,6 +24,7 @@ type AdminBusiness = {
   ownerTelefono?: string;
   ownerEmail?: string;
   whatsapp?: string;
+  customDomain?: string;
   monthlyPrice?: number;
   signupDate?: string;
   billingStartDate?: string;
@@ -170,6 +171,7 @@ function toBusiness(id: string, data: Record<string, unknown>): AdminBusiness {
     ownerTelefono: data.ownerTelefono ? String(data.ownerTelefono) : undefined,
     ownerEmail: data.ownerEmail ? String(data.ownerEmail) : undefined,
     whatsapp: data.whatsapp ? String(data.whatsapp) : undefined,
+    customDomain: data.customDomain ? String(data.customDomain) : undefined,
     monthlyPrice: typeof data.monthlyPrice === "number" ? data.monthlyPrice : undefined,
     signupDate: data.signupDate ? String(data.signupDate) : undefined,
     billingStartDate: data.billingStartDate ? String(data.billingStartDate) : undefined,
@@ -285,7 +287,8 @@ export function SuperAdminDashboard() {
           ownerTelefono: String(formData.get("ownerTelefono") ?? "").trim(),
           whatsapp: String(formData.get("whatsapp") ?? "").trim(),
           instagram: String(formData.get("instagram") ?? "").trim(),
-          logoUrl: String(formData.get("logoUrl") ?? "").trim()
+          logoUrl: String(formData.get("logoUrl") ?? "").trim(),
+          customDomain: String(formData.get("customDomain") ?? "").trim()
         })
       });
 
@@ -295,6 +298,8 @@ export function SuperAdminDashboard() {
           firebase_admin_not_configured: "Faltan variables FIREBASE_ADMIN_* en Vercel o el deploy no las tomó.",
           slug_already_exists: "Ese slug ya existe en un negocio activo. Archivá o cancelá el anterior para liberarlo.",
           invalid_owner_credentials: "Revisá email y contraseña inicial del dueño.",
+          invalid_custom_domain: "Revisá el dominio propio. Cargalo sin https://, por ejemplo exoticlenceria.com.ar.",
+          custom_domain_already_exists: "Ese dominio propio ya está asignado a otro negocio activo.",
           forbidden: "Tu usuario no tiene permiso de superadmin.",
           owner_lookup_failed: "No se pudo revisar o crear el usuario dueño en Firebase Auth."
         };
@@ -444,11 +449,13 @@ export function SuperAdminDashboard() {
   }
 
   function exportBusinessesCsv() {
-    const headers = ["negocio", "slug", "link", "plan", "estado", "dueno", "email", "telefono", "whatsapp", "mensual"];
+    const headers = ["negocio", "slug", "link", "dominio_propio", "reservas_dominio", "plan", "estado", "dueno", "email", "telefono", "whatsapp", "mensual"];
     const rows = filteredBusinesses.map((business) => [
       business.nombre,
       business.slug,
       `${siteUrl}/${business.slug}`,
+      business.customDomain ?? "",
+      business.customDomain ? `https://${business.customDomain}/reservas` : "",
       planLabels[business.plan],
       statusLabels[business.estado],
       business.ownerNombre ?? "",
@@ -658,6 +665,11 @@ export function SuperAdminDashboard() {
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="logoUrl" placeholder="Opcional" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Dominio propio
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="customDomain" placeholder="exoticlenceria.com.ar" />
+          <span className="text-xs font-semibold text-ink/50">Solo para Web Completa. Sin https:// ni barra final.</span>
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
           Fecha de alta
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={dateKeyInArgentina()} name="signupDate" type="date" />
         </label>
@@ -714,6 +726,11 @@ export function SuperAdminDashboard() {
                 <span className="rounded-full bg-cream px-3 py-1 text-xs font-bold text-ink/60">{formatCurrency(business.monthlyPrice)}</span>
               </div>
               <p className="mt-2 text-sm font-semibold text-ink/62">{business.rubro ?? "Sin rubro"} · {business.ownerNombre ?? "Sin dueño asignado"}</p>
+              {business.customDomain ? (
+                <Link className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-teal" href={`https://${business.customDomain}`} rel="noopener noreferrer" target="_blank">
+                  Dominio propio: {business.customDomain} <ExternalLink size={16} />
+                </Link>
+              ) : null}
               <div className="mt-3 grid gap-2 text-sm font-bold text-ink/62 sm:grid-cols-2 xl:grid-cols-4">
                 <label className="grid gap-1">
                   Alta

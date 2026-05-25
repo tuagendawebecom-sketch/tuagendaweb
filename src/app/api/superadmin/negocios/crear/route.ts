@@ -11,6 +11,21 @@ function clean(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function normalizeCustomDomain(value: unknown) {
+  const raw = clean(value).toLowerCase();
+  if (!raw) return "";
+  return raw
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/.*$/, "")
+    .trim();
+}
+
+function isValidCustomDomain(value: string) {
+  if (!value) return true;
+  return /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(value);
+}
+
 function initialsFromName(name: string) {
   return name
     .split(/\s+/)
@@ -91,6 +106,7 @@ export async function POST(request: Request) {
   const updateExistingPassword = body?.updateExistingPassword === true;
   const signupDate = isDateKey(clean(body?.signupDate)) ? clean(body?.signupDate) : todayKey();
   const nextPaymentDue = isDateKey(clean(body?.nextPaymentDue)) ? clean(body?.nextPaymentDue) : addMonths(signupDate, 1);
+  const customDomain = normalizeCustomDomain(body?.customDomain);
 
   if (!nombre || !isValidSlug(slug)) {
     return NextResponse.json({ ok: false, error: "invalid_business" }, { status: 400 });
@@ -102,6 +118,10 @@ export async function POST(request: Request) {
 
   if (!ownerEmail || initialPassword.length < 6) {
     return NextResponse.json({ ok: false, error: "invalid_owner_credentials" }, { status: 400 });
+  }
+
+  if (!isValidCustomDomain(customDomain)) {
+    return NextResponse.json({ ok: false, error: "invalid_custom_domain" }, { status: 400 });
   }
 
   const duplicateSnapshot = await admin.db.collection("negocios").where("slug", "==", slug).limit(1).get();
@@ -121,6 +141,14 @@ export async function POST(request: Request) {
       estado: "cancelled",
       updatedAt: FieldValue.serverTimestamp()
     });
+  }
+
+  if (customDomain) {
+    const domainSnapshot = await admin.db.collection("negocios").where("customDomain", "==", customDomain).limit(1).get();
+    const domainOwner = domainSnapshot.docs[0];
+    if (domainOwner && domainOwner.data().archived !== true && domainOwner.data().estado !== "cancelled") {
+      return NextResponse.json({ ok: false, error: "custom_domain_already_exists" }, { status: 409 });
+    }
   }
 
   let owner;
@@ -159,6 +187,7 @@ export async function POST(request: Request) {
     whatsapp: normalizePhone(clean(body?.whatsapp)),
     instagram: clean(body?.instagram),
     logoUrl: clean(body?.logoUrl),
+    customDomain,
     initials: initialsFromName(nombre),
     colorPrimario: "#123D3A",
     colorSecundario: "#E7B85A",

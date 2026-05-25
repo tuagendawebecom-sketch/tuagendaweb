@@ -893,6 +893,31 @@ Mejoras aplicadas:
 Validacion:
 - npm run lint: OK.
 - npm run build: OK.
+
+Ajuste Super Admin - dominio propio en alta de negocio
+
+Fecha: 2026-05-25
+
+Problema:
+- El sistema ya soportaba `customDomain`, pero el formulario de alta en Super Admin no exponia el campo.
+- La API de creacion tampoco guardaba el dominio propio recibido.
+
+Correccion:
+- Se agrego el campo "Dominio propio" al formulario de crear negocio.
+- Se envia `customDomain` al endpoint `/api/superadmin/negocios/crear`.
+- La API normaliza dominios quitando `https://`, `www.` y rutas finales.
+- La API valida formato de dominio.
+- La API evita asignar el mismo dominio propio a dos negocios activos.
+- La lista de negocios muestra el dominio propio cuando existe.
+- El CSV de negocios incluye dominio propio y URL de reservas por dominio.
+
+Uso:
+- Para Web Completa, cargar dominio como `exoticlenceria.com.ar`.
+- No cargar `https://`, `www.` ni `/reservas`.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
 - npm run test:smoke en localhost:3001: OK, 8 rutas x 2 viewports.
 
 Nota operativa:
