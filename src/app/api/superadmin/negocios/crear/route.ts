@@ -27,6 +27,25 @@ function planPrice(plan: BusinessPlan) {
   return 0;
 }
 
+function todayKey() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Argentina/Buenos_Aires",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date());
+}
+
+function isDateKey(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function addMonths(dateKey: string, months: number) {
+  const date = new Date(`${dateKey}T12:00:00.000Z`);
+  date.setUTCMonth(date.getUTCMonth() + months);
+  return date.toISOString().slice(0, 10);
+}
+
 const defaultScheduleConfig = {
   intervaloMin: 30,
   diasReservaMax: 21,
@@ -70,6 +89,8 @@ export async function POST(request: Request) {
   const ownerEmail = clean(body?.ownerEmail).toLowerCase();
   const initialPassword = clean(body?.initialPassword);
   const updateExistingPassword = body?.updateExistingPassword === true;
+  const signupDate = isDateKey(clean(body?.signupDate)) ? clean(body?.signupDate) : todayKey();
+  const nextPaymentDue = isDateKey(clean(body?.nextPaymentDue)) ? clean(body?.nextPaymentDue) : addMonths(signupDate, 1);
 
   if (!nombre || !isValidSlug(slug)) {
     return NextResponse.json({ ok: false, error: "invalid_business" }, { status: 400 });
@@ -142,6 +163,10 @@ export async function POST(request: Request) {
     colorPrimario: "#123D3A",
     colorSecundario: "#E7B85A",
     monthlyPrice: planPrice(plan),
+    signupDate,
+    billingStartDate: signupDate,
+    nextPaymentDue,
+    lastPaymentAt: null,
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp()
   });

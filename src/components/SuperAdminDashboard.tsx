@@ -25,6 +25,11 @@ type AdminBusiness = {
   ownerEmail?: string;
   whatsapp?: string;
   monthlyPrice?: number;
+  signupDate?: string;
+  billingStartDate?: string;
+  nextPaymentDue?: string;
+  lastPaymentAt?: { toDate?: () => Date } | string | null;
+  createdAt?: { toDate?: () => Date };
   archived?: boolean;
 };
 
@@ -90,6 +95,45 @@ function formatCurrency(value?: number) {
   }).format(value);
 }
 
+function dateKeyInArgentina(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone: "America/Argentina/Buenos_Aires",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value ?? "1970";
+  const month = parts.find((part) => part.type === "month")?.value ?? "01";
+  const day = parts.find((part) => part.type === "day")?.value ?? "01";
+  return `${year}-${month}-${day}`;
+}
+
+function addMonths(dateKey: string, months: number) {
+  const date = new Date(`${dateKey}T12:00:00.000Z`);
+  date.setUTCMonth(date.getUTCMonth() + months);
+  return date.toISOString().slice(0, 10);
+}
+
+function formatDateKey(value?: string) {
+  if (!value) return "Sin fecha";
+  const date = new Date(`${value}T12:00:00.000Z`);
+  return new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+}
+
+function daysUntil(value?: string) {
+  if (!value) return null;
+  const today = new Date(`${dateKeyInArgentina()}T12:00:00.000Z`).getTime();
+  const target = new Date(`${value}T12:00:00.000Z`).getTime();
+  return Math.round((target - today) / 86_400_000);
+}
+
+function paymentBadgeClass(days: number | null) {
+  if (days === null) return "bg-cream text-ink/60";
+  if (days < 0) return "bg-red-50 text-red-700";
+  if (days <= 5) return "bg-gold/30 text-teal";
+  return "bg-mint text-teal";
+}
+
 function formatLeadDate(value?: Lead["createdAt"]) {
   const date = value?.toDate?.();
   if (!date) return "";
@@ -102,6 +146,14 @@ function formatLeadAge(value?: Lead["createdAt"]) {
   const diffHours = Math.max(0, Math.round((Date.now() - date.getTime()) / 36e5));
   if (diffHours < 24) return `Hace ${diffHours || 1} h`;
   return `Hace ${Math.round(diffHours / 24)} d`;
+}
+
+function formatLastPayment(value: AdminBusiness["lastPaymentAt"]) {
+  if (!value) return "Sin pagos registrados";
+  if (typeof value === "string") return formatDateKey(value);
+  const date = value.toDate?.();
+  if (!date) return "Sin pagos registrados";
+  return new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle: "short" }).format(date);
 }
 
 function toBusiness(id: string, data: Record<string, unknown>): AdminBusiness {
@@ -119,6 +171,11 @@ function toBusiness(id: string, data: Record<string, unknown>): AdminBusiness {
     ownerEmail: data.ownerEmail ? String(data.ownerEmail) : undefined,
     whatsapp: data.whatsapp ? String(data.whatsapp) : undefined,
     monthlyPrice: typeof data.monthlyPrice === "number" ? data.monthlyPrice : undefined,
+    signupDate: data.signupDate ? String(data.signupDate) : undefined,
+    billingStartDate: data.billingStartDate ? String(data.billingStartDate) : undefined,
+    nextPaymentDue: data.nextPaymentDue ? String(data.nextPaymentDue) : undefined,
+    lastPaymentAt: data.lastPaymentAt as AdminBusiness["lastPaymentAt"],
+    createdAt: data.createdAt as AdminBusiness["createdAt"],
     archived: data.archived === true
   };
 }
@@ -218,6 +275,8 @@ export function SuperAdminDashboard() {
           nombre,
           slug,
           plan: String(formData.get("plan") ?? "agenda_simple"),
+          signupDate: String(formData.get("signupDate") ?? ""),
+          nextPaymentDue: String(formData.get("nextPaymentDue") ?? ""),
           rubro: String(formData.get("rubro") ?? "").trim(),
           ownerNombre: String(formData.get("ownerNombre") ?? "").trim(),
           ownerEmail,
@@ -349,6 +408,41 @@ export function SuperAdminDashboard() {
     URL.revokeObjectURL(url);
   }
 
+  async function updateBusinessBillingDate(business: AdminBusiness, field: "signupDate" | "nextPaymentDue", value: string) {
+    if (!db || !value) return;
+    setError("");
+    try {
+      await updateDoc(doc(db, "negocios", business.id), {
+        [field]: value,
+        ...(field === "signupDate" ? { billingStartDate: value } : {}),
+        updatedAt: serverTimestamp()
+      });
+      setMessage(`${business.nombre}: fecha actualizada.`);
+    } catch {
+      setError("No se pudo actualizar la fecha del negocio.");
+    }
+  }
+
+  async function markBusinessPaid(business: AdminBusiness) {
+    if (!db) return;
+    const baseDate = business.nextPaymentDue && daysUntil(business.nextPaymentDue) !== null && (daysUntil(business.nextPaymentDue) ?? 0) > -45 ? business.nextPaymentDue : dateKeyInArgentina();
+    const nextPaymentDue = addMonths(baseDate, 1);
+    setError("");
+    try {
+      await updateDoc(doc(db, "negocios", business.id), {
+        estado: "active",
+        activo: true,
+        billingStatus: "manual_active",
+        lastPaymentAt: serverTimestamp(),
+        nextPaymentDue,
+        updatedAt: serverTimestamp()
+      });
+      setMessage(`${business.nombre}: pago registrado. Proximo cobro ${formatDateKey(nextPaymentDue)}.`);
+    } catch {
+      setError("No se pudo registrar el pago.");
+    }
+  }
+
   function exportBusinessesCsv() {
     const headers = ["negocio", "slug", "link", "plan", "estado", "dueno", "email", "telefono", "whatsapp", "mensual"];
     const rows = filteredBusinesses.map((business) => [
@@ -384,7 +478,7 @@ export function SuperAdminDashboard() {
   }
 
   async function copyPaymentReminder(business: AdminBusiness) {
-    const text = `Hola ${business.ownerNombre ?? ""}, te escribo por el estado de TuAgendaWeb para ${business.nombre}. Cuando regularices el pago, te activo la agenda nuevamente. Link: ${siteUrl}/${business.slug}`;
+    const text = `Hola ${business.ownerNombre ?? ""}, te escribo por TuAgendaWeb para ${business.nombre}.\n\nImporte mensual: ${formatCurrency(business.monthlyPrice)}\nVencimiento: ${formatDateKey(business.nextPaymentDue)}\nAgenda: ${siteUrl}/${business.slug}\n\nCuando regularices el pago, te dejo la agenda activa.`;
     try {
       await navigator.clipboard?.writeText(text);
       setMessage("Recordatorio de pago copiado.");
@@ -412,7 +506,7 @@ export function SuperAdminDashboard() {
     if (businessPlanFilter !== "all" && business.plan !== businessPlanFilter) return false;
     if (businessStatusFilter !== "all" && business.estado !== businessStatusFilter) return false;
     if (!value) return true;
-    return [business.nombre, business.slug, business.rubro, business.ownerNombre, business.ownerEmail]
+    return [business.nombre, business.slug, business.rubro, business.ownerNombre, business.ownerEmail, business.nextPaymentDue, business.signupDate]
       .filter(Boolean)
       .some((item) => item?.toLowerCase().includes(value));
   });
@@ -432,6 +526,15 @@ export function SuperAdminDashboard() {
   const followUpLeads = leads.filter((lead) => (lead.status ?? "new") === "follow_up").length;
   const businessesWithoutOwner = visibleBusinesses.filter((business) => !business.ownerEmail).length;
   const pastDueBusinesses = visibleBusinesses.filter((business) => business.estado === "past_due").length;
+  const overdueBusinesses = visibleBusinesses.filter((business) => {
+    const days = daysUntil(business.nextPaymentDue);
+    return business.estado !== "cancelled" && days !== null && days < 0;
+  }).length;
+  const dueSoonBusinesses = visibleBusinesses.filter((business) => {
+    const days = daysUntil(business.nextPaymentDue);
+    return business.estado !== "cancelled" && days !== null && days >= 0 && days <= 5;
+  }).length;
+  const sortedBusinesses = [...filteredBusinesses].sort((a, b) => (a.nextPaymentDue ?? "9999-12-31").localeCompare(b.nextPaymentDue ?? "9999-12-31"));
   const estimatedMonthlyRevenue = visibleBusinesses
     .filter((business) => business.estado === "active" || business.estado === "trial")
     .reduce((total, business) => total + (business.monthlyPrice ?? 0), 0);
@@ -486,6 +589,8 @@ export function SuperAdminDashboard() {
           ["Pausados/cancelados", suspendedBusinesses],
           ["Leads nuevos", newLeads],
           ["Seguimientos", followUpLeads],
+          ["Vencidos", overdueBusinesses],
+          ["Vencen pronto", dueSoonBusinesses],
           ["Sin email owner", businessesWithoutOwner],
           ["Mensual estimado", formatCurrency(estimatedMonthlyRevenue)]
         ].map(([label, value]) => (
@@ -552,6 +657,14 @@ export function SuperAdminDashboard() {
           Logo URL
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="logoUrl" placeholder="Opcional" />
         </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Fecha de alta
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={dateKeyInArgentina()} name="signupDate" type="date" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Proximo cobro
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="nextPaymentDue" type="date" />
+        </label>
         <label className="flex items-center gap-3 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal lg:col-span-2">
           <input name="updateExistingPassword" type="checkbox" />
           Si el email ya existe, actualizar su contrasena inicial
@@ -588,7 +701,10 @@ export function SuperAdminDashboard() {
           </div>
         </div>
         {filteredBusinesses.length === 0 ? <p className="rounded-2xl bg-paper p-5 font-semibold text-ink/60">No hay negocios para ese filtro.</p> : null}
-        {filteredBusinesses.map((business) => (
+        {sortedBusinesses.map((business) => {
+          const dueDays = daysUntil(business.nextPaymentDue);
+          const signupFallback = business.signupDate ?? business.createdAt?.toDate?.().toISOString().slice(0, 10);
+          return (
           <article className="grid gap-4 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-[1fr_auto]" key={business.id}>
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -598,6 +714,20 @@ export function SuperAdminDashboard() {
                 <span className="rounded-full bg-cream px-3 py-1 text-xs font-bold text-ink/60">{formatCurrency(business.monthlyPrice)}</span>
               </div>
               <p className="mt-2 text-sm font-semibold text-ink/62">{business.rubro ?? "Sin rubro"} · {business.ownerNombre ?? "Sin dueño asignado"}</p>
+              <div className="mt-3 grid gap-2 text-sm font-bold text-ink/62 sm:grid-cols-2 xl:grid-cols-4">
+                <label className="grid gap-1">
+                  Alta
+                  <input className="rounded-xl border border-ink/10 bg-cream px-3 py-2 text-sm outline-none focus:border-action" defaultValue={signupFallback ?? ""} onBlur={(event) => updateBusinessBillingDate(business, "signupDate", event.target.value)} type="date" />
+                </label>
+                <label className="grid gap-1">
+                  Proximo cobro
+                  <input className="rounded-xl border border-ink/10 bg-cream px-3 py-2 text-sm outline-none focus:border-action" defaultValue={business.nextPaymentDue ?? ""} onBlur={(event) => updateBusinessBillingDate(business, "nextPaymentDue", event.target.value)} type="date" />
+                </label>
+                <span className={`inline-flex items-center rounded-xl px-3 py-2 text-xs font-extrabold ${paymentBadgeClass(dueDays)}`}>
+                  {dueDays === null ? "Sin vencimiento" : dueDays < 0 ? `Vencido hace ${Math.abs(dueDays)} dias` : dueDays === 0 ? "Vence hoy" : `Vence en ${dueDays} dias`}
+                </span>
+                <span className="inline-flex items-center rounded-xl bg-cream px-3 py-2 text-xs font-bold text-ink/55">Ultimo pago: {formatLastPayment(business.lastPaymentAt)}</span>
+              </div>
               <Link className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-action" href={`/${business.slug}`} rel="noopener noreferrer" target="_blank">
                 {siteUrl}/{business.slug} <ExternalLink size={16} />
               </Link>
@@ -614,6 +744,9 @@ export function SuperAdminDashboard() {
               </button>
               <button className="inline-flex items-center gap-2 rounded-2xl bg-paper px-4 py-3 text-sm font-bold text-teal ring-1 ring-ink/10" onClick={() => copyPaymentReminder(business)} type="button">
                 Cobro
+              </button>
+              <button className="inline-flex items-center gap-2 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal" onClick={() => markBusinessPaid(business)} type="button">
+                Pago recibido
               </button>
               <button className="inline-flex items-center gap-2 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal" onClick={() => updateBusinessStatus(business, "trial")} type="button">
                 Trial
@@ -635,7 +768,8 @@ export function SuperAdminDashboard() {
               </button>
             </div>
           </article>
-        ))}
+          );
+        })}
       </section>
 
       <section className="grid gap-4">

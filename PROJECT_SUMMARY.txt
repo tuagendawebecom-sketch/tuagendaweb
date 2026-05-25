@@ -994,3 +994,54 @@ Validacion pendiente al aplicar:
 - npm run lint
 - npm run build
 - npm run test:smoke con localhost:3001
+
+Tanda de 30 mejoras - cobros, alta de negocios y operacion interna
+
+Fecha: 2026-05-24
+
+Alcance:
+- No se modifico la landing publica.
+- Se mejoraron Super Admin, panel cliente y alta de negocios.
+
+Mejoras aplicadas:
+1. El alta de negocio ahora guarda `signupDate`.
+2. El alta de negocio ahora guarda `billingStartDate`.
+3. El alta de negocio ahora guarda `nextPaymentDue`.
+4. Si no se carga fecha de alta, se usa la fecha actual de Argentina.
+5. Si no se carga proximo cobro, se calcula un mes despues del alta.
+6. El alta inicial guarda `lastPaymentAt` como null para historial futuro.
+7. Super Admin muestra campo "Fecha de alta" al crear negocio.
+8. Super Admin muestra campo "Proximo cobro" al crear negocio.
+9. Super Admin permite editar la fecha de alta desde cada tarjeta.
+10. Super Admin permite editar el proximo cobro desde cada tarjeta.
+11. Editar fecha de alta tambien sincroniza `billingStartDate`.
+12. Super Admin calcula dias hasta el vencimiento.
+13. Super Admin etiqueta negocios vencidos.
+14. Super Admin etiqueta negocios que vencen hoy.
+15. Super Admin etiqueta negocios que vencen pronto.
+16. Super Admin suma KPI "Vencidos".
+17. Super Admin suma KPI "Vencen pronto".
+18. Super Admin ordena negocios por proximo cobro.
+19. La busqueda de negocios tambien encuentra por fecha de alta.
+20. La busqueda de negocios tambien encuentra por proximo cobro.
+21. Super Admin muestra ultimo pago registrado.
+22. Super Admin agrega boton "Pago recibido".
+23. "Pago recibido" activa el negocio y deja billing activo.
+24. "Pago recibido" guarda `lastPaymentAt`.
+25. "Pago recibido" mueve el proximo cobro un mes.
+26. Si el vencimiento estaba muy viejo, el proximo cobro se calcula desde hoy.
+27. El mensaje de cobro copiado incluye importe mensual.
+28. El mensaje de cobro copiado incluye vencimiento.
+29. El mensaje de cobro copiado incluye link de agenda.
+30. Panel cliente muestra fecha de alta.
+31. Panel cliente muestra proximo cobro.
+32. Panel cliente muestra si vence hoy, vence pronto o esta vencido.
+33. Dashboard cliente agrega tarjeta de proximo cobro.
+34. Super Admin conserva compatibilidad con negocios viejos sin estas fechas.
+35. Build valida que los campos nuevos no rompen negocios existentes.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+- npm run test:smoke en localhost:3001: OK.
+- Nota: se limpio `.next` y se rebuildio porque un primer smoke local levanto chunks viejos con MIME incorrecto.

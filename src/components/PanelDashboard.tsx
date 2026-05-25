@@ -43,6 +43,10 @@ type PanelBusiness = {
   ownerNombre?: string;
   ownerTelefono?: string;
   ownerEmail?: string;
+  signupDate?: string;
+  billingStartDate?: string;
+  nextPaymentDue?: string;
+  monthlyPrice?: number;
 };
 
 type ServiceItem = {
@@ -158,6 +162,19 @@ function initialsFromName(name: string) {
 
 function formatCurrency(value?: number) {
   return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(value ?? 0);
+}
+
+function formatDateKey(value?: string) {
+  if (!value) return "Sin fecha";
+  const date = new Date(`${value}T12:00:00.000Z`);
+  return new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+}
+
+function daysUntil(value?: string) {
+  if (!value) return null;
+  const today = new Date(`${dateKeyInArgentina()}T12:00:00.000Z`).getTime();
+  const target = new Date(`${value}T12:00:00.000Z`).getTime();
+  return Math.round((target - today) / 86_400_000);
 }
 
 function dateKeyInArgentina(date = new Date()) {
@@ -408,6 +425,7 @@ export function PanelDashboard() {
   const activeDb = db;
   const publicLink = `${siteUrl}/${business.slug}`;
   const canEdit = business.estado !== "suspended" && business.estado !== "cancelled";
+  const billingDaysLeft = daysUntil(business.nextPaymentDue);
   const todayKey = dateKeyInArgentina();
   const confirmedReservations = reservations.filter((reservation) => reservation.estado !== "cancelada");
   const cancelledReservations = reservations.filter((reservation) => reservation.estado === "cancelada");
@@ -793,6 +811,11 @@ export function PanelDashboard() {
         <p className="mt-3 max-w-2xl leading-7 text-cream/75">
           Plan: {planLabels[business.plan ?? "agenda_simple"] ?? business.plan} · Estado: {statusLabels[business.estado ?? "trial"] ?? business.estado}
         </p>
+        <div className="mt-5 grid gap-3 text-sm font-bold text-cream/80 sm:grid-cols-3">
+          <p className="rounded-2xl border border-cream/15 px-4 py-3">Alta: {formatDateKey(business.signupDate ?? business.billingStartDate)}</p>
+          <p className="rounded-2xl border border-cream/15 px-4 py-3">Proximo cobro: {formatDateKey(business.nextPaymentDue)}</p>
+          <p className="rounded-2xl border border-cream/15 px-4 py-3">{billingDaysLeft === null ? "Cobro sin fecha" : billingDaysLeft < 0 ? `Vencido hace ${Math.abs(billingDaysLeft)} dias` : billingDaysLeft === 0 ? "Vence hoy" : `Vence en ${billingDaysLeft} dias`}</p>
+        </div>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link className="inline-flex items-center gap-2 rounded-2xl bg-action px-5 py-3 text-sm font-bold text-white" href={`/${business.slug}`} rel="noopener noreferrer" target="_blank">
             Ver agenda pública <ExternalLink size={16} />
@@ -850,7 +873,8 @@ export function PanelDashboard() {
               ["Proximos 7 dias", nextSevenDaysReservations.length],
               ["Clientes unicos", uniqueClients],
               ["Ticket promedio", formatCurrency(averageTicket)],
-              ["Asistencia", completedTotal ? `${attendanceRate}%` : "Sin datos"]
+              ["Asistencia", completedTotal ? `${attendanceRate}%` : "Sin datos"],
+              ["Proximo cobro", formatDateKey(business.nextPaymentDue)]
             ].map(([label, value]) => (
               <article className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={String(label)}>
                 <p className="text-sm font-bold text-ink/55">{String(label)}</p>
