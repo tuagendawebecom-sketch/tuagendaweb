@@ -89,7 +89,7 @@ for (const viewport of viewports) {
       }
 
       if (viewport.name === "mobile") {
-        await page.locator("button[aria-controls]").click();
+        await page.getByRole("button", { name: "Abrir menú" }).click();
         await expectVisible(page.locator('nav[aria-label="Mobile"]'), "mobile menu");
         await expectVisible(page.locator('nav[aria-label="Mobile"]').getByText("Soluciones").first(), "mobile solutions heading");
         await expectVisible(page.locator('nav[aria-label="Mobile"]').getByText("Demos").first(), "mobile demos heading");

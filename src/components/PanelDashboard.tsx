@@ -21,6 +21,7 @@ import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "
 import { siteUrl } from "@/data/site";
 import { getClientAuth, getClientDb, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { normalizePhone } from "@/lib/phone";
+import type { PublicWebContent } from "@/types/tenant";
 
 type BusinessUser = {
   negocioId?: string;
@@ -98,6 +99,27 @@ type ScheduleConfig = {
   diasReservaMax: number;
   anticipacionHoras: number;
   horariosPorDia: Record<string, DaySchedule>;
+};
+
+const defaultPanelWebContent: PublicWebContent = {
+  heroEtiqueta: "Reservas online",
+  heroTitulo: "Una experiencia profesional para reservar desde el celular.",
+  heroSubtitulo: "Mostramos tus servicios, horarios, profesionales y formas de contacto en una web clara para que tus clientes puedan pedir turno sin vueltas.",
+  ctaPrincipalTexto: "Reservar turno",
+  sobreTitulo: "Una web pensada para tu forma de atender",
+  sobreTexto: "TuAgendaWeb adapta la presencia online del negocio para que cada cliente entienda que ofrecés, cómo reservar y cómo contactarte.",
+  beneficiosTitulo: "Por qué ayuda a tu negocio",
+  beneficio1Titulo: "Menos mensajes repetidos",
+  beneficio1Texto: "El cliente puede ver servicios, elegir día y horario sin esperar respuesta.",
+  beneficio2Titulo: "Imagen más profesional",
+  beneficio2Texto: "Tu negocio tiene una web propia, clara y alineada con tu identidad.",
+  beneficio3Titulo: "Agenda más ordenada",
+  beneficio3Texto: "Los turnos quedan registrados y el panel ayuda a revisar reservas, clientes y servicios.",
+  finalCtaTitulo: "Reservá tu próximo turno",
+  finalCtaTexto: "Elegí servicio, profesional, sucursal, día y horario desde esta misma página.",
+  heroImageUrl: "",
+  mapaLinkUrl: "",
+  facebook: ""
 };
 
 const weekDays = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
@@ -300,6 +322,34 @@ function readSchedule(data: Record<string, unknown> | undefined): ScheduleConfig
   };
 }
 
+function readWebContent(data: Record<string, unknown> | undefined): PublicWebContent {
+  const read = (key: keyof PublicWebContent) => {
+    const value = data?.[key];
+    return typeof value === "string" && value.trim() ? value.trim() : defaultPanelWebContent[key];
+  };
+
+  return {
+    heroEtiqueta: read("heroEtiqueta"),
+    heroTitulo: read("heroTitulo"),
+    heroSubtitulo: read("heroSubtitulo"),
+    ctaPrincipalTexto: read("ctaPrincipalTexto"),
+    sobreTitulo: read("sobreTitulo"),
+    sobreTexto: read("sobreTexto"),
+    beneficiosTitulo: read("beneficiosTitulo"),
+    beneficio1Titulo: read("beneficio1Titulo"),
+    beneficio1Texto: read("beneficio1Texto"),
+    beneficio2Titulo: read("beneficio2Titulo"),
+    beneficio2Texto: read("beneficio2Texto"),
+    beneficio3Titulo: read("beneficio3Titulo"),
+    beneficio3Texto: read("beneficio3Texto"),
+    finalCtaTitulo: read("finalCtaTitulo"),
+    finalCtaTexto: read("finalCtaTexto"),
+    heroImageUrl: typeof data?.heroImageUrl === "string" ? data.heroImageUrl.trim() : "",
+    mapaLinkUrl: typeof data?.mapaLinkUrl === "string" ? data.mapaLinkUrl.trim() : "",
+    facebook: typeof data?.facebook === "string" ? data.facebook.trim() : ""
+  };
+}
+
 function setupWarnings(business: PanelBusiness, servicesCount: number, staffCount: number, branchesCount: number, schedule: ScheduleConfig) {
   const warnings: string[] = [];
   if (!business.whatsapp) warnings.push("Cargar WhatsApp visible");
@@ -354,11 +404,12 @@ export function PanelDashboard() {
   const [branches, setBranches] = useState<BranchItem[]>([]);
   const [reservations, setReservations] = useState<ReservationItem[]>([]);
   const [schedule, setSchedule] = useState<ScheduleConfig>(defaultSchedule);
+  const [webContent, setWebContent] = useState<PublicWebContent>(defaultPanelWebContent);
   const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState("");
-  const [activeTab, setActiveTab] = useState<"dashboard" | "turnos" | "configuracion">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "turnos" | "configuracion" | "web">("dashboard");
   const [dashboardRange, setDashboardRange] = useState<"today" | "7d" | "30d" | "all">("30d");
   const [turnSearch, setTurnSearch] = useState("");
   const [turnStatusFilter, setTurnStatusFilter] = useState<"today" | "upcoming" | "all" | "cancelled" | "done">("upcoming");
@@ -432,7 +483,9 @@ export function PanelDashboard() {
         );
         unsubscribers.push(
           onSnapshot(doc(activeDb, "negocios", userData.negocioId, "configuracion", "general"), (snapshot) => {
-            setSchedule(readSchedule(snapshot.data()));
+            const data = snapshot.data();
+            setSchedule(readSchedule(data));
+            setWebContent(readWebContent(data));
           })
         );
       } catch {
@@ -472,6 +525,7 @@ export function PanelDashboard() {
   const activeDb = db;
   const publicLink = `${siteUrl}/${business.slug}`;
   const canEdit = business.estado !== "suspended" && business.estado !== "cancelled";
+  const isWebComplete = business.plan === "web_completa";
   const billingDaysLeft = daysUntil(business.nextPaymentDue);
   const todayKey = dateKeyInArgentina();
   const confirmedReservations = reservations.filter((reservation) => reservation.estado !== "cancelada");
@@ -931,6 +985,53 @@ export function PanelDashboard() {
     }
   }
 
+  async function handleWebContent(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canEdit || !isWebComplete) return;
+
+    const formData = new FormData(event.currentTarget);
+    const payload = {
+      heroEtiqueta: String(formData.get("heroEtiqueta") ?? "").trim(),
+      heroTitulo: String(formData.get("heroTitulo") ?? "").trim(),
+      heroSubtitulo: String(formData.get("heroSubtitulo") ?? "").trim(),
+      ctaPrincipalTexto: String(formData.get("ctaPrincipalTexto") ?? "").trim(),
+      sobreTitulo: String(formData.get("sobreTitulo") ?? "").trim(),
+      sobreTexto: String(formData.get("sobreTexto") ?? "").trim(),
+      beneficiosTitulo: String(formData.get("beneficiosTitulo") ?? "").trim(),
+      beneficio1Titulo: String(formData.get("beneficio1Titulo") ?? "").trim(),
+      beneficio1Texto: String(formData.get("beneficio1Texto") ?? "").trim(),
+      beneficio2Titulo: String(formData.get("beneficio2Titulo") ?? "").trim(),
+      beneficio2Texto: String(formData.get("beneficio2Texto") ?? "").trim(),
+      beneficio3Titulo: String(formData.get("beneficio3Titulo") ?? "").trim(),
+      beneficio3Texto: String(formData.get("beneficio3Texto") ?? "").trim(),
+      finalCtaTitulo: String(formData.get("finalCtaTitulo") ?? "").trim(),
+      finalCtaTexto: String(formData.get("finalCtaTexto") ?? "").trim(),
+      heroImageUrl: String(formData.get("heroImageUrl") ?? "").trim(),
+      mapaLinkUrl: String(formData.get("mapaLinkUrl") ?? "").trim(),
+      facebook: String(formData.get("facebook") ?? "").trim()
+    };
+
+    if (payload.heroTitulo.length < 8 || payload.heroSubtitulo.length < 12) {
+      showError("La web necesita un titulo y una descripcion principal mas claros.");
+      return;
+    }
+
+    setSaving("web");
+    setError("");
+    try {
+      await setDoc(
+        doc(activeDb, "negocios", businessId, "configuracion", "general"),
+        { ...payload, updatedAt: serverTimestamp() },
+        { merge: true }
+      );
+      showSuccess("Contenido de Web Completa actualizado correctamente.");
+    } catch {
+      showError("No se pudo guardar el contenido de la web.");
+    } finally {
+      setSaving("");
+    }
+  }
+
   async function handlePasswordChange(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const user = auth?.currentUser;
@@ -997,16 +1098,17 @@ export function PanelDashboard() {
         {error ? <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</p> : null}
       </div>
 
-      <nav className="grid gap-2 rounded-[1.5rem] border border-ink/10 bg-paper p-2 shadow-soft sm:grid-cols-3" aria-label="Secciones del panel">
+      <nav className={`grid gap-2 rounded-[1.5rem] border border-ink/10 bg-paper p-2 shadow-soft ${isWebComplete ? "sm:grid-cols-4" : "sm:grid-cols-3"}`} aria-label="Secciones del panel">
         {[
           ["dashboard", "Dashboard", BarChart3],
           ["turnos", "Turnos", CalendarCheck],
-          ["configuracion", "Configuracion", Settings2]
+          ["configuracion", "Configuracion", Settings2],
+          ...(isWebComplete ? [["web", "Web completa", Building2]] : [])
         ].map(([tab, label, Icon]) => (
           <button
             className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold transition ${activeTab === tab ? "bg-teal text-cream" : "text-teal hover:bg-mint"}`}
             key={String(tab)}
-            onClick={() => setActiveTab(tab as "dashboard" | "turnos" | "configuracion")}
+            onClick={() => setActiveTab(tab as "dashboard" | "turnos" | "configuracion" | "web")}
             type="button"
           >
             <Icon size={17} /> {String(label)}
@@ -1249,6 +1351,92 @@ export function PanelDashboard() {
           )}
         </div>
       </section>
+      ) : null}
+
+      {activeTab === "web" && isWebComplete ? (
+      <form className="grid gap-5 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-2" onSubmit={handleWebContent}>
+        <div className="lg:col-span-2">
+          <div className="flex items-center gap-3">
+            <Building2 className="text-action" />
+            <h2 className="font-display text-2xl font-extrabold text-teal">Contenido de Web Completa</h2>
+          </div>
+          <p className="mt-2 leading-7 text-ink/62">
+            Esta edicion solo aparece para clientes de Web Completa. Los cambios se aplican en su web publica y pagina de reserva, no en la identidad del panel.
+          </p>
+          <p className="mt-3 rounded-2xl bg-mint p-4 text-sm font-bold text-teal">
+            Agenda Full mantiene solo datos publicos, colores de reserva, servicios, personal, sucursales y horarios.
+          </p>
+        </div>
+
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Etiqueta del hero
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.heroEtiqueta} name="heroEtiqueta" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Texto del boton principal
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.ctaPrincipalTexto} name="ctaPrincipalTexto" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
+          Titulo principal
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.heroTitulo} name="heroTitulo" required />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
+          Subtitulo principal
+          <textarea className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.heroSubtitulo} name="heroSubtitulo" required />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
+          URL de imagen principal
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.heroImageUrl} name="heroImageUrl" placeholder="https://... o /assets/clientes/imagen.jpg" />
+        </label>
+
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Titulo sobre el negocio
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.sobreTitulo} name="sobreTitulo" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Titulo beneficios
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.beneficiosTitulo} name="beneficiosTitulo" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
+          Texto sobre el negocio
+          <textarea className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.sobreTexto} name="sobreTexto" />
+        </label>
+
+        {[
+          ["beneficio1Titulo", "Beneficio 1 - titulo", webContent.beneficio1Titulo],
+          ["beneficio1Texto", "Beneficio 1 - texto", webContent.beneficio1Texto],
+          ["beneficio2Titulo", "Beneficio 2 - titulo", webContent.beneficio2Titulo],
+          ["beneficio2Texto", "Beneficio 2 - texto", webContent.beneficio2Texto],
+          ["beneficio3Titulo", "Beneficio 3 - titulo", webContent.beneficio3Titulo],
+          ["beneficio3Texto", "Beneficio 3 - texto", webContent.beneficio3Texto]
+        ].map(([name, label, value]) => (
+          <label className="grid gap-2 text-sm font-bold text-ink/70" key={name}>
+            {label}
+            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={value} name={name} />
+          </label>
+        ))}
+
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Titulo final de reserva
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.finalCtaTitulo} name="finalCtaTitulo" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Link de ubicacion
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.mapaLinkUrl} name="mapaLinkUrl" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
+          Texto final de reserva
+          <textarea className="min-h-24 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.finalCtaTexto} name="finalCtaTexto" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
+          Facebook URL
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.facebook} name="facebook" />
+        </label>
+
+        <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60 lg:col-span-2" disabled={!canEdit || saving === "web"} type="submit">
+          <Save size={18} /> {saving === "web" ? "Guardando web..." : "Guardar contenido de la web"}
+        </button>
+      </form>
       ) : null}
 
       {activeTab === "configuracion" ? (

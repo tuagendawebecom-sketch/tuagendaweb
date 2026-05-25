@@ -1,6 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "./admin";
-import type { LeadInterestPlan, PublicBranch, PublicBusiness, PublicScheduleConfig, PublicStaff } from "@/types/tenant";
+import type { LeadInterestPlan, PublicBranch, PublicBusiness, PublicScheduleConfig, PublicStaff, PublicWebContent } from "@/types/tenant";
 
 export const defaultScheduleConfig: PublicScheduleConfig = {
   diasAtencion: ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
@@ -18,6 +18,27 @@ export const defaultScheduleConfig: PublicScheduleConfig = {
     sábado: { activo: true, rangos: [{ inicio: "09:00", fin: "13:00" }] },
     domingo: { activo: false, rangos: [] }
   }
+};
+
+export const defaultWebContent: PublicWebContent = {
+  heroEtiqueta: "Reservas online",
+  heroTitulo: "Una experiencia profesional para reservar desde el celular.",
+  heroSubtitulo: "Mostramos tus servicios, horarios, profesionales y formas de contacto en una web clara para que tus clientes puedan pedir turno sin vueltas.",
+  ctaPrincipalTexto: "Reservar turno",
+  sobreTitulo: "Una web pensada para tu forma de atender",
+  sobreTexto: "TuAgendaWeb adapta la presencia online del negocio para que cada cliente entienda que ofrecés, cómo reservar y cómo contactarte.",
+  beneficiosTitulo: "Por qué ayuda a tu negocio",
+  beneficio1Titulo: "Menos mensajes repetidos",
+  beneficio1Texto: "El cliente puede ver servicios, elegir día y horario sin esperar respuesta.",
+  beneficio2Titulo: "Imagen más profesional",
+  beneficio2Texto: "Tu negocio tiene una web propia, clara y alineada con tu identidad.",
+  beneficio3Titulo: "Agenda más ordenada",
+  beneficio3Texto: "Los turnos quedan registrados y el panel ayuda a revisar reservas, clientes y servicios.",
+  finalCtaTitulo: "Reservá tu próximo turno",
+  finalCtaTexto: "Elegí servicio, profesional, sucursal, día y horario desde esta misma página.",
+  heroImageUrl: "",
+  mapaLinkUrl: "",
+  facebook: ""
 };
 
 function serializeBusiness(id: string, data: FirebaseFirestore.DocumentData): PublicBusiness {
@@ -54,6 +75,21 @@ export async function getBusinessBySlug(slug: string) {
   if (!db) return null;
 
   const snapshot = await db.collection("negocios").where("slug", "==", slug).limit(1).get();
+  const doc = snapshot.docs[0];
+  if (doc?.data().archived === true) return null;
+  return doc ? serializeBusiness(doc.id, doc.data()) : null;
+}
+
+export async function getBusinessByCustomDomain(hostname: string) {
+  const db = getAdminDb();
+  if (!db) return null;
+
+  const rawHost = hostname.toLowerCase().split(":")[0];
+  const normalizedHost = rawHost.replace(/^www\./, "");
+  if (!normalizedHost) return null;
+
+  const candidates = Array.from(new Set([normalizedHost, rawHost].filter(Boolean)));
+  const snapshot = await db.collection("negocios").where("customDomain", "in", candidates).limit(1).get();
   const doc = snapshot.docs[0];
   if (doc?.data().archived === true) return null;
   return doc ? serializeBusiness(doc.id, doc.data()) : null;
@@ -142,6 +178,40 @@ export async function getPublicScheduleConfig(negocioId: string): Promise<Public
     diasReservaMax: Number.isFinite(Number(data?.diasReservaMax)) ? Math.max(1, Number(data?.diasReservaMax)) : defaultScheduleConfig.diasReservaMax,
     anticipacionHoras: Number.isFinite(Number(data?.anticipacionHoras)) ? Math.max(0, Number(data?.anticipacionHoras)) : defaultScheduleConfig.anticipacionHoras,
     horariosPorDia: horariosPorDia ?? defaultScheduleConfig.horariosPorDia
+  };
+}
+
+function readText(data: FirebaseFirestore.DocumentData | undefined, key: keyof PublicWebContent) {
+  const value = data?.[key];
+  return typeof value === "string" && value.trim() ? value.trim() : defaultWebContent[key];
+}
+
+export async function getPublicWebContent(negocioId: string): Promise<PublicWebContent> {
+  const db = getAdminDb();
+  if (!db) return defaultWebContent;
+
+  const snapshot = await db.collection("negocios").doc(negocioId).collection("configuracion").doc("general").get();
+  const data = snapshot.data();
+
+  return {
+    heroEtiqueta: readText(data, "heroEtiqueta"),
+    heroTitulo: readText(data, "heroTitulo"),
+    heroSubtitulo: readText(data, "heroSubtitulo"),
+    ctaPrincipalTexto: readText(data, "ctaPrincipalTexto"),
+    sobreTitulo: readText(data, "sobreTitulo"),
+    sobreTexto: readText(data, "sobreTexto"),
+    beneficiosTitulo: readText(data, "beneficiosTitulo"),
+    beneficio1Titulo: readText(data, "beneficio1Titulo"),
+    beneficio1Texto: readText(data, "beneficio1Texto"),
+    beneficio2Titulo: readText(data, "beneficio2Titulo"),
+    beneficio2Texto: readText(data, "beneficio2Texto"),
+    beneficio3Titulo: readText(data, "beneficio3Titulo"),
+    beneficio3Texto: readText(data, "beneficio3Texto"),
+    finalCtaTitulo: readText(data, "finalCtaTitulo"),
+    finalCtaTexto: readText(data, "finalCtaTexto"),
+    heroImageUrl: typeof data?.heroImageUrl === "string" ? data.heroImageUrl.trim() : "",
+    mapaLinkUrl: typeof data?.mapaLinkUrl === "string" ? data.mapaLinkUrl.trim() : "",
+    facebook: typeof data?.facebook === "string" ? data.facebook.trim() : ""
   };
 }
 

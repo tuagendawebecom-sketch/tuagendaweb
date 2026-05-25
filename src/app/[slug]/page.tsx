@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicBookingFlow } from "@/components/PublicBookingFlow";
+import { PublicWebCompletePage } from "@/components/PublicWebCompletePage";
 import { siteUrl } from "@/data/site";
-import { canReserveBusiness, defaultScheduleConfig, getBusinessBySlug } from "@/lib/firebase/business";
+import { canReserveBusiness, defaultScheduleConfig, getBusinessBySlug, getPublicWebContent } from "@/lib/firebase/business";
 import { getPublicBookingData } from "@/lib/firebase/reservations";
 import { isValidSlug } from "@/lib/slug";
 
@@ -49,6 +50,13 @@ export default async function PublicSlugPage({ params }: PublicSlugPageProps) {
     availableDates: []
   }));
   const canReserve = canReserveBusiness(business);
+
+  if (business.plan === "web_completa") {
+    const webContent = await getPublicWebContent(business.id).catch(() => null);
+    if (webContent) {
+      return <PublicWebCompletePage bookingData={bookingData} business={business} canReserve={canReserve} webContent={webContent} />;
+    }
+  }
 
   return (
     <main className="min-h-screen bg-cream px-4 py-8 text-ink sm:px-6">

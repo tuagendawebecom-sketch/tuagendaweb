@@ -940,6 +940,52 @@ Validacion:
 - npm run build: OK.
 - npm run test:smoke en localhost:3001: OK.
 
+Unificacion Agenda Full / Web Completa
+
+Fecha: 2026-05-25
+
+Objetivo:
+- Evitar aplicar mejoras en dos proyectos distintos.
+- Dejar `tuagendaweb-landing` como producto principal unico para Agenda Full y Web Completa.
+- Usar `turnero-mvp` como referencia tecnica/demo temporal, no como segundo producto vivo.
+
+Cambios aplicados:
+1. Se agrego el tipo `PublicWebContent` para contenido editable de Web Completa.
+2. Se agrego contenido por defecto para webs completas.
+3. Se agrego lectura server-side de contenido web desde `negocios/{negocioId}/configuracion/general`.
+4. Se agrego resolucion de negocio por `customDomain`.
+5. La ruta `/{slug}` ahora muestra una web completa si el negocio tiene plan `web_completa`.
+6. Agenda Full mantiene la pagina directa de reserva en `/{slug}`.
+7. La home puede resolver un dominio propio y mostrar la web completa del negocio correspondiente.
+8. Se creo `PublicWebCompletePage` como plantilla inicial editable para clientes de Web Completa.
+9. La plantilla usa los colores del negocio solo en la web publica/reserva.
+10. El panel interno conserva la identidad visual de TuAgendaWeb.
+11. El panel cliente agrega la pestaña "Web completa" solo si el plan del negocio es `web_completa`.
+12. Agenda Full no ve la edicion de secciones de web.
+13. Agenda Full conserva edicion de logo, iniciales, colores de reserva, datos publicos, servicios, personal, sucursales y horarios.
+14. Web Completa puede editar hero, CTA, textos comerciales, beneficios, imagen principal, ubicacion y Facebook.
+15. Los datos editables se guardan con merge en `configuracion/general`, sin pisar horarios.
+16. Se ajusto el smoke test para no confundirse con el boton de Next DevTools.
+17. Se corrigio una key duplicada en la tabla comparativa.
+
+Regla de producto:
+- Agenda Full: link dentro de TuAgendaWeb, reserva completa y panel operativo.
+- Web Completa: mismo sistema, mismo panel y misma reserva, mas dominio propio y secciones publicas editables.
+- Los colores del cliente se aplican en su web/reserva, no en el panel administrativo.
+
+Aplicacion para nuevos clientes:
+1. Crear el negocio desde Super Admin.
+2. Elegir `agenda_simple` para Agenda Full o `web_completa` para Web Completa.
+3. Crear/asignar usuario dueño con contraseña temporal.
+4. El cliente entra en `/login`, cambia su contraseña y configura su negocio.
+5. Si es Web Completa, aparece la pestaña "Web completa" para editar secciones.
+6. Si tiene dominio propio, cargar `customDomain` en el negocio y apuntar el dominio al proyecto de Vercel.
+
+Validacion:
+- npm run lint: OK.
+- npm run test:smoke en localhost:3001: OK.
+- npm run build: OK.
+
 Tanda de 30 mejoras - reserva, panel cliente y Super Admin
 
 Fecha: 2026-05-24

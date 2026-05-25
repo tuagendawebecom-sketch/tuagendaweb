@@ -462,7 +462,7 @@ export function Comparison() {
           {comparisonRows.map((row) => (
             <div className="grid grid-cols-[1.2fr_repeat(2,1fr)] gap-2 border-b border-ink/10 px-4 py-4 text-sm last:border-b-0" key={row[0]}>
               {row.map((cell, index) => (
-                <span className={index === 0 ? "font-bold text-teal" : "text-ink/68"} key={cell}>
+                <span className={index === 0 ? "font-bold text-teal" : "text-ink/68"} key={`${row[0]}-${index}`}>
                   {cell}
                 </span>
               ))}

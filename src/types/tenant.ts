@@ -29,6 +29,27 @@ export type PublicBusiness = {
   nextPaymentDue?: string;
 };
 
+export type PublicWebContent = {
+  heroEtiqueta: string;
+  heroTitulo: string;
+  heroSubtitulo: string;
+  ctaPrincipalTexto: string;
+  sobreTitulo: string;
+  sobreTexto: string;
+  beneficiosTitulo: string;
+  beneficio1Titulo: string;
+  beneficio1Texto: string;
+  beneficio2Titulo: string;
+  beneficio2Texto: string;
+  beneficio3Titulo: string;
+  beneficio3Texto: string;
+  finalCtaTitulo: string;
+  finalCtaTexto: string;
+  heroImageUrl: string;
+  mapaLinkUrl: string;
+  facebook: string;
+};
+
 export type PublicService = {
   id: string;
   nombre: string;

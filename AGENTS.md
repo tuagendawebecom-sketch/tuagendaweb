@@ -36,7 +36,10 @@
 
 - Mantener `negocioId` como identificador principal.
 - Colección principal: `negocios/{negocioId}`.
-- Rutas públicas: `/agenda/[slug]` y `/agenda/[slug]/reservar`.
+- Ruta pública principal: `/{slug}`.
+- Rutas legacy compatibles: `/agenda/[slug]` y `/agenda/[slug]/reservar` redirigen a `/{slug}`.
+- Agenda Full usa `/{slug}` como pagina de reserva.
+- Web Completa usa el mismo sistema y puede resolver por `customDomain`.
 - Panel cliente: `/panel`.
 - Super Admin: `/superadmin`.
 - Super Admin opera negocios, planes y estados manuales.
@@ -55,6 +58,8 @@
 - Mantener estética actual: crema, verde profundo, dorado, tarjetas redondeadas, mockups, tono profesional y cercano.
 - No cambiar innecesariamente la paleta ni rehacer toda la landing.
 - No prometer funciones no implementadas; usar “próximamente” o “a cotizar”.
+- La edicion de secciones publicas de Web Completa solo debe estar visible para negocios con plan `web_completa`.
+- Agenda Full puede editar datos publicos, logo/iniciales, colores de reserva, servicios, personal, sucursales y horarios, pero no secciones comerciales de web completa.
 
 ## Validación
 
