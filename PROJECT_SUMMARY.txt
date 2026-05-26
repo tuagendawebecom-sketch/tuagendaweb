@@ -894,6 +894,45 @@ Validacion:
 - npm run lint: OK.
 - npm run build: OK.
 
+Chequeo profundo de panel cliente y Web Completa
+
+Fecha: 2026-05-26
+
+Respuesta tecnica clave:
+- Las mejoras hechas sobre `PublicBookingFlow` y APIs de reserva se aplican a Agenda Full y Web Completa porque ambas usan el mismo flujo compartido.
+- Las mejoras de landing son especificas: landing principal de TuAgendaWeb y landing editable de Web Completa son superficies separadas.
+
+Mejoras aplicadas:
+1. Dashboard agrega bloque de estado operativo.
+2. Dashboard indica si la agenda necesita configuracion, esta lista o ya esta operativa.
+3. Dashboard muestra un proximo paso accionable.
+4. Dashboard agrega accesos rapidos a turnos, configuracion y agenda publica.
+5. KPI principal ahora separa turnos del rango, facturacion estimada, ticket promedio y asistencia.
+6. KPIs agregan textos de ayuda para que el cliente entienda que significa cada numero.
+7. Proximo cobro ahora marca tono de advertencia si esta vencido o cerca.
+8. Resumen rapido se transformo en filas comparables con etiqueta y valor.
+9. Resumen rapido aclara que es lectura ejecutiva para tomar decisiones.
+10. Exportar reporte valida que la fecha "desde" no sea posterior a "hasta".
+11. Link de "Ver agenda" en Web Completa usa dominio propio cuando existe.
+12. Copiar link copia el link recomendado de reservas.
+13. Edicion de Web Completa deja de ser una lista gigante de campos.
+14. Edicion de Web Completa se divide en secciones desplegables.
+15. Seccion desplegable "Portada" agrupa hero, CTAs e imagen principal.
+16. Seccion desplegable "Presentacion y servicios" agrupa texto del negocio y servicios.
+17. Seccion desplegable "Beneficios" agrupa argumentos comerciales.
+18. Seccion desplegable "Opciones destacadas" agrupa paquetes o bloques comerciales.
+19. Seccion desplegable "Experiencia" agrupa diferenciales visuales.
+20. Seccion desplegable "Preguntas frecuentes" agrupa objeciones.
+21. Seccion desplegable "Contacto y cierre" agrupa mapa, contacto y CTA final.
+22. Cada desplegable incluye una descripcion simple de lo que edita.
+23. El boton de guardar contenido web queda sticky al final para no perderlo en formularios largos.
+24. El guardado de Web Completa preserva campos no visibles en el formulario actual en vez de borrarlos.
+25. Se mantuvo la restriccion: Agenda Full no ve la edicion de secciones de Web Completa.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+
 Correccion routing dominio propio existente
 
 Fecha: 2026-05-25

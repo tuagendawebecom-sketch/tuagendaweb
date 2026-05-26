@@ -15,9 +15,9 @@ import {
   setDoc,
   updateDoc
 } from "firebase/firestore";
-import { BarChart3, Building2, CalendarCheck, Copy, Download, ExternalLink, Loader2, MapPin, MessageCircle, PlusCircle, Save, Search, Settings2, ShieldAlert, Trash2, Trophy, Users } from "lucide-react";
+import { AlertTriangle, BarChart3, Building2, CalendarCheck, CheckCircle2, ChevronDown, Clock3, Copy, Download, ExternalLink, Eye, FileSpreadsheet, Loader2, MapPin, MessageCircle, PlusCircle, Save, Search, Settings2, ShieldAlert, Trash2, TrendingUp, Trophy, Users } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { siteUrl } from "@/data/site";
 import { getClientAuth, getClientDb, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { normalizePhone } from "@/lib/phone";
@@ -48,6 +48,7 @@ type PanelBusiness = {
   billingStartDate?: string;
   nextPaymentDue?: string;
   monthlyPrice?: number;
+  customDomain?: string;
 };
 
 type ServiceItem = {
@@ -403,6 +404,66 @@ function setupWarnings(business: PanelBusiness, servicesCount: number, staffCoun
   return warnings;
 }
 
+function PanelMetricCard({
+  helper,
+  icon,
+  label,
+  tone = "default",
+  value
+}: {
+  helper?: string;
+  icon: ReactNode;
+  label: string;
+  tone?: "default" | "strong" | "warning";
+  value: ReactNode;
+}) {
+  const toneClass =
+    tone === "strong"
+      ? "bg-teal text-cream"
+      : tone === "warning"
+        ? "bg-gold/20 text-teal"
+        : "bg-paper text-teal";
+  const helperClass = tone === "strong" ? "text-cream/70" : "text-ink/55";
+
+  return (
+    <article className={`rounded-[1.5rem] border border-ink/10 p-5 shadow-soft ${toneClass}`}>
+      <div className="flex items-center justify-between gap-3">
+        <p className={`text-sm font-bold ${tone === "strong" ? "text-cream/75" : "text-ink/55"}`}>{label}</p>
+        <span className={`grid h-10 w-10 place-items-center rounded-2xl ${tone === "strong" ? "bg-cream/10 text-cream" : "bg-cream text-action"}`}>
+          {icon}
+        </span>
+      </div>
+      <p className={`mt-3 font-display text-3xl font-extrabold ${tone === "strong" ? "text-cream" : "text-teal"}`}>{value}</p>
+      {helper ? <p className={`mt-2 text-xs font-semibold leading-5 ${helperClass}`}>{helper}</p> : null}
+    </article>
+  );
+}
+
+function WebEditSection({
+  children,
+  defaultOpen = false,
+  description,
+  title
+}: {
+  children: ReactNode;
+  defaultOpen?: boolean;
+  description: string;
+  title: string;
+}) {
+  return (
+    <details className="group rounded-[1.5rem] border border-ink/10 bg-paper p-0 shadow-soft" open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-[1.5rem] px-5 py-4">
+        <span>
+          <span className="block font-display text-xl font-extrabold text-teal">{title}</span>
+          <span className="mt-1 block text-sm font-semibold leading-6 text-ink/55">{description}</span>
+        </span>
+        <ChevronDown className="shrink-0 text-action transition group-open:rotate-180" size={20} />
+      </summary>
+      <div className="grid gap-4 border-t border-ink/10 p-5 lg:grid-cols-2">{children}</div>
+    </details>
+  );
+}
+
 function resizeLogo(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -566,6 +627,8 @@ export function PanelDashboard() {
 
   const activeDb = db;
   const publicLink = `${siteUrl}/${business.slug}`;
+  const publicWebLink = business.customDomain ? `https://${business.customDomain}` : publicLink;
+  const reservationLink = business.customDomain ? `https://${business.customDomain}/reservar` : publicLink;
   const canEdit = business.estado !== "suspended" && business.estado !== "cancelled";
   const isWebComplete = business.plan === "web_completa";
   const billingDaysLeft = daysUntil(business.nextPaymentDue);
@@ -629,6 +692,17 @@ export function PanelDashboard() {
     { label: "Horarios", done: Object.values(schedule.horariosPorDia).some((day) => day.activo && day.rangos.length) }
   ];
   const setupProgress = Math.round((setupChecklist.filter((item) => item.done).length / setupChecklist.length) * 100);
+  const rangeLabel = dashboardRange === "today" ? "hoy" : dashboardRange === "7d" ? "ultimos 7 dias" : dashboardRange === "30d" ? "ultimos 30 dias" : "todo el historial";
+  const dashboardHealth = pendingSetup.length
+    ? { label: "Necesita configuracion", text: `${pendingSetup.length} pendiente${pendingSetup.length === 1 ? "" : "s"} antes de vender con tranquilidad.`, tone: "warning" as const }
+    : nextReservation
+      ? { label: "Agenda operativa", text: "Ya tenes datos cargados y proximos turnos para gestionar.", tone: "strong" as const }
+      : { label: "Lista para recibir turnos", text: "La agenda esta configurada. Compartila para empezar a medir reservas.", tone: "strong" as const };
+  const nextAction = pendingSetup[0]
+    ? `Proximo paso: ${pendingSetup[0]}.`
+    : upcomingReservations.length
+      ? "Proximo paso: revisar y confirmar los turnos cercanos."
+      : "Proximo paso: compartir el link publico y generar las primeras reservas.";
 
   function showSuccess(text: string) {
     setError("");
@@ -642,7 +716,7 @@ export function PanelDashboard() {
 
   async function copyPublicLink() {
     try {
-      await navigator.clipboard?.writeText(publicLink);
+      await navigator.clipboard?.writeText(reservationLink);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -730,6 +804,10 @@ export function PanelDashboard() {
   }
 
   function exportBusinessReportXlsx() {
+    if (reportStart && reportEnd && reportStart > reportEnd) {
+      showError("La fecha desde no puede ser posterior a la fecha hasta.");
+      return;
+    }
     const start = reportStart || "0000-01-01";
     const end = reportEnd || "9999-12-31";
     const reportReservations = reservations
@@ -1032,12 +1110,12 @@ export function PanelDashboard() {
     if (!canEdit || !isWebComplete) return;
 
     const formData = new FormData(event.currentTarget);
-    const payload = Object.fromEntries(
-      (Object.keys(defaultPanelWebContent) as Array<keyof PublicWebContent>).map((key) => [
-        key,
-        String(formData.get(key) ?? "").trim()
-      ])
-    ) as PublicWebContent;
+    const payload = { ...webContent };
+    (Object.keys(defaultPanelWebContent) as Array<keyof PublicWebContent>).forEach((key) => {
+      if (formData.has(key)) {
+        payload[key] = String(formData.get(key) ?? "").trim();
+      }
+    });
 
     if (payload.heroTitulo.length < 8 || payload.heroSubtitulo.length < 12) {
       showError("La web necesita un titulo y una descripcion principal mas claros.");
@@ -1108,11 +1186,11 @@ export function PanelDashboard() {
           <p className="rounded-2xl border border-cream/15 px-4 py-3">{billingDaysLeft === null ? "Cobro sin fecha" : billingDaysLeft < 0 ? `Vencido hace ${Math.abs(billingDaysLeft)} dias` : billingDaysLeft === 0 ? "Vence hoy" : `Vence en ${billingDaysLeft} dias`}</p>
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link className="inline-flex items-center gap-2 rounded-2xl bg-action px-5 py-3 text-sm font-bold text-white" href={`/${business.slug}`} rel="noopener noreferrer" target="_blank">
+          <Link className="inline-flex items-center gap-2 rounded-2xl bg-action px-5 py-3 text-sm font-bold text-white" href={business.customDomain ? publicWebLink : reservationLink} rel="noopener noreferrer" target="_blank">
             Ver agenda pública <ExternalLink size={16} />
           </Link>
           <button className="inline-flex items-center gap-2 rounded-2xl border border-cream/20 px-5 py-3 text-sm font-bold" onClick={copyPublicLink} type="button">
-            <Copy size={16} /> {copied ? "Link copiado" : "Copiar link"}
+            <Copy size={16} /> {copied ? "Link copiado" : "Copiar reservas"}
           </button>
           <button className="rounded-2xl border border-cream/20 px-5 py-3 text-sm font-bold" onClick={() => auth && signOut(auth)} type="button">
             Cerrar sesión
@@ -1158,21 +1236,40 @@ export function PanelDashboard() {
               <option value="all">Todo</option>
             </select>
           </div>
+          <section className="grid gap-4 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft xl:grid-cols-[1fr_auto] xl:items-center">
+            <div className="flex items-start gap-4">
+              <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${dashboardHealth.tone === "warning" ? "bg-gold/25 text-teal" : "bg-mint text-teal"}`}>
+                {dashboardHealth.tone === "warning" ? <AlertTriangle size={22} /> : <CheckCircle2 size={22} />}
+              </span>
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-ink/45">Estado operativo</p>
+                <h3 className="mt-1 font-display text-2xl font-extrabold text-teal">{dashboardHealth.label}</h3>
+                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-ink/60">{dashboardHealth.text}</p>
+                <p className="mt-3 rounded-2xl bg-cream px-4 py-3 text-sm font-bold text-ink/65">{nextAction}</p>
+              </div>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3 xl:min-w-[460px]">
+              <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-teal px-4 py-3 text-sm font-bold text-cream" onClick={() => setActiveTab("turnos")} type="button">
+                <CalendarCheck size={16} /> Ver turnos
+              </button>
+              <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal" onClick={() => setActiveTab("configuracion")} type="button">
+                <Settings2 size={16} /> Configurar
+              </button>
+              <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-cream px-4 py-3 text-sm font-bold text-teal ring-1 ring-ink/10" href={reservationLink} target="_blank">
+                <Eye size={16} /> Ver agenda
+              </Link>
+            </div>
+          </section>
+
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {[
-              ["Turnos confirmados", confirmedReservations.length],
-              ["Turnos de hoy", todayReservations.length],
-              ["Proximos 7 dias", nextSevenDaysReservations.length],
-              ["Clientes unicos", uniqueClients],
-              ["Ticket promedio", formatCurrency(averageTicket)],
-              ["Asistencia", completedTotal ? `${attendanceRate}%` : "Sin datos"],
-              ["Proximo cobro", formatDateKey(business.nextPaymentDue)]
-            ].map(([label, value]) => (
-              <article className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" key={String(label)}>
-                <p className="text-sm font-bold text-ink/55">{String(label)}</p>
-                <p className="mt-2 font-display text-4xl font-extrabold text-teal">{value}</p>
-              </article>
-            ))}
+            <PanelMetricCard helper={`Reservas no canceladas en ${rangeLabel}.`} icon={<CalendarCheck size={19} />} label="Turnos del rango" tone="strong" value={rangeReservations.length} />
+            <PanelMetricCard helper="Estimado por precio de los servicios reservados." icon={<TrendingUp size={19} />} label="Facturacion estimada" value={formatCurrency(rangeRevenue)} />
+            <PanelMetricCard helper="Promedio por turno dentro del rango elegido." icon={<FileSpreadsheet size={19} />} label="Ticket promedio" value={formatCurrency(averageTicket)} />
+            <PanelMetricCard helper={completedTotal ? "Calculado con turnos atendidos o ausentes." : "Marca turnos como atendidos/ausentes para medir."} icon={<CheckCircle2 size={19} />} label="Asistencia" value={completedTotal ? `${attendanceRate}%` : "Sin datos"} />
+            <PanelMetricCard helper="Turnos confirmados para el dia actual." icon={<Clock3 size={19} />} label="Turnos de hoy" value={todayReservations.length} />
+            <PanelMetricCard helper="Turnos confirmados entre hoy y los proximos 7 dias." icon={<CalendarCheck size={19} />} label="Proximos 7 dias" value={nextSevenDaysReservations.length} />
+            <PanelMetricCard helper="Telefonos unicos en reservas no canceladas." icon={<Users size={19} />} label="Clientes unicos" value={uniqueClients} />
+            <PanelMetricCard helper={billingDaysLeft === null ? "Cargalo desde Super Admin." : billingDaysLeft < 0 ? "Vencido, revisar cobro." : `${billingDaysLeft} dias restantes.`} icon={<Clock3 size={19} />} label="Proximo cobro" tone={billingDaysLeft !== null && billingDaysLeft <= 3 ? "warning" : "default"} value={formatDateKey(business.nextPaymentDue)} />
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
@@ -1198,14 +1295,22 @@ export function PanelDashboard() {
 
             <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
               <h2 className="font-display text-2xl font-extrabold text-teal">Resumen rapido</h2>
+              <p className="mt-2 text-sm font-semibold text-ink/55">Lectura ejecutiva para tomar decisiones sin revisar cada turno.</p>
               <div className="mt-5 grid gap-3">
-                <p className="rounded-2xl bg-mint p-4 text-sm font-bold text-teal">Facturacion estimada del rango: {formatCurrency(rangeRevenue)}</p>
-                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Facturacion estimada total: {formatCurrency(estimatedRevenue)}</p>
-                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Cancelados registrados: {cancelledReservations.length}</p>
-                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Atendidos: {attendedReservations.length}</p>
-                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Ausentes: {noShowReservations.length}</p>
-                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Servicios activos: {activeServices.length}</p>
-                <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Personal activo: {activeStaff.length}</p>
+                {[
+                  ["Facturacion del rango", formatCurrency(rangeRevenue), "bg-mint text-teal"],
+                  ["Facturacion total", formatCurrency(estimatedRevenue), "bg-cream text-ink/65"],
+                  ["Cancelados", cancelledReservations.length, "bg-cream text-ink/65"],
+                  ["Atendidos", attendedReservations.length, "bg-cream text-ink/65"],
+                  ["Ausentes", noShowReservations.length, "bg-cream text-ink/65"],
+                  ["Servicios activos", activeServices.length, "bg-cream text-ink/65"],
+                  ["Personal activo", activeStaff.length, "bg-cream text-ink/65"]
+                ].map(([label, value, className]) => (
+                  <p className={`flex items-center justify-between gap-3 rounded-2xl p-4 text-sm font-bold ${className}`} key={String(label)}>
+                    <span>{String(label)}</span>
+                    <span className="font-display text-lg font-extrabold">{value}</span>
+                  </p>
+                ))}
                 {nextReservation ? <p className="rounded-2xl bg-cream p-4 text-sm font-bold text-ink/65">Proximo turno: {nextReservation.clienteNombre ?? "Cliente"} - {nextReservation.fecha} {nextReservation.hora}</p> : null}
               </div>
             </section>
@@ -1382,7 +1487,7 @@ export function PanelDashboard() {
       ) : null}
 
       {activeTab === "web" && isWebComplete ? (
-      <form className="grid gap-5 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft lg:grid-cols-2" onSubmit={handleWebContent}>
+      <form className="grid gap-5 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft" onSubmit={handleWebContent}>
         <div className="lg:col-span-2">
           <div className="flex items-center gap-3">
             <Building2 className="text-action" />
@@ -1396,6 +1501,7 @@ export function PanelDashboard() {
           </p>
         </div>
 
+        <WebEditSection defaultOpen description="Lo primero que ve el cliente: titulo, subtitulo, botones e imagen principal." title="1. Portada de la web">
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Etiqueta del hero
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.heroEtiqueta} name="heroEtiqueta" />
@@ -1437,7 +1543,9 @@ export function PanelDashboard() {
             <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={value} name={name} />
           </label>
         ))}
+        </WebEditSection>
 
+        <WebEditSection description="Presentacion del negocio y textos que explican que ofrece antes de reservar." title="2. Presentacion y servicios">
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Titulo sobre el negocio
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.sobreTitulo} name="sobreTitulo" />
@@ -1462,7 +1570,9 @@ export function PanelDashboard() {
           Texto servicios
           <textarea className="min-h-24 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.queHacemosTexto} name="queHacemosTexto" />
         </label>
+        </WebEditSection>
 
+        <WebEditSection description="Argumentos de confianza que aparecen en tarjetas dentro de la web." title="3. Beneficios">
         {[
           ["beneficiosEtiqueta", "Etiqueta beneficios", webContent.beneficiosEtiqueta],
           ["beneficio1Titulo", "Beneficio 1 - titulo", webContent.beneficio1Titulo],
@@ -1477,8 +1587,9 @@ export function PanelDashboard() {
             <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={value} name={name} />
           </label>
         ))}
+        </WebEditSection>
 
-        <div className="grid gap-4 rounded-2xl bg-cream p-4 lg:col-span-2 lg:grid-cols-3">
+        <WebEditSection description="Tres opciones o bloques comerciales para destacar servicios, paquetes o propuestas." title="4. Opciones destacadas">
           <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-3">
             Titulo opciones/paquetes
             <input className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 outline-none focus:border-action" defaultValue={webContent.paquetesTitulo} name="paquetesTitulo" />
@@ -1496,8 +1607,9 @@ export function PanelDashboard() {
               <input className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 outline-none focus:border-action" defaultValue={value} name={name} />
             </label>
           ))}
-        </div>
+        </WebEditSection>
 
+        <WebEditSection description="Bloques de experiencia visual: ambiente, trato, confianza y diferenciales." title="5. Experiencia">
         {[
           ["menuEtiqueta", "Etiqueta experiencia", webContent.menuEtiqueta],
           ["menuTitulo", "Titulo experiencia", webContent.menuTitulo],
@@ -1513,7 +1625,9 @@ export function PanelDashboard() {
             <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={value} name={name} />
           </label>
         ))}
+        </WebEditSection>
 
+        <WebEditSection description="Preguntas frecuentes para resolver dudas antes de que el cliente escriba o reserve." title="6. Preguntas frecuentes">
         {[
           ["faqEtiqueta", "Etiqueta FAQ", webContent.faqEtiqueta],
           ["faqTitulo", "Titulo FAQ", webContent.faqTitulo],
@@ -1529,7 +1643,9 @@ export function PanelDashboard() {
             <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={value} name={name} />
           </label>
         ))}
+        </WebEditSection>
 
+        <WebEditSection description="Datos finales, redes, mapa y textos de cierre de la web." title="7. Contacto y cierre">
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Titulo final de reserva
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.finalCtaTitulo} name="finalCtaTitulo" />
@@ -1558,8 +1674,9 @@ export function PanelDashboard() {
           Facebook URL
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.facebook} name="facebook" />
         </label>
+        </WebEditSection>
 
-        <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60 lg:col-span-2" disabled={!canEdit || saving === "web"} type="submit">
+        <button className="sticky bottom-4 z-10 inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream shadow-xl shadow-black/10 disabled:opacity-60" disabled={!canEdit || saving === "web"} type="submit">
           <Save size={18} /> {saving === "web" ? "Guardando web..." : "Guardar contenido de la web"}
         </button>
       </form>
