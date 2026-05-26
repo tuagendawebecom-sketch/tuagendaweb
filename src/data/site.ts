@@ -77,28 +77,28 @@ export const planOverviewNavigation = [
 ];
 
 export const hero = {
-  eyebrow: "Agenda online lista para vender por Instagram",
-  title: "Deja que tus clientes reserven turno sin escribirte mil veces.",
+  eyebrow: "Turnos online para negocios locales",
+  title: "Tu agenda online lista para recibir reservas desde el celular.",
   subtitle:
-    "Te preparo una agenda online para que tu negocio reciba reservas desde el celular, con servicios, horarios, personal, sucursales y panel para administrarlo todo.",
+    "Configuramos tu negocio con servicios, horarios, personal, sucursales y un panel simple para que ordenes los turnos sin depender de coordinar todo por mensaje.",
   support:
-    "Ideal para barberias, estetica, unas, peluquerias y profesionales que hoy coordinan por WhatsApp o Instagram.",
-  price: "Promo lanzamiento: $10.000/mes",
+    "Ideal para barberias, estetica, uñas, peluquerias, consultorios, canchas y profesionales que trabajan con turnos.",
+  price: "Agenda Full desde $10.000/mes",
   primaryCta: "Quiero probar Agenda Full",
   secondaryCta: "Ver Web Completa"
 };
 
 export const trustSignals = [
-  "Link listo para pegar en la bio de Instagram",
+  "Link de reserva propio para tu negocio",
   "Tus clientes eligen servicio, dia y horario",
-  "Panel simple para ver turnos y configurar tu negocio",
-  "WhatsApp sigue siendo tu canal de venta"
+  "Panel simple para administrar todo",
+  "WhatsApp sigue siendo tu canal de contacto"
 ] as const;
 
 export const heroMicroProof = [
   "Sin instalar apps",
   "Sin dominio obligatorio",
-  "Activacion rapida"
+  "Listo para usar"
 ] as const;
 
 export const launchOfferHighlights = [
@@ -129,7 +129,7 @@ export const quickTrustNotes = [
 export const conversionProof = [
   ["Para el cliente", "Reserva desde el celular sin esperar una respuesta manual."],
   ["Para el negocio", "Turnos, servicios, personal y sucursales quedan en un panel propio."],
-  ["Para vender mejor", "El link se puede pegar en Instagram, WhatsApp, historias, bio o anuncios."],
+  ["Para ordenar la agenda", "Cada reserva queda registrada con servicio, horario, profesional y sucursal."],
   ["Para empezar rápido", "Agenda Full no exige dominio propio ni una web completa desde el día uno."]
 ] as const;
 
@@ -153,7 +153,7 @@ export const reassuranceItems = [
 ] as const;
 
 export const fitChecklist = [
-  "Tenés clientes que te piden turnos por WhatsApp o Instagram.",
+  "Tenés clientes que te piden turnos por mensajes.",
   "Necesitás mostrar servicios, horarios y una forma clara de reservar.",
   "Querés separar consultas reales del ida y vuelta repetitivo.",
   "Querés verte más profesional sin sumar una herramienta complicada."
