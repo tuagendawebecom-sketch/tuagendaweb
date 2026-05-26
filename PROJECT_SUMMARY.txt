@@ -894,6 +894,31 @@ Validacion:
 - npm run lint: OK.
 - npm run build: OK.
 
+Correccion routing dominio propio existente
+
+Fecha: 2026-05-25
+
+Problema:
+- `exoticlenceria.com.ar` podia seguir mostrando la landing principal si el negocio fue creado antes de guardar `customDomain`.
+- Super Admin permitia cargar dominio propio al crear negocios nuevos, pero no editarlo facilmente en negocios ya creados.
+
+Correccion:
+- Super Admin ahora permite editar `customDomain` en cada negocio existente desde la lista.
+- El input normaliza `https://`, `www.` y rutas finales.
+- La lista muestra links directos a la web del dominio y a `/reservas`.
+- La resolucion server-side por dominio propio ahora tiene fallback por slug derivado del host.
+- Ejemplo: si el dominio `exoticlenceria.com.ar` no encuentra `customDomain`, intenta resolver `slug = exoticlenceria`.
+
+Accion operativa:
+- En Super Admin, buscar Exotic Lenceria.
+- En "Dominio propio", cargar `exoticlenceria.com.ar`.
+- Confirmar que el negocio tenga plan `Web Completa`.
+- Abrir `https://exoticlenceria.com.ar` y `https://exoticlenceria.com.ar/reservas`.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+
 Correccion conceptual Web Completa
 
 Fecha: 2026-05-25

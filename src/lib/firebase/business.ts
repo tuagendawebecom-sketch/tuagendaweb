@@ -1,5 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "./admin";
+import { normalizeSlug } from "@/lib/slug";
 import type { LeadInterestPlan, PublicBranch, PublicBusiness, PublicScheduleConfig, PublicStaff, PublicWebContent } from "@/types/tenant";
 
 export const defaultScheduleConfig: PublicScheduleConfig = {
@@ -108,8 +109,19 @@ export async function getBusinessByCustomDomain(hostname: string) {
   if (!normalizedHost) return null;
 
   const candidates = Array.from(new Set([normalizedHost, rawHost].filter(Boolean)));
-  const snapshot = await db.collection("negocios").where("customDomain", "in", candidates).limit(1).get();
-  const doc = snapshot.docs[0];
+  const domainSnapshot = await db.collection("negocios").where("customDomain", "in", candidates).limit(1).get();
+  let doc = domainSnapshot.docs[0];
+
+  if (!doc) {
+    const hostParts = normalizedHost.split(".");
+    const slugBase = hostParts.length > 2 ? hostParts.slice(0, -2).join("-") : hostParts[0];
+    const slugCandidate = normalizeSlug(slugBase);
+    if (slugCandidate) {
+      const slugSnapshot = await db.collection("negocios").where("slug", "==", slugCandidate).limit(1).get();
+      doc = slugSnapshot.docs[0];
+    }
+  }
+
   if (doc?.data().archived === true) return null;
   return doc ? serializeBusiness(doc.id, doc.data()) : null;
 }

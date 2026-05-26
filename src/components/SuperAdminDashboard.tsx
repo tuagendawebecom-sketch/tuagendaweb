@@ -157,6 +157,15 @@ function formatLastPayment(value: AdminBusiness["lastPaymentAt"]) {
   return new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle: "short" }).format(date);
 }
 
+function normalizeCustomDomainInput(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/.*$/, "");
+}
+
 function toBusiness(id: string, data: Record<string, unknown>): AdminBusiness {
   return {
     id,
@@ -425,6 +434,26 @@ export function SuperAdminDashboard() {
       setMessage(`${business.nombre}: fecha actualizada.`);
     } catch {
       setError("No se pudo actualizar la fecha del negocio.");
+    }
+  }
+
+  async function updateBusinessCustomDomain(business: AdminBusiness, value: string) {
+    if (!db) return;
+    const customDomain = normalizeCustomDomainInput(value);
+    if (customDomain && !/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(customDomain)) {
+      setError("Revisá el dominio propio. Usá un formato como exoticlenceria.com.ar.");
+      return;
+    }
+
+    setError("");
+    try {
+      await updateDoc(doc(db, "negocios", business.id), {
+        customDomain,
+        updatedAt: serverTimestamp()
+      });
+      setMessage(customDomain ? `${business.nombre}: dominio propio actualizado.` : `${business.nombre}: dominio propio eliminado.`);
+    } catch {
+      setError("No se pudo actualizar el dominio propio.");
     }
   }
 
@@ -726,12 +755,16 @@ export function SuperAdminDashboard() {
                 <span className="rounded-full bg-cream px-3 py-1 text-xs font-bold text-ink/60">{formatCurrency(business.monthlyPrice)}</span>
               </div>
               <p className="mt-2 text-sm font-semibold text-ink/62">{business.rubro ?? "Sin rubro"} · {business.ownerNombre ?? "Sin dueño asignado"}</p>
-              {business.customDomain ? (
-                <Link className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-teal" href={`https://${business.customDomain}`} rel="noopener noreferrer" target="_blank">
-                  Dominio propio: {business.customDomain} <ExternalLink size={16} />
-                </Link>
-              ) : null}
               <div className="mt-3 grid gap-2 text-sm font-bold text-ink/62 sm:grid-cols-2 xl:grid-cols-4">
+                <label className="grid gap-1 sm:col-span-2">
+                  Dominio propio
+                  <input
+                    className="rounded-xl border border-ink/10 bg-cream px-3 py-2 text-sm outline-none focus:border-action"
+                    defaultValue={business.customDomain ?? ""}
+                    onBlur={(event) => updateBusinessCustomDomain(business, event.target.value)}
+                    placeholder="exoticlenceria.com.ar"
+                  />
+                </label>
                 <label className="grid gap-1">
                   Alta
                   <input className="rounded-xl border border-ink/10 bg-cream px-3 py-2 text-sm outline-none focus:border-action" defaultValue={signupFallback ?? ""} onBlur={(event) => updateBusinessBillingDate(business, "signupDate", event.target.value)} type="date" />
@@ -748,6 +781,16 @@ export function SuperAdminDashboard() {
               <Link className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-action" href={`/${business.slug}`} rel="noopener noreferrer" target="_blank">
                 {siteUrl}/{business.slug} <ExternalLink size={16} />
               </Link>
+              {business.customDomain ? (
+                <div className="mt-2 flex flex-wrap gap-3 text-sm font-bold">
+                  <Link className="inline-flex items-center gap-2 text-teal" href={`https://${business.customDomain}`} rel="noopener noreferrer" target="_blank">
+                    Web: {business.customDomain} <ExternalLink size={16} />
+                  </Link>
+                  <Link className="inline-flex items-center gap-2 text-teal" href={`https://${business.customDomain}/reservas`} rel="noopener noreferrer" target="_blank">
+                    Reservas: /reservas <ExternalLink size={16} />
+                  </Link>
+                </div>
+              ) : null}
             </div>
             <div className="flex flex-wrap gap-2 lg:justify-end">
               <button className="inline-flex items-center gap-2 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal" onClick={() => copyPublicLink(business.slug)} type="button">
