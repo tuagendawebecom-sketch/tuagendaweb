@@ -77,13 +77,15 @@ function BrandMark({ business, primary, secondary }: { business: PublicBusiness;
   const logoSrc = getImageSrc(business.logoUrl);
   return (
     <span
-      className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full text-sm font-black ring-1 ring-black/10"
-      style={{ backgroundColor: `${secondary}55`, color: primary }}
+      className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full border-2 bg-white text-sm font-black shadow-sm ring-1 ring-black/5 sm:h-[60px] sm:w-[60px]"
+      style={{ borderColor: `${secondary}AA`, color: primary }}
     >
       {logoSrc ? (
-        <img alt={`Logo de ${business.nombre}`} className="h-full w-full object-contain p-1.5" src={logoSrc} />
+        <img alt={`Logo de ${business.nombre}`} className="h-full w-full object-cover" src={logoSrc} />
       ) : (
-        business.initials ?? getInitials(business.nombre)
+        <span className="grid h-full w-full place-items-center" style={{ backgroundColor: `${secondary}55` }}>
+          {business.initials ?? getInitials(business.nombre)}
+        </span>
       )}
     </span>
   );
@@ -189,14 +191,14 @@ export function PublicWebCompletePage({
   return (
     <main className="min-h-screen overflow-x-clip bg-[#f4f3ee] text-[#101c19]">
       <header className="sticky top-0 z-40 border-b bg-[#f4f3ee]/94 backdrop-blur-xl" style={borderStyle}>
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <Link className="flex min-w-0 items-center gap-3" href="/">
+        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+          <Link className="flex min-w-0 items-center gap-3.5" href="/">
             <BrandMark business={business} primary={primary} secondary={secondary} />
-            <span className="min-w-0">
-              <span className="block truncate font-display text-lg font-black tracking-tight" style={primaryTextStyle}>
+            <span className="min-w-0 leading-none">
+              <span className="block max-w-[42vw] truncate font-display text-lg font-black tracking-tight sm:max-w-[260px] sm:text-xl" style={primaryTextStyle}>
                 {business.nombre}
               </span>
-              <span className="block truncate text-xs font-bold text-[#52615d]">
+              <span className="mt-1 block max-w-[42vw] truncate text-xs font-bold leading-tight text-[#52615d] sm:max-w-[260px]">
                 {webContent.landingSubtituloMarca || business.rubro || "Reservas online"}
               </span>
             </span>
