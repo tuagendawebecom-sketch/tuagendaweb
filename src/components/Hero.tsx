@@ -1,6 +1,6 @@
-import { ArrowDown, CheckCircle2, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowDown, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { hero, heroMicroProof, trustSignals, whatsappMessages } from "@/data/site";
+import { hero, heroMicroProof, whatsappMessages } from "@/data/site";
 import { createWhatsAppHref } from "@/lib/whatsapp";
 import { WhatsAppButton } from "./WhatsAppButton";
 
@@ -87,10 +87,10 @@ export function Hero() {
           <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-gold/25 px-4 py-2 text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-teal shadow-soft sm:mb-5 sm:text-sm">
             <Sparkles size={15} /> {hero.eyebrow}
           </p>
-          <h1 className="max-w-3xl text-balance font-display text-[2.25rem] font-extrabold leading-[1.03] text-teal min-[390px]:text-[2.45rem] sm:text-5xl lg:text-[3.7rem] xl:text-[4.05rem]">
+          <h1 className="max-w-3xl text-balance font-display text-[2.55rem] font-extrabold leading-[1.02] text-teal min-[390px]:text-[2.8rem] sm:text-6xl lg:text-[4.25rem]">
             {hero.title}
           </h1>
-          <p className="mt-4 max-w-2xl text-[1.02rem] font-semibold leading-7 text-ink/72 sm:text-lg sm:leading-8">
+          <p className="mt-4 max-w-xl text-[1.04rem] font-semibold leading-7 text-ink/72 sm:text-lg sm:leading-8">
             {hero.subtitle}
           </p>
 
@@ -102,13 +102,10 @@ export function Hero() {
             ))}
           </div>
 
-          <div className="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
-            <span className="rounded-2xl border border-teal/15 bg-paper px-4 py-3 text-center font-display text-xl font-extrabold text-teal shadow-soft">
-              {hero.price}
-            </span>
-            <span className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal px-4 py-3 text-center text-sm font-extrabold leading-6 text-cream shadow-soft">
-              <CheckCircle2 className="text-gold" size={18} /> Web Completa: $100.000 pago unico
-            </span>
+          <div className="mt-5 inline-flex max-w-full flex-wrap items-center gap-2 rounded-2xl border border-teal/12 bg-paper px-4 py-3 font-bold text-teal shadow-soft">
+            <span>{hero.price}</span>
+            <span className="hidden text-ink/25 sm:inline">|</span>
+            <span>Web Completa: $100.000 pago único</span>
           </div>
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
@@ -116,22 +113,6 @@ export function Hero() {
             <Link className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-teal px-5 py-3 text-sm font-bold text-teal transition hover:bg-mint sm:w-auto" href="#web-completa">
               {hero.secondaryCta} <ArrowDown size={18} />
             </Link>
-          </div>
-          <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-ink/55">
-            <MessageCircle className="text-action" size={17} /> Te respondo por WhatsApp y vemos si encaja para tu rubro.
-          </p>
-
-          <p className="mt-4 max-w-2xl text-sm font-bold leading-6 text-ink/58">
-            {hero.support}
-          </p>
-
-          <div className="mt-5 hidden gap-2 sm:grid sm:grid-cols-2">
-            {trustSignals.map((signal) => (
-              <p className="flex items-start gap-2 rounded-2xl bg-paper/80 px-4 py-3 text-sm font-semibold leading-5 text-ink/68 shadow-soft" key={signal}>
-                <CheckCircle2 className="mt-0.5 shrink-0 text-action" size={17} />
-                {signal}
-              </p>
-            ))}
           </div>
         </div>
 

@@ -78,9 +78,9 @@ export const planOverviewNavigation = [
 
 export const hero = {
   eyebrow: "Agenda online + panel para tu negocio",
-  title: "Turnos online para tu negocio desde $10.000/mes.",
+  title: "Turnos online para tu negocio.",
   subtitle:
-    "Tus clientes reservan desde el celular y vos administrás turnos, servicios, personal, sucursales y datos del negocio desde un panel simple.",
+    "Desde $10.000/mes. Tus clientes reservan desde el celular y vos administrás todo desde un panel simple.",
   support:
     "Para barberias, estética, uñas, peluquerías, consultorios, canchas y profesionales que trabajan con agenda.",
   price: "Agenda Full: $10.000/mes",
