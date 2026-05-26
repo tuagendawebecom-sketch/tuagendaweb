@@ -159,7 +159,7 @@ export function PublicWebCompletePage({
         <div className="mx-auto flex max-w-6xl flex-col gap-5 rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft md:flex-row md:items-center md:justify-between">
           <div>
             <p className="font-display text-2xl font-extrabold" style={{ color: primary }}>{business.nombre}</p>
-            <p className="mt-2 text-sm font-semibold text-ink/55">Reservas online por TuAgendaWeb</p>
+            <p className="mt-2 text-sm font-semibold text-ink/55">Web propia con reserva online</p>
           </div>
           <div className="flex flex-wrap gap-3">
             {business.instagram ? <Link className="inline-flex items-center gap-2 rounded-2xl bg-cream px-4 py-3 text-sm font-bold text-teal" href={business.instagram} target="_blank"><Camera size={16} /> Instagram</Link> : null}

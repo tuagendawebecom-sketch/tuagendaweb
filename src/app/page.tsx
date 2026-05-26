@@ -56,7 +56,7 @@ export default async function Home() {
           schedule: defaultScheduleConfig,
           availableDates: []
         })),
-        getPublicWebContent(business.id)
+        getPublicWebContent(business.id, business)
       ]);
       return (
         <PublicWebCompletePage

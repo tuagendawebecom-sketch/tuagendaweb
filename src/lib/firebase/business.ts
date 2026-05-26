@@ -20,26 +20,45 @@ export const defaultScheduleConfig: PublicScheduleConfig = {
   }
 };
 
-export const defaultWebContent: PublicWebContent = {
-  heroEtiqueta: "Reservas online",
-  heroTitulo: "Una experiencia profesional para reservar desde el celular.",
-  heroSubtitulo: "Mostramos tus servicios, horarios, profesionales y formas de contacto en una web clara para que tus clientes puedan pedir turno sin vueltas.",
-  ctaPrincipalTexto: "Reservar turno",
-  sobreTitulo: "Una web pensada para tu forma de atender",
-  sobreTexto: "TuAgendaWeb adapta la presencia online del negocio para que cada cliente entienda que ofrecés, cómo reservar y cómo contactarte.",
-  beneficiosTitulo: "Por qué ayuda a tu negocio",
-  beneficio1Titulo: "Menos mensajes repetidos",
-  beneficio1Texto: "El cliente puede ver servicios, elegir día y horario sin esperar respuesta.",
-  beneficio2Titulo: "Imagen más profesional",
-  beneficio2Texto: "Tu negocio tiene una web propia, clara y alineada con tu identidad.",
-  beneficio3Titulo: "Agenda más ordenada",
-  beneficio3Texto: "Los turnos quedan registrados y el panel ayuda a revisar reservas, clientes y servicios.",
-  finalCtaTitulo: "Reservá tu próximo turno",
-  finalCtaTexto: "Elegí servicio, profesional, sucursal, día y horario desde esta misma página.",
-  heroImageUrl: "",
-  mapaLinkUrl: "",
-  facebook: ""
-};
+export function buildDefaultWebContent(input: { nombre?: string; rubro?: string } = {}): PublicWebContent {
+  const nombre = input.nombre?.trim() || "Tu negocio";
+  const rubro = input.rubro?.trim() || "Atencion personalizada";
+  const normalizedRubro = rubro.toLowerCase();
+  const isBeauty = /estet|belleza|peluquer|unas|cejas|pesta|masaje|spa/.test(normalizedRubro);
+  const isShop = /tienda|lencer|ropa|boutique|moda|indumentaria/.test(normalizedRubro);
+
+  const heroTitulo = isShop
+    ? `${nombre}: una experiencia cuidada para conocer, consultar y reservar`
+    : `${nombre}: reservas online y atencion profesional`;
+  const heroSubtitulo = isBeauty
+    ? `Conoce los servicios de ${nombre}, elegi profesional, dia y horario, y reserva desde el celular con una experiencia simple y prolija.`
+    : isShop
+      ? `Descubri la propuesta de ${nombre}, consulta por WhatsApp y reserva una atencion personalizada desde el celular.`
+      : `Conoce la propuesta de ${nombre}, revisa disponibilidad y reserva tu turno desde el celular.`;
+
+  return {
+    heroEtiqueta: rubro,
+    heroTitulo,
+    heroSubtitulo,
+    ctaPrincipalTexto: "Reservar turno",
+    sobreTitulo: `Sobre ${nombre}`,
+    sobreTexto: `${nombre} cuenta con una web propia para mostrar su propuesta, ordenar consultas y recibir reservas online de forma clara para cada cliente.`,
+    beneficiosTitulo: "Una forma mas simple de atender",
+    beneficio1Titulo: "Reserva desde el celular",
+    beneficio1Texto: "El cliente puede elegir servicio, dia y horario sin esperar una respuesta manual.",
+    beneficio2Titulo: "Informacion clara",
+    beneficio2Texto: "Servicios, horarios, contacto y redes quedan reunidos en una experiencia profesional.",
+    beneficio3Titulo: "Mejor organizacion",
+    beneficio3Texto: "Cada reserva queda registrada para que el negocio pueda administrar su agenda desde el panel.",
+    finalCtaTitulo: `Reserva en ${nombre}`,
+    finalCtaTexto: "Elegi servicio, profesional, sucursal, dia y horario desde esta misma pagina.",
+    heroImageUrl: "",
+    mapaLinkUrl: "",
+    facebook: ""
+  };
+}
+
+export const defaultWebContent: PublicWebContent = buildDefaultWebContent();
 
 function serializeBusiness(id: string, data: FirebaseFirestore.DocumentData): PublicBusiness {
   return {
@@ -181,34 +200,35 @@ export async function getPublicScheduleConfig(negocioId: string): Promise<Public
   };
 }
 
-function readText(data: FirebaseFirestore.DocumentData | undefined, key: keyof PublicWebContent) {
+function readText(data: FirebaseFirestore.DocumentData | undefined, key: keyof PublicWebContent, defaults: PublicWebContent) {
   const value = data?.[key];
-  return typeof value === "string" && value.trim() ? value.trim() : defaultWebContent[key];
+  return typeof value === "string" && value.trim() ? value.trim() : defaults[key];
 }
 
-export async function getPublicWebContent(negocioId: string): Promise<PublicWebContent> {
+export async function getPublicWebContent(negocioId: string, business?: Pick<PublicBusiness, "nombre" | "rubro">): Promise<PublicWebContent> {
+  const defaults = buildDefaultWebContent({ nombre: business?.nombre, rubro: business?.rubro });
   const db = getAdminDb();
-  if (!db) return defaultWebContent;
+  if (!db) return defaults;
 
   const snapshot = await db.collection("negocios").doc(negocioId).collection("configuracion").doc("general").get();
   const data = snapshot.data();
 
   return {
-    heroEtiqueta: readText(data, "heroEtiqueta"),
-    heroTitulo: readText(data, "heroTitulo"),
-    heroSubtitulo: readText(data, "heroSubtitulo"),
-    ctaPrincipalTexto: readText(data, "ctaPrincipalTexto"),
-    sobreTitulo: readText(data, "sobreTitulo"),
-    sobreTexto: readText(data, "sobreTexto"),
-    beneficiosTitulo: readText(data, "beneficiosTitulo"),
-    beneficio1Titulo: readText(data, "beneficio1Titulo"),
-    beneficio1Texto: readText(data, "beneficio1Texto"),
-    beneficio2Titulo: readText(data, "beneficio2Titulo"),
-    beneficio2Texto: readText(data, "beneficio2Texto"),
-    beneficio3Titulo: readText(data, "beneficio3Titulo"),
-    beneficio3Texto: readText(data, "beneficio3Texto"),
-    finalCtaTitulo: readText(data, "finalCtaTitulo"),
-    finalCtaTexto: readText(data, "finalCtaTexto"),
+    heroEtiqueta: readText(data, "heroEtiqueta", defaults),
+    heroTitulo: readText(data, "heroTitulo", defaults),
+    heroSubtitulo: readText(data, "heroSubtitulo", defaults),
+    ctaPrincipalTexto: readText(data, "ctaPrincipalTexto", defaults),
+    sobreTitulo: readText(data, "sobreTitulo", defaults),
+    sobreTexto: readText(data, "sobreTexto", defaults),
+    beneficiosTitulo: readText(data, "beneficiosTitulo", defaults),
+    beneficio1Titulo: readText(data, "beneficio1Titulo", defaults),
+    beneficio1Texto: readText(data, "beneficio1Texto", defaults),
+    beneficio2Titulo: readText(data, "beneficio2Titulo", defaults),
+    beneficio2Texto: readText(data, "beneficio2Texto", defaults),
+    beneficio3Titulo: readText(data, "beneficio3Titulo", defaults),
+    beneficio3Texto: readText(data, "beneficio3Texto", defaults),
+    finalCtaTitulo: readText(data, "finalCtaTitulo", defaults),
+    finalCtaTexto: readText(data, "finalCtaTexto", defaults),
     heroImageUrl: typeof data?.heroImageUrl === "string" ? data.heroImageUrl.trim() : "",
     mapaLinkUrl: typeof data?.mapaLinkUrl === "string" ? data.mapaLinkUrl.trim() : "",
     facebook: typeof data?.facebook === "string" ? data.facebook.trim() : ""

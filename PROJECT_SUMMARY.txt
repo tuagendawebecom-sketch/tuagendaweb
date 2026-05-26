@@ -894,6 +894,31 @@ Validacion:
 - npm run lint: OK.
 - npm run build: OK.
 
+Correccion conceptual Web Completa
+
+Fecha: 2026-05-25
+
+Problema:
+- La Web Completa podia sentirse demasiado parecida a la landing principal de TuAgendaWeb.
+- El objetivo correcto es que cada dominio propio parezca la web del negocio cliente, no una copia de TuAgendaWeb.
+
+Correccion:
+- Se reemplazaron textos por defecto que mencionaban a TuAgendaWeb dentro de la web del cliente.
+- Los defaults de Web Completa ahora se generan con nombre y rubro del negocio.
+- Al crear una Web Completa, la API guarda textos iniciales adaptados al negocio.
+- Si un negocio viejo no tiene textos guardados, la web publica genera defaults usando `nombre` y `rubro`.
+- El footer publico del cliente ya no dice "Reservas online por TuAgendaWeb"; queda como web propia con reserva online.
+- La pestaña "Web completa" del panel muestra textos neutros del negocio, no copy interno de TuAgendaWeb.
+
+Regla:
+- TuAgendaWeb es el motor y panel.
+- El dominio propio debe verse como la marca del cliente.
+- La firma de TuAgendaWeb debe ser minima o invisible, salvo que se decida mostrarla comercialmente.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+
 Ajuste Super Admin - dominio propio en alta de negocio
 
 Fecha: 2026-05-25

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { normalizePhone } from "@/lib/phone";
 import { isValidSlug, normalizeSlug } from "@/lib/slug";
 import { requireSuperAdmin } from "@/lib/firebase/superadmin";
+import { buildDefaultWebContent } from "@/lib/firebase/business";
 import type { BusinessPlan } from "@/types/tenant";
 
 export const dynamic = "force-dynamic";
@@ -107,6 +108,7 @@ export async function POST(request: Request) {
   const signupDate = isDateKey(clean(body?.signupDate)) ? clean(body?.signupDate) : todayKey();
   const nextPaymentDue = isDateKey(clean(body?.nextPaymentDue)) ? clean(body?.nextPaymentDue) : addMonths(signupDate, 1);
   const customDomain = normalizeCustomDomain(body?.customDomain);
+  const rubro = clean(body?.rubro);
 
   if (!nombre || !isValidSlug(slug)) {
     return NextResponse.json({ ok: false, error: "invalid_business" }, { status: 400 });
@@ -180,7 +182,7 @@ export async function POST(request: Request) {
     activo: true,
     archived: false,
     billingStatus: "manual_active",
-    rubro: clean(body?.rubro),
+    rubro,
     ownerNombre: clean(body?.ownerNombre),
     ownerEmail,
     ownerTelefono: clean(body?.ownerTelefono),
@@ -220,6 +222,7 @@ export async function POST(request: Request) {
 
   await businessRef.collection("configuracion").doc("general").set({
     ...defaultScheduleConfig,
+    ...(plan === "web_completa" ? buildDefaultWebContent({ nombre, rubro }) : {}),
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp()
   });

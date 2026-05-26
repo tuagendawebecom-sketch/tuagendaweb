@@ -61,6 +61,8 @@
 - No prometer funciones no implementadas; usar “próximamente” o “a cotizar”.
 - La edicion de secciones publicas de Web Completa solo debe estar visible para negocios con plan `web_completa`.
 - Agenda Full puede editar datos publicos, logo/iniciales, colores de reserva, servicios, personal, sucursales y horarios, pero no secciones comerciales de web completa.
+- La Web Completa con dominio propio debe sentirse como la web del cliente, no como una copia de la landing principal de TuAgendaWeb.
+- En webs completas, TuAgendaWeb es motor/panel interno; la marca visible principal debe ser la del cliente.
 
 ## Validación
 

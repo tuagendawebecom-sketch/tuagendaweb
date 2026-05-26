@@ -52,7 +52,7 @@ export default async function PublicSlugPage({ params }: PublicSlugPageProps) {
   const canReserve = canReserveBusiness(business);
 
   if (business.plan === "web_completa") {
-    const webContent = await getPublicWebContent(business.id).catch(() => null);
+    const webContent = await getPublicWebContent(business.id, business).catch(() => null);
     if (webContent) {
       return <PublicWebCompletePage bookingData={bookingData} business={business} canReserve={canReserve} webContent={webContent} />;
     }
