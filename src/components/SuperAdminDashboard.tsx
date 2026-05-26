@@ -484,7 +484,7 @@ export function SuperAdminDashboard() {
       business.slug,
       `${siteUrl}/${business.slug}`,
       business.customDomain ?? "",
-      business.customDomain ? `https://${business.customDomain}/reservas` : "",
+      business.customDomain ? `https://${business.customDomain}/reservar` : "",
       planLabels[business.plan],
       statusLabels[business.estado],
       business.ownerNombre ?? "",
@@ -786,8 +786,8 @@ export function SuperAdminDashboard() {
                   <Link className="inline-flex items-center gap-2 text-teal" href={`https://${business.customDomain}`} rel="noopener noreferrer" target="_blank">
                     Web: {business.customDomain} <ExternalLink size={16} />
                   </Link>
-                  <Link className="inline-flex items-center gap-2 text-teal" href={`https://${business.customDomain}/reservas`} rel="noopener noreferrer" target="_blank">
-                    Reservas: /reservas <ExternalLink size={16} />
+                  <Link className="inline-flex items-center gap-2 text-teal" href={`https://${business.customDomain}/reservar`} rel="noopener noreferrer" target="_blank">
+                    Reservas: /reservar <ExternalLink size={16} />
                   </Link>
                 </div>
               ) : null}

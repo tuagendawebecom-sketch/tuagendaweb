@@ -63,7 +63,7 @@ export default async function Home() {
           bookingData={bookingData}
           business={business}
           canReserve={canReserveBusiness(business)}
-          reservationHref="/reservas"
+          reservationHref="/reservar"
           showBackLink={false}
           showBookingSection={false}
           webContent={webContent}

@@ -1015,6 +1015,44 @@ Validacion:
 - npm run build: OK.
 - npm run test:smoke en localhost:3001: OK.
 
+Correccion de Web Completa y dominios propios
+
+Fecha: 2026-05-25
+
+Que se corrigio:
+- Web Completa ya no usa una copia reducida de la landing principal de TuAgendaWeb.
+- Se adapto el concepto de landing editable del proyecto `turnero-mvp`: hero con imagen, servicios, beneficios, opciones, experiencia, contacto, mapa, FAQ y CTA final.
+- Los datos salen de `negocios/{negocioId}/configuracion/general` y se editan desde la pestaña "Web" del panel del cliente.
+- Agenda Full sigue sin ver la edicion de secciones de la web; solo Web Completa tiene esa pestaña.
+- `tuagendaweb.com.ar/[slug]` redirige al dominio propio cuando el negocio tiene `customDomain`.
+- En dominio propio, `/` muestra la web comercial del cliente.
+- En dominio propio, `/reservar` muestra la reserva del negocio.
+- `/reservas` se conserva como alias de compatibilidad, pero el link recomendado para clientes es `/reservar`.
+- Super Admin ahora muestra/exporta el link de reservas como `/reservar`.
+
+Archivos modificados:
+- `src/components/PublicWebCompletePage.tsx`
+- `src/components/PanelDashboard.tsx`
+- `src/components/SuperAdminDashboard.tsx`
+- `src/lib/firebase/business.ts`
+- `src/types/tenant.ts`
+- `src/app/page.tsx`
+- `src/app/[slug]/page.tsx`
+- `src/app/reservar/page.tsx`
+- `AGENTS.md`
+
+Como probar Exotic Lenceria:
+1. Crear o editar el negocio con plan `Web Completa`.
+2. Cargar `customDomain` como `exoticlenceria.com.ar` sin `https://`, sin `www` y sin ruta.
+3. Verificar que el negocio este `active` o `trial`.
+4. Abrir `https://exoticlenceria.com.ar` para ver la landing del cliente.
+5. Abrir `https://exoticlenceria.com.ar/reservar` para probar reservas.
+6. Abrir `https://tuagendaweb.com.ar/exoticlenceria`; debe redirigir al dominio propio.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+
 Unificacion Agenda Full / Web Completa
 
 Fecha: 2026-05-25

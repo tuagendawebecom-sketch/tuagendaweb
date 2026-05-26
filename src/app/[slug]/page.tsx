@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { PublicBookingFlow } from "@/components/PublicBookingFlow";
 import { PublicWebCompletePage } from "@/components/PublicWebCompletePage";
 import { siteUrl } from "@/data/site";
@@ -52,6 +52,9 @@ export default async function PublicSlugPage({ params }: PublicSlugPageProps) {
   const canReserve = canReserveBusiness(business);
 
   if (business.plan === "web_completa") {
+    if (business.customDomain) {
+      redirect(`https://${business.customDomain}`);
+    }
     const webContent = await getPublicWebContent(business.id, business).catch(() => null);
     if (webContent) {
       return <PublicWebCompletePage bookingData={bookingData} business={business} canReserve={canReserve} webContent={webContent} />;

@@ -106,19 +106,78 @@ const defaultPanelWebContent: PublicWebContent = {
   heroTitulo: "Tu negocio con una web propia y reservas online.",
   heroSubtitulo: "Mostra tu propuesta, servicios, horarios, redes y formas de contacto en una experiencia clara para tus clientes.",
   ctaPrincipalTexto: "Reservar turno",
+  ctaSecundarioTexto: "Consultar por WhatsApp",
+  landingSubtituloMarca: "Reservas online",
+  navServiciosTexto: "Servicios",
+  navBeneficiosTexto: "Beneficios",
+  navPaquetesTexto: "Opciones",
+  navContactoTexto: "Contacto",
+  heroCardEtiqueta: "Reserva online",
+  heroCardTitulo: "Tu proximo turno empieza aca.",
+  heroCardTexto: "Elegis servicio, profesional, dia y horario en pocos pasos.",
   sobreTitulo: "Sobre el negocio",
   sobreTexto: "Esta seccion puede contar que hace el negocio, que lo diferencia y como quiere recibir a sus clientes.",
+  serviciosEtiqueta: "Servicios",
+  queHacemosTitulo: "Servicios claros y faciles de reservar.",
+  queHacemosTexto: "Cada servicio puede mostrar duracion, precio y disponibilidad para que el cliente avance sin dudas.",
+  beneficiosEtiqueta: "Beneficios",
   beneficiosTitulo: "Una forma mas simple de atender",
+  beneficioDetalleTexto: "Una experiencia mas clara, humana y consistente para cada cliente.",
   beneficio1Titulo: "Reserva desde el celular",
   beneficio1Texto: "El cliente puede elegir servicio, dia y horario sin esperar una respuesta manual.",
   beneficio2Titulo: "Informacion clara",
   beneficio2Texto: "Servicios, horarios, contacto y redes quedan reunidos en una experiencia profesional.",
   beneficio3Titulo: "Mejor organizacion",
   beneficio3Texto: "Cada reserva queda registrada para administrar la agenda desde el panel.",
+  paquetesEtiqueta: "Opciones",
+  paquetesTitulo: "Elegí la opción que mejor se adapte a lo que necesitás.",
+  paquete1Nombre: "Atención completa",
+  paquete1Texto: "Para clientes que buscan una atención más detallada o personalizada.",
+  paquete1Feature1: "Servicio principal",
+  paquete1Feature2: "Reserva online",
+  paquete1Feature3: "Contacto directo",
+  paquete2Nombre: "Servicio destacado",
+  paquete2Texto: "La opción ideal para mostrar lo más pedido del negocio.",
+  paquete2Feature1: "Duración clara",
+  paquete2Feature2: "Profesional asignado",
+  paquete2Feature3: "Agenda organizada",
+  paquete3Nombre: "Consulta rápida",
+  paquete3Texto: "Para resolver una necesidad concreta con una reserva simple.",
+  paquete3Feature1: "Turno puntual",
+  paquete3Feature2: "Confirmación online",
+  paquete3Feature3: "WhatsApp disponible",
+  menuEtiqueta: "Experiencia",
+  menuTitulo: "Una presencia digital prolija tambien comunica profesionalismo.",
+  experiencia1Titulo: "Presencia cuidada",
+  experiencia1Texto: "La primera impresión transmite orden, claridad y confianza.",
+  experiencia2Titulo: "Detalles visibles",
+  experiencia2Texto: "Textos, imagenes, servicios y contacto reducen dudas antes de reservar.",
+  experiencia3Titulo: "Experiencia consistente",
+  experiencia3Texto: "La misma claridad se mantiene en la web, la reserva y la administracion.",
+  faqEtiqueta: "Preguntas frecuentes",
+  faqTitulo: "Dudas simples antes de reservar.",
+  faq1Pregunta: "Como se confirma un turno?",
+  faq1Respuesta: "El cliente elige servicio, dia y horario, deja sus datos y el turno queda registrado.",
+  faq2Pregunta: "Puedo consultar antes de reservar?",
+  faq2Respuesta: "Si. La web mantiene el contacto por WhatsApp para consultas directas.",
+  faq3Pregunta: "Que pasa si un horario ya esta ocupado?",
+  faq3Respuesta: "La agenda bloquea horarios duplicados para evitar dos reservas en el mismo tramo.",
+  finalCtaEtiqueta: "Proximo paso",
   finalCtaTitulo: "Reserva tu turno",
   finalCtaTexto: "Elegi servicio, profesional, sucursal, dia y horario desde esta misma pagina.",
   heroImageUrl: "",
+  galeriaImageUrl1: "",
+  galeriaImageUrl2: "",
+  seccion5ImageUrl: "",
+  direccion: "",
+  zonaAtencion: "Atencion personalizada",
+  contactoTitulo: "Contacto",
+  linksTitulo: "Links",
+  mapaTexto: "Abrir mapa",
   mapaLinkUrl: "",
+  mapaEmbedUrl: "",
+  footerTexto: "Web propia con reserva online y contacto directo.",
+  footerLegalTexto: "Atencion profesional con agenda online.",
   facebook: ""
 };
 
@@ -328,26 +387,9 @@ function readWebContent(data: Record<string, unknown> | undefined): PublicWebCon
     return typeof value === "string" && value.trim() ? value.trim() : defaultPanelWebContent[key];
   };
 
-  return {
-    heroEtiqueta: read("heroEtiqueta"),
-    heroTitulo: read("heroTitulo"),
-    heroSubtitulo: read("heroSubtitulo"),
-    ctaPrincipalTexto: read("ctaPrincipalTexto"),
-    sobreTitulo: read("sobreTitulo"),
-    sobreTexto: read("sobreTexto"),
-    beneficiosTitulo: read("beneficiosTitulo"),
-    beneficio1Titulo: read("beneficio1Titulo"),
-    beneficio1Texto: read("beneficio1Texto"),
-    beneficio2Titulo: read("beneficio2Titulo"),
-    beneficio2Texto: read("beneficio2Texto"),
-    beneficio3Titulo: read("beneficio3Titulo"),
-    beneficio3Texto: read("beneficio3Texto"),
-    finalCtaTitulo: read("finalCtaTitulo"),
-    finalCtaTexto: read("finalCtaTexto"),
-    heroImageUrl: typeof data?.heroImageUrl === "string" ? data.heroImageUrl.trim() : "",
-    mapaLinkUrl: typeof data?.mapaLinkUrl === "string" ? data.mapaLinkUrl.trim() : "",
-    facebook: typeof data?.facebook === "string" ? data.facebook.trim() : ""
-  };
+  return Object.fromEntries(
+    (Object.keys(defaultPanelWebContent) as Array<keyof PublicWebContent>).map((key) => [key, read(key)])
+  ) as PublicWebContent;
 }
 
 function setupWarnings(business: PanelBusiness, servicesCount: number, staffCount: number, branchesCount: number, schedule: ScheduleConfig) {
@@ -990,26 +1032,12 @@ export function PanelDashboard() {
     if (!canEdit || !isWebComplete) return;
 
     const formData = new FormData(event.currentTarget);
-    const payload = {
-      heroEtiqueta: String(formData.get("heroEtiqueta") ?? "").trim(),
-      heroTitulo: String(formData.get("heroTitulo") ?? "").trim(),
-      heroSubtitulo: String(formData.get("heroSubtitulo") ?? "").trim(),
-      ctaPrincipalTexto: String(formData.get("ctaPrincipalTexto") ?? "").trim(),
-      sobreTitulo: String(formData.get("sobreTitulo") ?? "").trim(),
-      sobreTexto: String(formData.get("sobreTexto") ?? "").trim(),
-      beneficiosTitulo: String(formData.get("beneficiosTitulo") ?? "").trim(),
-      beneficio1Titulo: String(formData.get("beneficio1Titulo") ?? "").trim(),
-      beneficio1Texto: String(formData.get("beneficio1Texto") ?? "").trim(),
-      beneficio2Titulo: String(formData.get("beneficio2Titulo") ?? "").trim(),
-      beneficio2Texto: String(formData.get("beneficio2Texto") ?? "").trim(),
-      beneficio3Titulo: String(formData.get("beneficio3Titulo") ?? "").trim(),
-      beneficio3Texto: String(formData.get("beneficio3Texto") ?? "").trim(),
-      finalCtaTitulo: String(formData.get("finalCtaTitulo") ?? "").trim(),
-      finalCtaTexto: String(formData.get("finalCtaTexto") ?? "").trim(),
-      heroImageUrl: String(formData.get("heroImageUrl") ?? "").trim(),
-      mapaLinkUrl: String(formData.get("mapaLinkUrl") ?? "").trim(),
-      facebook: String(formData.get("facebook") ?? "").trim()
-    };
+    const payload = Object.fromEntries(
+      (Object.keys(defaultPanelWebContent) as Array<keyof PublicWebContent>).map((key) => [
+        key,
+        String(formData.get(key) ?? "").trim()
+      ])
+    ) as PublicWebContent;
 
     if (payload.heroTitulo.length < 8 || payload.heroSubtitulo.length < 12) {
       showError("La web necesita un titulo y una descripcion principal mas claros.");
@@ -1376,6 +1404,14 @@ export function PanelDashboard() {
           Texto del boton principal
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.ctaPrincipalTexto} name="ctaPrincipalTexto" />
         </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Texto boton WhatsApp
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.ctaSecundarioTexto} name="ctaSecundarioTexto" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Subtitulo junto al logo
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.landingSubtituloMarca} name="landingSubtituloMarca" />
+        </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
           Titulo principal
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.heroTitulo} name="heroTitulo" required />
@@ -1388,6 +1424,19 @@ export function PanelDashboard() {
           URL de imagen principal
           <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.heroImageUrl} name="heroImageUrl" placeholder="https://... o /assets/clientes/imagen.jpg" />
         </label>
+        {[
+          ["heroCardEtiqueta", "Etiqueta de la tarjeta sobre imagen", webContent.heroCardEtiqueta],
+          ["heroCardTitulo", "Titulo de la tarjeta sobre imagen", webContent.heroCardTitulo],
+          ["heroCardTexto", "Texto de la tarjeta sobre imagen", webContent.heroCardTexto],
+          ["galeriaImageUrl1", "Imagen secundaria 1", webContent.galeriaImageUrl1],
+          ["galeriaImageUrl2", "Imagen secundaria 2", webContent.galeriaImageUrl2],
+          ["seccion5ImageUrl", "Imagen de experiencia", webContent.seccion5ImageUrl]
+        ].map(([name, label, value]) => (
+          <label className="grid gap-2 text-sm font-bold text-ink/70" key={name}>
+            {label}
+            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={value} name={name} />
+          </label>
+        ))}
 
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Titulo sobre el negocio
@@ -1401,14 +1450,79 @@ export function PanelDashboard() {
           Texto sobre el negocio
           <textarea className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.sobreTexto} name="sobreTexto" />
         </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Etiqueta servicios
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.serviciosEtiqueta} name="serviciosEtiqueta" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Titulo servicios
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.queHacemosTitulo} name="queHacemosTitulo" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
+          Texto servicios
+          <textarea className="min-h-24 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.queHacemosTexto} name="queHacemosTexto" />
+        </label>
 
         {[
+          ["beneficiosEtiqueta", "Etiqueta beneficios", webContent.beneficiosEtiqueta],
           ["beneficio1Titulo", "Beneficio 1 - titulo", webContent.beneficio1Titulo],
           ["beneficio1Texto", "Beneficio 1 - texto", webContent.beneficio1Texto],
           ["beneficio2Titulo", "Beneficio 2 - titulo", webContent.beneficio2Titulo],
           ["beneficio2Texto", "Beneficio 2 - texto", webContent.beneficio2Texto],
           ["beneficio3Titulo", "Beneficio 3 - titulo", webContent.beneficio3Titulo],
           ["beneficio3Texto", "Beneficio 3 - texto", webContent.beneficio3Texto]
+        ].map(([name, label, value]) => (
+          <label className="grid gap-2 text-sm font-bold text-ink/70" key={name}>
+            {label}
+            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={value} name={name} />
+          </label>
+        ))}
+
+        <div className="grid gap-4 rounded-2xl bg-cream p-4 lg:col-span-2 lg:grid-cols-3">
+          <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-3">
+            Titulo opciones/paquetes
+            <input className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 outline-none focus:border-action" defaultValue={webContent.paquetesTitulo} name="paquetesTitulo" />
+          </label>
+          {[
+            ["paquete1Nombre", "Opcion 1", webContent.paquete1Nombre],
+            ["paquete2Nombre", "Opcion 2", webContent.paquete2Nombre],
+            ["paquete3Nombre", "Opcion 3", webContent.paquete3Nombre],
+            ["paquete1Texto", "Texto opcion 1", webContent.paquete1Texto],
+            ["paquete2Texto", "Texto opcion 2", webContent.paquete2Texto],
+            ["paquete3Texto", "Texto opcion 3", webContent.paquete3Texto]
+          ].map(([name, label, value]) => (
+            <label className="grid gap-2 text-sm font-bold text-ink/70" key={name}>
+              {label}
+              <input className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 outline-none focus:border-action" defaultValue={value} name={name} />
+            </label>
+          ))}
+        </div>
+
+        {[
+          ["menuEtiqueta", "Etiqueta experiencia", webContent.menuEtiqueta],
+          ["menuTitulo", "Titulo experiencia", webContent.menuTitulo],
+          ["experiencia1Titulo", "Experiencia 1 - titulo", webContent.experiencia1Titulo],
+          ["experiencia1Texto", "Experiencia 1 - texto", webContent.experiencia1Texto],
+          ["experiencia2Titulo", "Experiencia 2 - titulo", webContent.experiencia2Titulo],
+          ["experiencia2Texto", "Experiencia 2 - texto", webContent.experiencia2Texto],
+          ["experiencia3Titulo", "Experiencia 3 - titulo", webContent.experiencia3Titulo],
+          ["experiencia3Texto", "Experiencia 3 - texto", webContent.experiencia3Texto]
+        ].map(([name, label, value]) => (
+          <label className="grid gap-2 text-sm font-bold text-ink/70" key={name}>
+            {label}
+            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={value} name={name} />
+          </label>
+        ))}
+
+        {[
+          ["faqEtiqueta", "Etiqueta FAQ", webContent.faqEtiqueta],
+          ["faqTitulo", "Titulo FAQ", webContent.faqTitulo],
+          ["faq1Pregunta", "Pregunta 1", webContent.faq1Pregunta],
+          ["faq1Respuesta", "Respuesta 1", webContent.faq1Respuesta],
+          ["faq2Pregunta", "Pregunta 2", webContent.faq2Pregunta],
+          ["faq2Respuesta", "Respuesta 2", webContent.faq2Respuesta],
+          ["faq3Pregunta", "Pregunta 3", webContent.faq3Pregunta],
+          ["faq3Respuesta", "Respuesta 3", webContent.faq3Respuesta]
         ].map(([name, label, value]) => (
           <label className="grid gap-2 text-sm font-bold text-ink/70" key={name}>
             {label}
@@ -1427,6 +1541,18 @@ export function PanelDashboard() {
         <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
           Texto final de reserva
           <textarea className="min-h-24 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.finalCtaTexto} name="finalCtaTexto" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Direccion visible
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.direccion} name="direccion" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Zona de atencion
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.zonaAtencion} name="zonaAtencion" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
+          Google Maps embed o link
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={webContent.mapaEmbedUrl} name="mapaEmbedUrl" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70 lg:col-span-2">
           Facebook URL

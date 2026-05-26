@@ -40,7 +40,9 @@
 - Rutas legacy compatibles: `/agenda/[slug]` y `/agenda/[slug]/reservar` redirigen a `/{slug}`.
 - Agenda Full usa `/{slug}` como pagina de reserva.
 - Web Completa usa el mismo sistema y puede resolver por `customDomain`.
-- En dominios propios de Web Completa, `/` muestra la web comercial y `/reservas` muestra el flujo de reserva del negocio.
+- En dominios propios de Web Completa, `/` muestra la web comercial editable del cliente y `/reservar` muestra el flujo de reserva del negocio.
+- `/reservas` se mantiene como alias de compatibilidad, pero el link recomendado para clientes es `/reservar`.
+- En `tuagendaweb.com.ar/[slug]`, si el negocio tiene `customDomain`, debe redirigir al dominio propio del cliente.
 - Panel cliente: `/panel`.
 - Super Admin: `/superadmin`.
 - Super Admin opera negocios, planes y estados manuales.
