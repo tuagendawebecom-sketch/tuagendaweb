@@ -24,6 +24,14 @@ async function getBusinessFromRequestHost() {
   return getBusinessByCustomDomain(host).catch(() => null);
 }
 
+function getBusinessIcon(logoUrl?: string) {
+  if (!logoUrl || logoUrl.trim().length === 0) return undefined;
+  return {
+    icon: [{ url: logoUrl, type: "image/png" }],
+    apple: [{ url: logoUrl, type: "image/png" }]
+  };
+}
+
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,9 +42,23 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   }
 
+  const domain = normalizeHost(business.customDomain || "");
+  const title = `${business.nombre} | Reservas`;
+  const description = `Reservá turno online en ${business.nombre} desde el celular.`;
+
   return {
-    title: `Reservas en ${business.nombre}`,
-    description: `Reservá turno online en ${business.nombre} desde el celular.`
+    title: {
+      absolute: title
+    },
+    description,
+    alternates: domain ? { canonical: `https://${domain}/reservas` } : undefined,
+    openGraph: {
+      title,
+      description,
+      url: domain ? `https://${domain}/reservas` : undefined,
+      siteName: business.nombre
+    },
+    icons: getBusinessIcon(business.logoUrl)
   };
 }
 

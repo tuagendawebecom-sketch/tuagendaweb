@@ -24,15 +24,36 @@ async function getBusinessFromRequestHost() {
   return getBusinessByCustomDomain(host).catch(() => null);
 }
 
+function getBusinessIcon(logoUrl?: string) {
+  if (!logoUrl || logoUrl.trim().length === 0) return undefined;
+  return {
+    icon: [{ url: logoUrl, type: "image/png" }],
+    apple: [{ url: logoUrl, type: "image/png" }]
+  };
+}
+
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const business = await getBusinessFromRequestHost();
   if (!business) return { title: "Reservar turno" };
+  const domain = normalizeHost(business.customDomain || "");
+  const title = `${business.nombre} | Reservar turno`;
+  const description = `Reserva tu turno online en ${business.nombre} desde el celular.`;
 
   return {
-    title: `Reservar en ${business.nombre}`,
-    description: `Reserva tu turno online en ${business.nombre} desde el celular.`
+    title: {
+      absolute: title
+    },
+    description,
+    alternates: domain ? { canonical: `https://${domain}/reservar` } : undefined,
+    openGraph: {
+      title,
+      description,
+      url: domain ? `https://${domain}/reservar` : undefined,
+      siteName: business.nombre
+    },
+    icons: getBusinessIcon(business.logoUrl)
   };
 }
 

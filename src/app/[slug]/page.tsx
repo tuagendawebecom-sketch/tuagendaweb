@@ -14,23 +14,41 @@ type PublicSlugPageProps = Readonly<{
 
 export const dynamic = "force-dynamic";
 
+function getBusinessIcon(logoUrl?: string) {
+  if (!logoUrl || logoUrl.trim().length === 0) return undefined;
+  return {
+    icon: [{ url: logoUrl, type: "image/png" }],
+    apple: [{ url: logoUrl, type: "image/png" }]
+  };
+}
+
 export async function generateMetadata({ params }: PublicSlugPageProps): Promise<Metadata> {
   const { slug } = await params;
   const business = isValidSlug(slug) ? await getBusinessBySlug(slug).catch(() => null) : null;
 
   if (!business) return {};
 
+  const isWebComplete = business.plan === "web_completa";
+  const title = isWebComplete ? `${business.nombre} | Web con turnos online` : `${business.nombre} | Reservar turno`;
+  const description = isWebComplete
+    ? `${business.nombre}: conocé sus servicios y reservá turno online desde el celular.`
+    : `Reservá turno online en ${business.nombre} desde el celular.`;
+
   return {
-    title: `Reservar en ${business.nombre}`,
-    description: `Reservá turno online en ${business.nombre} desde el celular.`,
+    title: {
+      absolute: title
+    },
+    description,
     alternates: {
       canonical: `${siteUrl}/${business.slug}`
     },
     openGraph: {
-      title: `Reservar en ${business.nombre}`,
-      description: `Elegí servicio, día y horario para reservar en ${business.nombre}.`,
-      url: `${siteUrl}/${business.slug}`
-    }
+      title,
+      description,
+      url: `${siteUrl}/${business.slug}`,
+      siteName: business.nombre
+    },
+    icons: getBusinessIcon(business.logoUrl)
   };
 }
 

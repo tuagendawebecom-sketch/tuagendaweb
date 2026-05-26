@@ -1088,6 +1088,24 @@ Validacion:
 - npm run build: OK.
 - npm run test:smoke en localhost:3001: OK.
 
+Correccion de titulos por dominio propio
+
+Fecha: 2026-05-26
+
+Alcance:
+- Se corrigio la metadata dinamica para que las webs completas con dominio propio no hereden el titulo de TuAgendaWeb.
+- En dominios como exoticlenceria.com.ar, la pestaña del navegador debe mostrar el nombre del negocio.
+
+Cambios aplicados:
+1. La home detecta si el host pertenece a un negocio con plan Web Completa y genera titulo, descripcion, Open Graph y canonical propios.
+2. La landing publica del cliente usa titulo absoluto, por ejemplo "Exotic Lenceria | Turnos online".
+3. Las rutas /reservar y /reservas tambien usan titulo absoluto del negocio.
+4. La ruta por slug usa titulo del negocio para Agenda Full y Web Completa.
+5. Si el negocio tiene logo cargado, se intenta usarlo tambien como icono de pestaña.
+
+Nota:
+- Si el navegador sigue mostrando el titulo anterior, limpiar cache o esperar el redeploy de Vercel. La pestaña puede conservar metadata vieja hasta recargar fuerte.
+
 Correccion de Web Completa y dominios propios
 
 Fecha: 2026-05-25
