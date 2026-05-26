@@ -88,6 +88,12 @@ function normalizeDayName(day: string) {
   return inputDayAliases[normalized] ?? normalized;
 }
 
+function staffWorksAtBranch(person: PublicStaff | undefined, sucursalId?: string) {
+  if (!person || !sucursalId) return true;
+  const allowedBranches = person.sucursalIds ?? [];
+  return !allowedBranches.length || allowedBranches.includes(sucursalId);
+}
+
 function isBusinessDay(date: string, schedule: PublicScheduleConfig) {
   const current = localDateFromISO(date);
   const dayName = dayNames[current.getUTCDay()];
@@ -194,13 +200,16 @@ export async function getAvailableTimes(input: {
   const db = getAdminDb();
   if (!db) return { ok: false as const, error: "firebase_not_configured" };
 
-  const [services, schedule] = await Promise.all([getPublicServices(business.id), getPublicScheduleConfig(business.id)]);
+  const [services, staff, schedule] = await Promise.all([getPublicServices(business.id), getPublicStaff(business.id), getPublicScheduleConfig(business.id)]);
   const service = services.find((item) => item.id === input.serviceId && item.activo !== false);
+  const person = input.personalId ? staff.find((item) => item.id === input.personalId && item.activo !== false) : undefined;
   if (!service) return { ok: false as const, error: "service_not_found" };
   if (service.personalIds?.length && !input.personalId) return { ok: false as const, error: "staff_not_found" };
   if (service.personalIds?.length && input.personalId && !service.personalIds.includes(input.personalId)) return { ok: false as const, error: "staff_not_found" };
   if (service.sucursalIds?.length && !input.sucursalId) return { ok: false as const, error: "branch_not_found" };
   if (service.sucursalIds?.length && input.sucursalId && !service.sucursalIds.includes(input.sucursalId)) return { ok: false as const, error: "branch_not_found" };
+  if (input.personalId && !person) return { ok: false as const, error: "staff_not_found" };
+  if (!staffWorksAtBranch(person, input.sucursalId)) return { ok: false as const, error: "staff_branch_mismatch" };
   if (!isWithinReservableRange(input.date, schedule)) return { ok: true as const, times: [] };
   if (!isBusinessDay(input.date, schedule)) return { ok: true as const, times: [] };
 
@@ -273,6 +282,7 @@ export async function createReservation(input: {
   if (service.sucursalIds?.length && input.sucursalId && !service.sucursalIds.includes(input.sucursalId)) return { ok: false as const, error: "branch_not_found" };
   if (input.personalId && !person) return { ok: false as const, error: "staff_not_found" };
   if (input.sucursalId && !branch) return { ok: false as const, error: "branch_not_found" };
+  if (!staffWorksAtBranch(person, input.sucursalId)) return { ok: false as const, error: "staff_branch_mismatch" };
   if (input.clienteNombre.trim().length < 2 || telefonoNormalizado.length < 10) return { ok: false as const, error: "invalid_customer" };
   if (!isWithinReservableRange(input.date, schedule)) return { ok: false as const, error: "date_not_available" };
   if (!isBusinessDay(input.date, schedule)) return { ok: false as const, error: "date_not_available" };

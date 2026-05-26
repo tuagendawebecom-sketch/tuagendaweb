@@ -217,7 +217,8 @@ export async function getPublicStaff(negocioId: string): Promise<PublicStaff[]> 
       id: doc.id,
       nombre: data.nombre ?? "Profesional",
       especialidad: data.especialidad,
-      activo: data.activo !== false
+      activo: data.activo !== false,
+      sucursalIds: Array.isArray(data.sucursalIds) ? data.sucursalIds.map(String) : []
     };
   }));
 }

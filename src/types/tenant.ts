@@ -124,6 +124,7 @@ export type PublicStaff = {
   nombre: string;
   especialidad?: string;
   activo: boolean;
+  sucursalIds?: string[];
 };
 
 export type PublicBranch = {

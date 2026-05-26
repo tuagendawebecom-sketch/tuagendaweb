@@ -67,6 +67,7 @@ type StaffItem = {
   nombre?: string;
   especialidad?: string;
   activo?: boolean;
+  sucursalIds?: string[];
 };
 
 type BranchItem = {
@@ -1025,6 +1026,7 @@ export function PanelDashboard() {
       await addDoc(collection(activeDb, "negocios", businessId, "personal"), {
         nombre,
         especialidad: String(formData.get("especialidad") ?? "").trim(),
+        sucursalIds: formData.getAll("sucursalIds").map(String),
         activo: true,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -1036,6 +1038,26 @@ export function PanelDashboard() {
     } finally {
       setSaving("");
     }
+  }
+
+  async function updateStaff(person: StaffItem, patch: Partial<StaffItem>) {
+    if (!canEdit) return;
+    setSaving(`staff-${person.id}`);
+    try {
+      await updateDoc(doc(activeDb, "negocios", businessId, "personal", person.id), { ...patch, updatedAt: serverTimestamp() });
+      showSuccess("Personal actualizado correctamente.");
+    } catch {
+      showError("No se pudo actualizar el personal.");
+    } finally {
+      setSaving("");
+    }
+  }
+
+  async function toggleStaffBranch(person: StaffItem, branchId: string) {
+    const current = new Set((person.sucursalIds ?? []).map(String));
+    if (current.has(branchId)) current.delete(branchId);
+    else current.add(branchId);
+    await updateStaff(person, { sucursalIds: Array.from(current) });
   }
 
   async function handleBranch(event: FormEvent<HTMLFormElement>) {
@@ -1863,12 +1885,50 @@ export function PanelDashboard() {
             <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" minLength={2} name="nombre" placeholder="Nombre" required />
             <input className="min-w-0 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="especialidad" placeholder="Especialidad" />
             <button className="min-w-0 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream" disabled={!canEdit} type="submit">Agregar</button>
+            {branches.length ? (
+              <div className="rounded-2xl bg-cream p-4 md:col-span-3">
+                <p className="text-sm font-extrabold text-teal">Sucursales donde atiende</p>
+                <p className="mt-1 text-xs font-semibold text-ink/55">Si no marcás ninguna, se toma como disponible en todas las sucursales.</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {branches.map((branch) => (
+                    <label className="rounded-full bg-paper px-3 py-2 text-xs font-bold text-ink/70" key={branch.id}>
+                      <input className="mr-2" name="sucursalIds" type="checkbox" value={branch.id} />
+                      {branch.nombre}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </form>
           <div className="mt-4 grid gap-2">
             {staff.map((person) => (
-              <div className="flex items-center justify-between gap-3 rounded-2xl bg-cream p-4" key={person.id}>
-                <p className="font-bold text-teal">{person.nombre}<span className="block text-xs font-semibold text-ink/50">{person.especialidad}</span></p>
-                <button className="text-xs font-bold text-red-700" onClick={() => deleteDoc(doc(activeDb, "negocios", businessId, "personal", person.id))} type="button">Eliminar</button>
+              <div className="grid gap-3 rounded-2xl bg-cream p-4" key={person.id}>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-bold text-teal">{person.nombre}<span className="block text-xs font-semibold text-ink/50">{person.especialidad}</span></p>
+                  <button className="text-xs font-bold text-red-700" onClick={() => deleteDoc(doc(activeDb, "negocios", businessId, "personal", person.id))} type="button">Eliminar</button>
+                </div>
+                {branches.length ? (
+                  <div>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-ink/45">Atienden en</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {branches.map((branch) => {
+                        const selected = person.sucursalIds?.includes(branch.id);
+                        const allBranches = !person.sucursalIds?.length;
+                        return (
+                          <button
+                            className={`rounded-full px-3 py-2 text-xs font-bold ${selected || allBranches ? "bg-teal text-cream" : "bg-paper text-ink/70"}`}
+                            key={branch.id}
+                            onClick={() => toggleStaffBranch(person, branch.id)}
+                            type="button"
+                          >
+                            {branch.nombre}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {!person.sucursalIds?.length ? <p className="mt-2 text-xs font-semibold text-ink/50">Disponible en todas hasta que marques sucursales específicas.</p> : null}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>

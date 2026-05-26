@@ -27,6 +27,7 @@ const errorMessages: Record<string, string> = {
   service_not_found: "Elegí un servicio disponible.",
   staff_not_found: "Elegí una persona disponible.",
   branch_not_found: "Elegí una sucursal disponible.",
+  staff_branch_mismatch: "Esa persona no atiende en la sucursal elegida.",
   invalid_customer: "Completá nombre y WhatsApp para confirmar.",
   date_not_available: "Ese día no está disponible.",
   time_not_available: "Ese horario ya no está disponible. Elegí otro.",
@@ -59,6 +60,11 @@ function statusLabel(status?: string) {
   return labels[status ?? "confirmada"] ?? "Confirmado";
 }
 
+function staffWorksAtBranch(person: PublicBookingData["staff"][number], sucursalId: string) {
+  const allowedBranches = person.sucursalIds ?? [];
+  return !allowedBranches.length || allowedBranches.includes(sucursalId);
+}
+
 export function PublicBookingFlow({ business, bookingData, canReserve }: PublicBookingFlowProps) {
   const firstService = bookingData.services[0]?.id ?? "";
   const firstDate = bookingData.availableDates[0]?.value ?? "";
@@ -81,17 +87,21 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
   const [reservations, setReservations] = useState<PublicReservation[]>([]);
 
   const selectedService = useMemo(() => bookingData.services.find((service) => service.id === serviceId), [bookingData.services, serviceId]);
-  const filteredStaff = useMemo(() => {
-    const allowed = selectedService?.personalIds ?? [];
-    if (!allowed.length) return bookingData.staff;
-    return bookingData.staff.filter((person) => allowed.includes(person.id));
-  }, [bookingData.staff, selectedService]);
   const filteredBranches = useMemo(() => {
     const allowed = selectedService?.sucursalIds ?? [];
     if (!allowed.length) return bookingData.branches;
     return bookingData.branches.filter((branch) => allowed.includes(branch.id));
   }, [bookingData.branches, selectedService]);
-  const needsStaff = filteredStaff.length > 0;
+  const serviceStaff = useMemo(() => {
+    const allowedStaff = selectedService?.personalIds ?? [];
+    if (!allowedStaff.length) return bookingData.staff;
+    return bookingData.staff.filter((person) => allowedStaff.includes(person.id));
+  }, [bookingData.staff, selectedService]);
+  const filteredStaff = useMemo(() => {
+    if (!sucursalId) return serviceStaff;
+    return serviceStaff.filter((person) => staffWorksAtBranch(person, sucursalId));
+  }, [serviceStaff, sucursalId]);
+  const needsStaff = serviceStaff.length > 0;
   const needsBranch = filteredBranches.length > 0;
   const readyForTimes = canReserve && serviceId && date && (!needsStaff || personalId) && (!needsBranch || sucursalId);
   const selectedStaff = filteredStaff.find((item) => item.id === personalId);
@@ -101,13 +111,17 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
   const canSubmit = canReserve && Boolean(selectedService) && Boolean(date) && Boolean(time) && customerReady && !booking;
   const steps = [
     { label: "Servicio", done: Boolean(selectedService), hidden: false },
-    { label: "Profesional", done: !needsStaff || Boolean(personalId), hidden: !needsStaff },
     { label: "Sucursal", done: !needsBranch || Boolean(sucursalId), hidden: !needsBranch },
+    { label: "Profesional", done: !needsStaff || Boolean(personalId), hidden: !needsStaff },
     { label: "Horario", done: Boolean(date && time), hidden: false },
     { label: "Datos", done: customerReady, hidden: false }
   ].filter((step) => !step.hidden);
   const progress = Math.round((steps.filter((step) => step.done).length / steps.length) * 100);
   const businessWhatsappHref = business.whatsapp ? `https://wa.me/${business.whatsapp}` : "";
+  const branchStepNumber = 2;
+  const staffStepNumber = needsBranch ? 3 : 2;
+  const scheduleStepNumber = 2 + (needsBranch ? 1 : 0) + (needsStaff ? 1 : 0);
+  const customerStepNumber = scheduleStepNumber + 1;
 
   useEffect(() => {
     const savedName = window.localStorage.getItem("tuagendaweb_customer_name") ?? "";
@@ -291,7 +305,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
             <h1 className="mt-2 font-display text-4xl font-extrabold text-teal">Reservá tu turno</h1>
           </div>
         </div>
-        <p className="mt-3 max-w-2xl leading-7 text-ink/65">Elegí servicio, profesional o sucursal si corresponde, día y horario. Después confirmás con tu nombre y WhatsApp.</p>
+        <p className="mt-3 max-w-2xl leading-7 text-ink/65">Elegí servicio, sucursal si corresponde, profesional disponible en esa sucursal, día y horario. Después confirmás con tu nombre y WhatsApp.</p>
 
         <div className="mt-6 rounded-2xl bg-cream p-4">
           <div className="flex items-center justify-between gap-3 text-xs font-extrabold uppercase tracking-[0.12em] text-ink/50">
@@ -368,30 +382,9 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
               {selectedService?.sucursalIds?.length && !filteredBranches.length ? <p className="mt-3 rounded-2xl bg-gold/20 p-3 text-sm font-bold text-teal">Este servicio todavia no tiene sucursal asignada.</p> : null}
             </div>
 
-            {needsStaff ? (
-              <div>
-                <h2 className="font-display text-2xl font-extrabold text-teal">2. Elegí profesional</h2>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {filteredStaff.map((person) => (
-                    <button
-                      aria-pressed={personalId === person.id}
-                      className={`rounded-2xl border p-4 text-left transition ${personalId === person.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
-                      disabled={!canReserve}
-                      key={person.id}
-                      onClick={() => setPersonalId(person.id)}
-                      type="button"
-                    >
-                      <p className="font-bold text-teal">{person.nombre}</p>
-                      {person.especialidad ? <p className="mt-1 text-sm text-ink/60">{person.especialidad}</p> : null}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
             {needsBranch ? (
               <div>
-                <h2 className="font-display text-2xl font-extrabold text-teal">{needsStaff ? "3" : "2"}. Elegí sucursal</h2>
+                <h2 className="font-display text-2xl font-extrabold text-teal">{branchStepNumber}. Elegí sucursal</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {filteredBranches.map((branch) => (
                     <button
@@ -399,7 +392,10 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                       className={`rounded-2xl border p-4 text-left transition ${sucursalId === branch.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
                       disabled={!canReserve}
                       key={branch.id}
-                      onClick={() => setSucursalId(branch.id)}
+                      onClick={() => {
+                        setSucursalId(branch.id);
+                        setPersonalId("");
+                      }}
                       type="button"
                     >
                       <p className="font-bold text-teal">{branch.nombre}</p>
@@ -410,8 +406,35 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
               </div>
             ) : null}
 
+            {needsStaff ? (
+              <div>
+                <h2 className="font-display text-2xl font-extrabold text-teal">{staffStepNumber}. Elegí profesional</h2>
+                {needsBranch && !sucursalId ? (
+                  <p className="mt-4 rounded-2xl bg-cream p-4 text-sm font-bold text-ink/60">Primero elegí una sucursal para ver quién atiende ahí.</p>
+                ) : filteredStaff.length ? (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {filteredStaff.map((person) => (
+                      <button
+                        aria-pressed={personalId === person.id}
+                        className={`rounded-2xl border p-4 text-left transition ${personalId === person.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
+                        disabled={!canReserve}
+                        key={person.id}
+                        onClick={() => setPersonalId(person.id)}
+                        type="button"
+                      >
+                        <p className="font-bold text-teal">{person.nombre}</p>
+                        {person.especialidad ? <p className="mt-1 text-sm text-ink/60">{person.especialidad}</p> : null}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 rounded-2xl bg-gold/20 p-4 text-sm font-bold text-teal">No hay profesionales asignados a esa sucursal para este servicio.</p>
+                )}
+              </div>
+            ) : null}
+
             <div>
-              <h2 className="font-display text-2xl font-extrabold text-teal">{needsStaff && needsBranch ? "4" : needsStaff || needsBranch ? "3" : "2"}. Elegí día y horario</h2>
+              <h2 className="font-display text-2xl font-extrabold text-teal">{scheduleStepNumber}. Elegí día y horario</h2>
               <div className="mt-4 grid gap-4 rounded-2xl bg-cream p-4">
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7" aria-label="Calendario de días disponibles">
                   {bookingData.availableDates.map((item) => {
@@ -455,7 +478,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
             </div>
 
             <div>
-              <h2 className="font-display text-2xl font-extrabold text-teal">{needsStaff && needsBranch ? "5" : needsStaff || needsBranch ? "4" : "3"}. Confirmá tus datos</h2>
+              <h2 className="font-display text-2xl font-extrabold text-teal">{customerStepNumber}. Confirmá tus datos</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <input autoComplete="name" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} minLength={2} name="clienteNombre" onChange={(event) => setCustomerName(event.target.value)} placeholder="Tu nombre" required value={customerName} />
                 <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} inputMode="tel" minLength={8} name="telefono" onChange={(event) => setCustomerPhone(event.target.value)} placeholder="WhatsApp" required value={customerPhone} />
