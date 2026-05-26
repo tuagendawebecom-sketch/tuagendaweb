@@ -894,6 +894,40 @@ Validacion:
 - npm run lint: OK.
 - npm run build: OK.
 
+Mejoras landing principal para venta por Instagram
+
+Fecha: 2026-05-26
+
+Objetivo:
+- Dejar el primer impacto mas vendible para contactar barberias y negocios por Instagram.
+- Priorizar mobile first, precio visible y CTA directo a WhatsApp.
+
+Mejoras aplicadas:
+1. Se creo una nueva imagen hero local en `public/assets/hero/tuagendaweb-hero-barberias.png`.
+2. La imagen muestra panel + celular + contexto barberia sin depender de capturas de clientes reales.
+3. Se agrego `scripts/generate-hero-image.mjs` para regenerar el asset si hace falta.
+4. El hero ahora apunta a venta por Instagram: agenda online lista para pegar en bio.
+5. Titulo principal mas directo contra el dolor de mensajes repetidos.
+6. Subtitulo explica Agenda Full con servicios, horarios, personal, sucursales y panel.
+7. El soporte comercial menciona barberias, estetica, unas, peluquerias y profesionales.
+8. Precio principal actualizado como promo lanzamiento: `$10.000/mes`.
+9. CTA principal actualizado a "Quiero probar Agenda Full".
+10. WhatsApp prellenado del hero ahora pregunta por probar Agenda Full.
+11. Se agregaron micro-pruebas: sin instalar apps, sin dominio obligatorio, activacion rapida.
+12. En mobile la imagen aparece antes que las tarjetas de confianza para mejorar el primer impacto visual.
+13. Las tarjetas de confianza quedan ocultas en mobile y visibles desde tablet para reducir altura inicial.
+14. Hero usa una grilla visual sutil como fondo para dar mas caracter sin hacerlo pesado.
+15. El bloque de precio y Web Completa quedo mas contrastado.
+16. CTA mobile sticky ahora refuerza "Agenda Full $10.000/mes".
+17. Se verifico que no haya scroll horizontal en 390px.
+18. Se verifico screenshot desktop de 1440px sin overflow horizontal.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+- Playwright mobile 390x844: sin overflow horizontal.
+- Playwright desktop 1440x1000: sin overflow horizontal.
+
 Chequeo profundo de panel cliente y Web Completa
 
 Fecha: 2026-05-26

@@ -41,7 +41,7 @@ export const trackingEvents = {
 } as const;
 
 export const whatsappMessages = {
-  heroAgenda: "Hola, quiero consultar por Agenda Full promocional de $10.000 al mes para recibir turnos online desde un link.",
+  heroAgenda: "Hola, tengo un negocio con turnos y quiero probar Agenda Full por $10.000 al mes.",
   heroWeb: "Hola, quiero consultar por la Web Completa con sistema de turnos.",
   agendaSimple: "Hola, quiero consultar por Agenda Full promocional de $10.000 al mes para recibir turnos online desde un link.",
   agendaPro: "Hola, quiero consultar por Agenda Full de TuAgendaWeb para mi negocio.",
@@ -77,22 +77,28 @@ export const planOverviewNavigation = [
 ];
 
 export const hero = {
-  eyebrow: "Turnos online para negocios locales",
-  title: "Turnos online para tu negocio, con o sin web propia.",
+  eyebrow: "Agenda online lista para vender por Instagram",
+  title: "Deja que tus clientes reserven turno sin escribirte mil veces.",
   subtitle:
-    "Elegí entre una Agenda Full para recibir turnos desde un link, o una web completa con dominio, landing personalizada y panel de administración.",
+    "Te preparo una agenda online para que tu negocio reciba reservas desde el celular, con servicios, horarios, personal, sucursales y panel para administrarlo todo.",
   support:
-    "Para negocios que trabajan con turnos en Tucumán y quieren ordenar su agenda sin depender de coordinar todo por WhatsApp.",
-  price: "Promo: Agenda desde $10.000/mes",
-  primaryCta: "Quiero una agenda online",
-  secondaryCta: "Quiero una web completa"
+    "Ideal para barberias, estetica, unas, peluquerias y profesionales que hoy coordinan por WhatsApp o Instagram.",
+  price: "Promo lanzamiento: $10.000/mes",
+  primaryCta: "Quiero probar Agenda Full",
+  secondaryCta: "Ver Web Completa"
 };
 
 export const trustSignals = [
-  "Precio promocional para empezar ahora",
-  "Pensado para negocios de Tucumán y Argentina",
-  "WhatsApp sigue siendo tu canal de venta",
-  "Agenda online activa desde el celular"
+  "Link listo para pegar en la bio de Instagram",
+  "Tus clientes eligen servicio, dia y horario",
+  "Panel simple para ver turnos y configurar tu negocio",
+  "WhatsApp sigue siendo tu canal de venta"
+] as const;
+
+export const heroMicroProof = [
+  "Sin instalar apps",
+  "Sin dominio obligatorio",
+  "Activacion rapida"
 ] as const;
 
 export const launchOfferHighlights = [
