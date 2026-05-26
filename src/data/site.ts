@@ -77,14 +77,14 @@ export const planOverviewNavigation = [
 ];
 
 export const hero = {
-  eyebrow: "Turnos online para negocios locales",
-  title: "Tu agenda online lista para recibir reservas desde el celular.",
+  eyebrow: "Agenda online + panel para tu negocio",
+  title: "Turnos online para tu negocio desde $10.000/mes.",
   subtitle:
-    "Configuramos tu negocio con servicios, horarios, personal, sucursales y un panel simple para que ordenes los turnos sin depender de coordinar todo por mensaje.",
+    "Tus clientes reservan desde el celular y vos administrás turnos, servicios, personal, sucursales y datos del negocio desde un panel simple.",
   support:
-    "Ideal para barberias, estetica, uñas, peluquerias, consultorios, canchas y profesionales que trabajan con turnos.",
-  price: "Agenda Full desde $10.000/mes",
-  primaryCta: "Quiero probar Agenda Full",
+    "Para barberias, estética, uñas, peluquerías, consultorios, canchas y profesionales que trabajan con agenda.",
+  price: "Agenda Full: $10.000/mes",
+  primaryCta: "Consultar por Agenda Full",
   secondaryCta: "Ver Web Completa"
 };
 

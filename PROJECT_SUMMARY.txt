@@ -1113,6 +1113,7 @@ Fecha: 2026-05-26
 Alcance:
 - Se reemplazo el hero visual de la landing principal por un mockup propio de agenda, panel y reserva mobile.
 - Se retiraron mensajes publicos que sonaban internos o demasiado atados a Instagram.
+- Se reoptimizo el hero despues de revisar competidores de turnos online: mensaje mas corto, precio arriba del fold y CTA visible.
 
 Cambios aplicados:
 1. El hero ahora comunica agenda online, reservas desde celular y panel del negocio.
@@ -1120,6 +1121,7 @@ Cambios aplicados:
 3. El mockup muestra turnos, servicios, profesionales y confirmacion de reserva.
 4. Se mantuvo la oferta visible: Agenda Full desde $10.000/mes y Web Completa $100.000 pago unico.
 5. Se verifico en 1440px y 390px sin scroll horizontal.
+6. El hero ahora evita textos de "vender por Instagram" y se centra en reservas desde celular + panel simple.
 
 Correccion de Web Completa y dominios propios
 
