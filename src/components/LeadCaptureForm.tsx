@@ -17,6 +17,15 @@ const planOptions: Array<{ value: LeadInterestPlan; label: string }> = [
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
+const leadErrorMessages: Record<string, string> = {
+  too_many_requests: "Recibimos varios intentos seguidos. Probá en unos minutos o escribime por WhatsApp.",
+  payload_too_large: "El mensaje es demasiado largo. Acortalo un poco o escribime por WhatsApp.",
+  invalid_plan: "Elegí una opción de plan válida.",
+  invalid_fields: "Revisá los datos cargados antes de enviar.",
+  missing_required_fields: "Completá los campos obligatorios antes de enviar.",
+  firebase_not_configured: "El formulario no está disponible ahora. Escribime por WhatsApp y lo vemos directo."
+};
+
 export function LeadCaptureForm() {
   const [state, setState] = useState<FormState>("idle");
   const [error, setError] = useState("");
@@ -95,7 +104,8 @@ export function LeadCaptureForm() {
       });
 
       if (!response.ok) {
-        throw new Error("No se pudo enviar la consulta.");
+        const data = await response.json().catch(() => null);
+        throw new Error(leadErrorMessages[String(data?.error ?? "")] ?? "No se pudo enviar la consulta.");
       }
 
       trackEvent(trackingEvents.emailFormSubmit, {
@@ -108,9 +118,9 @@ export function LeadCaptureForm() {
       form.reset();
       setSelectedPlan("agenda_simple");
       setMessageLength(0);
-    } catch {
+    } catch (caughtError) {
       setState("error");
-      setError("No se pudo enviar. Probá por WhatsApp y lo vemos directo.");
+      setError(caughtError instanceof Error ? caughtError.message : "No se pudo enviar. Probá por WhatsApp y lo vemos directo.");
     }
   }
 
@@ -152,7 +162,7 @@ export function LeadCaptureForm() {
             </label>
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               WhatsApp
-              <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" maxLength={40} name="phone" pattern="[0-9+()\\s-]{8,}" placeholder="+54 9 381..." required type="tel" />
+              <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" maxLength={40} minLength={8} name="phone" pattern="[0-9+()\\s-]{8,}" placeholder="+54 9 381..." required type="tel" />
             </label>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -180,7 +190,7 @@ export function LeadCaptureForm() {
           </label>
           <label className="grid gap-2 text-sm font-bold text-ink/70">
             Mensaje opcional
-            <textarea className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" maxLength={600} name="message" onChange={(event) => setMessageLength(event.target.value.length)} placeholder="Contame si ya tenes logo, dominio, servicios o cantidad de personas que atienden." />
+            <textarea className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" maxLength={600} name="message" onChange={(event) => setMessageLength(event.target.value.length)} placeholder="Contame si ya tenés logo, dominio, servicios o cantidad de personas que atienden." />
             <span className="text-right text-xs font-semibold text-ink/45">{messageLength}/600</span>
           </label>
           <button

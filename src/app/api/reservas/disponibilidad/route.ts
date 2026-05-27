@@ -5,7 +5,7 @@ import { getAvailableTimes } from "@/lib/firebase/reservations";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const parsed = await readJsonRequest(request);
+  const parsed = await readJsonRequest(request, 3_000);
   if (!parsed.ok) {
     return parsed.response;
   }
@@ -30,9 +30,16 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
-    const status = result.error === "business_not_found" ? 404 : result.error === "firebase_not_configured" ? 503 : 400;
-    return NextResponse.json(result, { status });
+    const status =
+      result.error === "business_not_found"
+        ? 404
+        : result.error === "firebase_not_configured"
+          ? 503
+          : result.error === "staff_branch_mismatch"
+            ? 409
+            : 400;
+    return NextResponse.json(result, { headers: { "Cache-Control": "no-store" }, status });
   }
 
-  return NextResponse.json(result);
+  return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
 }

@@ -1123,6 +1123,58 @@ Cambios aplicados:
 5. Se verifico en 1440px y 390px sin scroll horizontal.
 6. El hero ahora evita textos de "vender por Instagram" y se centra en reservas desde celular + panel simple.
 
+Tanda de 30 mejoras chicas front/back
+
+Fecha: 2026-05-27
+
+Alcance:
+- Se aplicaron mejoras de bajo riesgo en landing, reserva publica, formulario de leads y APIs.
+- No se cambio el modelo comercial ni la arquitectura multi-negocio.
+
+Mejoras aplicadas:
+1. Hero con preview accesible mediante `role="img"`.
+2. Hero agrega etiqueta ARIA descriptiva del mockup.
+3. Bloque de precios del hero agrega etiqueta ARIA.
+4. CTA secundario del hero suma foco visible.
+5. Precio de Agenda Full se mantiene compacto en una linea.
+6. Botones de WhatsApp tienen microinteraccion hover.
+7. Sticky mobile CTA respeta safe-area inferior en celulares.
+8. Sticky mobile CTA agrega `aria-label` especifico.
+9. Sticky mobile CTA suma foco visible.
+10. Reserva publica agrega mensajes de error para payload, JSON y formato invalido.
+11. Reserva publica agrega mensaje para demasiados intentos.
+12. WhatsApp del negocio se normaliza a solo digitos antes de abrir `wa.me`.
+13. Formulario de reserva exige 10 digitos minimos para WhatsApp.
+14. Consulta/cancelacion de turnos exige 10 digitos minimos.
+15. API de crear reserva valida 10 digitos minimos.
+16. API de consultar reserva valida 10 digitos minimos.
+17. Si hay una sola sucursal disponible, se selecciona automaticamente.
+18. Si hay un solo profesional disponible, se selecciona automaticamente.
+19. Confirmacion de cancelacion publica ahora usa texto con tildes y signo de pregunta.
+20. Tarjetas de servicio agregan foco visible.
+21. Tarjetas de sucursal agregan foco visible.
+22. Tarjetas de profesional agregan foco visible.
+23. Botones de calendario agregan foco visible.
+24. Botones de horario agregan foco visible.
+25. Boton confirmar turno marca `aria-busy` mientras guarda.
+26. Boton buscar turno marca `aria-busy` mientras consulta.
+27. APIs de reservas responden con `Cache-Control: no-store`.
+28. API de disponibilidad limita payload a 3 KB.
+29. API de consulta limita payload a 2 KB.
+30. Sanitizado de API elimina caracteres de control y valida horas 00:00-23:59.
+31. API de disponibilidad devuelve 409 para combinaciones profesional/sucursal invalidas.
+32. API de crear reserva devuelve 409 para combinaciones profesional/sucursal invalidas.
+33. API health responde con `no-store`.
+34. Endpoint admin placeholder responde con `no-store`.
+35. Formulario de leads muestra errores especificos de API.
+36. Formulario de leads mejora placeholder con tilde en "tenés".
+37. API de leads responde exito/error final con `no-store`.
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+- npm run test:smoke: OK despues de levantar localhost:3001.
+
 Correccion de Web Completa y dominios propios
 
 Fecha: 2026-05-25

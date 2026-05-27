@@ -22,6 +22,11 @@ type ConfirmedReservation = {
 };
 
 const errorMessages: Record<string, string> = {
+  invalid_fields: "Revisá los datos antes de continuar.",
+  invalid_content_type: "La solicitud no llegó con el formato correcto.",
+  invalid_json: "La solicitud no se pudo leer correctamente.",
+  payload_too_large: "El mensaje es demasiado largo.",
+  too_many_requests: "Hubo demasiados intentos seguidos. Probá de nuevo en unos minutos.",
   business_not_available: "Esta agenda no está disponible temporalmente.",
   firebase_not_configured: "La agenda todavía no está conectada. Escribí por WhatsApp para reservar.",
   service_not_found: "Elegí un servicio disponible.",
@@ -107,7 +112,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
   const selectedStaff = filteredStaff.find((item) => item.id === personalId);
   const selectedBranch = filteredBranches.find((item) => item.id === sucursalId);
   const selectedDate = bookingData.availableDates.find((item) => item.value === date);
-  const customerReady = customerName.trim().length >= 2 && customerPhone.replace(/\D/g, "").length >= 8;
+  const customerReady = customerName.trim().length >= 2 && customerPhone.replace(/\D/g, "").length >= 10;
   const canSubmit = canReserve && Boolean(selectedService) && Boolean(date) && Boolean(time) && customerReady && !booking;
   const steps = [
     { label: "Servicio", done: Boolean(selectedService), hidden: false },
@@ -117,7 +122,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
     { label: "Datos", done: customerReady, hidden: false }
   ].filter((step) => !step.hidden);
   const progress = Math.round((steps.filter((step) => step.done).length / steps.length) * 100);
-  const businessWhatsappHref = business.whatsapp ? `https://wa.me/${business.whatsapp}` : "";
+  const businessWhatsappHref = business.whatsapp ? `https://wa.me/${business.whatsapp.replace(/\D/g, "")}` : "";
   const branchStepNumber = 2;
   const staffStepNumber = needsBranch ? 3 : 2;
   const scheduleStepNumber = 2 + (needsBranch ? 1 : 0) + (needsStaff ? 1 : 0);
@@ -135,6 +140,14 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
     if (personalId && !filteredStaff.some((person) => person.id === personalId)) setPersonalId("");
     if (sucursalId && !filteredBranches.some((branch) => branch.id === sucursalId)) setSucursalId("");
   }, [filteredBranches, filteredStaff, personalId, sucursalId]);
+
+  useEffect(() => {
+    if (!sucursalId && filteredBranches.length === 1) setSucursalId(filteredBranches[0].id);
+  }, [filteredBranches, sucursalId]);
+
+  useEffect(() => {
+    if (!personalId && (!needsBranch || sucursalId) && filteredStaff.length === 1) setPersonalId(filteredStaff[0].id);
+  }, [filteredStaff, needsBranch, personalId, sucursalId]);
 
   useEffect(() => {
     setTime("");
@@ -242,7 +255,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
   }
 
   async function cancelPublicReservation(reservaId: string) {
-    const confirmedCancel = window.confirm("Seguro que queres cancelar este turno?");
+    const confirmedCancel = window.confirm("¿Seguro que querés cancelar este turno?");
     if (!confirmedCancel) return;
 
     setLookupError("");
@@ -360,7 +373,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                   {bookingData.services.map((service) => (
                     <button
                       aria-pressed={serviceId === service.id}
-                      className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${serviceId === service.id ? "border-teal bg-mint shadow-soft" : "border-ink/10 bg-cream"}`}
+                      className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${serviceId === service.id ? "border-teal bg-mint shadow-soft" : "border-ink/10 bg-cream"}`}
                       disabled={!canReserve}
                       key={service.id}
                       onClick={() => {
@@ -389,7 +402,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                   {filteredBranches.map((branch) => (
                     <button
                       aria-pressed={sucursalId === branch.id}
-                      className={`rounded-2xl border p-4 text-left transition ${sucursalId === branch.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
+                      className={`rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${sucursalId === branch.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
                       disabled={!canReserve}
                       key={branch.id}
                       onClick={() => {
@@ -416,7 +429,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                     {filteredStaff.map((person) => (
                       <button
                         aria-pressed={personalId === person.id}
-                        className={`rounded-2xl border p-4 text-left transition ${personalId === person.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
+                        className={`rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${personalId === person.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
                         disabled={!canReserve}
                         key={person.id}
                         onClick={() => setPersonalId(person.id)}
@@ -442,7 +455,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                     return (
                       <button
                         aria-pressed={date === item.value}
-                        className={`rounded-2xl border px-3 py-3 text-left transition ${date === item.value ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal hover:border-teal/40"}`}
+                        className={`rounded-2xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${date === item.value ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal hover:border-teal/40"}`}
                         disabled={!canReserve}
                         key={item.value}
                         onClick={() => setDate(item.value)}
@@ -461,7 +474,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {times.map((item) => (
-                    <button aria-pressed={time === item} className={`rounded-xl border px-4 py-3 text-sm font-bold ${time === item ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal"}`} key={item} onClick={() => setTime(item)} type="button">
+                    <button aria-pressed={time === item} className={`rounded-xl border px-4 py-3 text-sm font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${time === item ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal"}`} key={item} onClick={() => setTime(item)} type="button">
                       {item}
                     </button>
                   ))}
@@ -481,7 +494,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
               <h2 className="font-display text-2xl font-extrabold text-teal">{customerStepNumber}. Confirmá tus datos</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <input autoComplete="name" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} minLength={2} name="clienteNombre" onChange={(event) => setCustomerName(event.target.value)} placeholder="Tu nombre" required value={customerName} />
-                <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} inputMode="tel" minLength={8} name="telefono" onChange={(event) => setCustomerPhone(event.target.value)} placeholder="WhatsApp" required value={customerPhone} />
+                <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} inputMode="tel" minLength={10} name="telefono" onChange={(event) => setCustomerPhone(event.target.value)} placeholder="WhatsApp con característica" required value={customerPhone} />
               </div>
               {customerName || customerPhone ? (
                 <button className="mt-3 rounded-full bg-cream px-4 py-2 text-xs font-extrabold text-teal ring-1 ring-ink/10" onClick={clearSavedCustomer} type="button">
@@ -501,7 +514,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
               {personalId ? <p><span className="font-bold text-cream">Profesional:</span> {selectedStaff?.nombre}</p> : null}
               {sucursalId ? <p><span className="font-bold text-cream">Sucursal:</span> {selectedBranch?.nombre}</p> : null}
             </div>
-            <button className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-action px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60" disabled={!canSubmit} type="submit">
+            <button aria-busy={booking} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-action px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60" disabled={!canSubmit} type="submit">
               {booking ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />} Confirmar turno
             </button>
             {!customerReady ? <p className="mt-3 text-xs font-bold text-cream/65">Completá nombre y WhatsApp para habilitar la confirmación.</p> : null}
@@ -520,8 +533,8 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
         <h2 className="mt-3 font-display text-3xl font-extrabold text-teal">Ver o cancelar un turno</h2>
         <p className="mt-3 max-w-2xl leading-7 text-ink/65">Ingresá el WhatsApp que usaste para reservar. Vas a ver tus próximos turnos y podés cancelarlos si ya no vas a asistir.</p>
         <form className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]" onSubmit={lookupReservations}>
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" onChange={(event) => setLookupPhone(event.target.value)} placeholder="WhatsApp usado en la reserva" required value={lookupPhone} />
-          <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60" disabled={lookupLoading} type="submit">
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" minLength={10} onChange={(event) => setLookupPhone(event.target.value)} placeholder="WhatsApp usado en la reserva" required value={lookupPhone} />
+          <button aria-busy={lookupLoading} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60" disabled={lookupLoading} type="submit">
             {lookupLoading ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />} Buscar
           </button>
         </form>

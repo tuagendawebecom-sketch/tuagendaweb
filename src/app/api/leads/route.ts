@@ -82,8 +82,8 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
-    return NextResponse.json({ ok: false, error: result.reason }, { status: 503 });
+    return NextResponse.json({ ok: false, error: result.reason }, { headers: { "Cache-Control": "no-store" }, status: 503 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
 }

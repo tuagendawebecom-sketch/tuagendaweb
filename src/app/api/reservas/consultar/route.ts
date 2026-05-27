@@ -5,7 +5,7 @@ import { findReservationsByPhone } from "@/lib/firebase/reservations";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const parsed = await readJsonRequest(request);
+  const parsed = await readJsonRequest(request, 2_000);
   if (!parsed.ok) {
     return parsed.response;
   }
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   const slug = cleanText(body.slug, 80);
   const telefono = cleanText(body.telefono, 30);
 
-  if (!slug || digitsOnly(telefono).length < 8) {
+  if (!slug || digitsOnly(telefono).length < 10) {
     return NextResponse.json({ ok: false, error: "invalid_fields" }, { status: 400 });
   }
 
@@ -25,8 +25,8 @@ export async function POST(request: Request) {
 
   if (!result.ok) {
     const status = result.error === "business_not_found" ? 404 : result.error === "firebase_not_configured" ? 503 : 400;
-    return NextResponse.json(result, { status });
+    return NextResponse.json(result, { headers: { "Cache-Control": "no-store" }, status });
   }
 
-  return NextResponse.json(result);
+  return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
 }

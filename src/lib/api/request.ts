@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 
+function stripControlChars(value: string) {
+  return Array.from(value)
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      return code >= 32 && code !== 127;
+    })
+    .join("");
+}
+
 export function cleanText(value: unknown, maxLength = 120) {
-  return String(value ?? "")
+  return stripControlChars(String(value ?? ""))
     .trim()
     .replace(/\s+/g, " ")
     .slice(0, maxLength);
@@ -16,7 +25,9 @@ export function isIsoDate(value: string) {
 }
 
 export function isTime(value: string) {
-  return /^\d{2}:\d{2}$/.test(value);
+  if (!/^\d{2}:\d{2}$/.test(value)) return false;
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
 }
 
 export async function readJsonRequest(request: Request, maxBytes = 4_000) {

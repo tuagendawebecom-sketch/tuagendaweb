@@ -12,7 +12,7 @@ function HeroProductMockup() {
   ];
 
   return (
-    <div className="relative mx-auto w-full max-w-[680px] lg:max-w-none">
+    <div aria-label="Vista previa de agenda online y panel de administración" className="relative mx-auto w-full max-w-[680px] lg:max-w-none" role="img">
       <div className="absolute -inset-5 -z-10 rounded-[2.5rem] bg-[radial-gradient(circle_at_20%_20%,rgba(231,184,90,.24),transparent_34%),radial-gradient(circle_at_80%_10%,rgba(32,143,128,.18),transparent_36%),linear-gradient(135deg,#fbf7ef,#edf5ef)] shadow-lift" />
       <div className="relative min-h-[440px] overflow-hidden rounded-[2rem] border border-ink/10 bg-paper/90 p-4 shadow-lift backdrop-blur sm:min-h-[470px] sm:p-5 lg:min-h-[510px] lg:p-6">
         <div className="rounded-[1.35rem] border border-teal/10 bg-cream p-4 shadow-soft">
@@ -102,15 +102,15 @@ export function Hero() {
             ))}
           </div>
 
-          <div className="mt-5 inline-flex max-w-full flex-wrap items-center gap-2 rounded-2xl border border-teal/12 bg-paper px-4 py-3 font-bold text-teal shadow-soft">
-            <span>{hero.price}</span>
+          <div className="mt-5 inline-flex max-w-full flex-wrap items-center gap-2 rounded-2xl border border-teal/12 bg-paper px-4 py-3 font-bold text-teal shadow-soft" aria-label="Precios principales">
+            <span className="whitespace-nowrap">{hero.price}</span>
             <span className="hidden text-ink/25 sm:inline">|</span>
             <span>Web Completa: $100.000 pago único</span>
           </div>
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <WhatsAppButton className="w-full text-base sm:w-auto" href={createWhatsAppHref(whatsappMessages.heroAgenda)} label={hero.primaryCta} location="hero" />
-            <Link className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-teal px-5 py-3 text-sm font-bold text-teal transition hover:bg-mint sm:w-auto" href="#web-completa">
+            <Link className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-teal px-5 py-3 text-sm font-bold text-teal transition hover:bg-mint focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 sm:w-auto" href="#web-completa">
               {hero.secondaryCta} <ArrowDown size={18} />
             </Link>
           </div>
