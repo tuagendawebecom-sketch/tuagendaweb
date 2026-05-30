@@ -1451,3 +1451,68 @@ Validacion:
 - npm run lint: OK.
 - npm run build: OK.
 - npm run test:smoke en localhost:3001: OK.
+Tanda de 50 mejoras - 2026-05-29
+
+Objetivo:
+- Pulir la landing, reservas, formularios y APIs para dejar TuAgendaWeb más estable antes de seguir vendiendo.
+- Mantener el posicionamiento actual: Agenda Full desde $10.000/mes y Web Completa $100.000 pago único.
+- No introducir cambios grandes de arquitectura ni prometer futuras mejoras pagas.
+
+Mejoras aplicadas:
+1. Se corrigió un texto con mojibake real en el flujo de reserva.
+2. Se endureció la validación de WhatsApp al reservar: mínimo 10 dígitos.
+3. Se endureció la validación de WhatsApp al consultar turnos: mínimo 10 dígitos.
+4. Se endureció la validación de WhatsApp al cancelar turnos.
+5. El formulario de reserva ya no vuelve a enviar si está guardando o si el turno ya fue confirmado.
+6. El link de WhatsApp del negocio solo se muestra si el número tiene longitud válida.
+7. Los botones de servicio se bloquean mientras se confirma un turno.
+8. Los botones de sucursal se bloquean mientras se confirma un turno.
+9. Los botones de profesional se bloquean mientras se confirma un turno.
+10. Los días del calendario se bloquean mientras se confirma un turno.
+11. Los horarios disponibles tienen aria-label específico.
+12. Los días del calendario tienen aria-label específico.
+13. El botón "Usar primer horario" tiene mejor foco accesible.
+14. El botón "Usar primer horario" se bloquea mientras se guarda.
+15. Si no hay días disponibles, la agenda muestra un empty state claro.
+16. El campo nombre del cliente tiene límite máximo.
+17. El campo WhatsApp del cliente tiene límite máximo.
+18. El campo WhatsApp del cliente usa autocomplete tel-national.
+19. El campo de consulta/cancelación usa autocomplete tel-national.
+20. El campo de consulta/cancelación tiene límite máximo.
+21. Las APIs de reserva usan un helper común para respuestas no cacheables.
+22. Los errores de JSON inválido ahora salen con Cache-Control no-store.
+23. Los errores de content-type inválido ahora salen con Cache-Control no-store.
+24. Los errores de payload grande ahora salen con Cache-Control no-store.
+25. /api/reservas/crear usa el helper no-store en éxito y error.
+26. /api/reservas/consultar usa el helper no-store en éxito y error.
+27. /api/reservas/disponibilidad usa el helper no-store en éxito y error.
+28. /api/reservas/cancelar usa el helper no-store en éxito y error.
+29. /api/reservas/cancelar ahora limita payload a 2 KB.
+30. /api/leads reutiliza limpieza centralizada de texto.
+31. /api/leads reutiliza lectura JSON segura.
+32. /api/leads responde no-store también en rate limit.
+33. /api/leads responde no-store también en honeypot.
+34. /api/leads responde no-store también en campos faltantes.
+35. /api/leads exige WhatsApp de 10 dígitos.
+36. El formulario de leads exige WhatsApp de 10 dígitos en HTML.
+37. El formulario de leads usa autocomplete tel-national.
+38. El honeypot del formulario de leads queda aria-hidden.
+39. El contador del mensaje opcional queda vinculado con aria-describedby.
+40. /api/superadmin/negocios/crear responde no-store en éxito.
+41. /api/superadmin/negocios/crear responde no-store en errores.
+42. El header cierra el menú mobile al pasar a desktop.
+43. El header mantiene Escape para cerrar menú mobile.
+44. Los dropdowns desktop tienen aria-controls.
+45. Los dropdowns desktop tienen IDs estables.
+46. Los dropdowns desktop se posicionan en top-full para reducir cortes al mover el mouse.
+47. El hero visual baja su altura mínima en mobile para evitar sensación apretada.
+48. El mockup mobile del hero se achica en pantallas pequeñas.
+49. La tarjeta inferior del mockup del hero se compacta en mobile.
+50. CSS global agrega scrollbar-gutter, font smoothing, límites de ancho en controles, overflow-wrap y grilla de fondo más liviana en mobile.
+
+Validación:
+- npm run lint: OK.
+- npm run build: OK.
+- npm run test:smoke en localhost:3001: OK.
+- Smoke test revisó home, login, panel, superadmin, demo barbería, legales y health API en 390x844 y 1440x1000.
+- El smoke test confirmó que no hay overflow horizontal en las rutas revisadas.

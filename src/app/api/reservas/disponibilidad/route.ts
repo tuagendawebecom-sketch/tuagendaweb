@@ -1,5 +1,4 @@
-import { NextResponse } from "next/server";
-import { cleanText, isIsoDate, readJsonRequest } from "@/lib/api/request";
+import { cleanText, isIsoDate, jsonNoStore, readJsonRequest } from "@/lib/api/request";
 import { getAvailableTimes } from "@/lib/firebase/reservations";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +17,7 @@ export async function POST(request: Request) {
   const sucursalId = cleanText(body.sucursalId, 100);
 
   if (!slug || !serviceId || !isIsoDate(date)) {
-    return NextResponse.json({ ok: false, error: "invalid_fields" }, { status: 400 });
+    return jsonNoStore({ ok: false, error: "invalid_fields" }, { status: 400 });
   }
 
   const result = await getAvailableTimes({
@@ -38,8 +37,8 @@ export async function POST(request: Request) {
           : result.error === "staff_branch_mismatch"
             ? 409
             : 400;
-    return NextResponse.json(result, { headers: { "Cache-Control": "no-store" }, status });
+    return jsonNoStore(result, { status });
   }
 
-  return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
+  return jsonNoStore(result);
 }

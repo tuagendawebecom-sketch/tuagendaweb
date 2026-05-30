@@ -1,5 +1,5 @@
 import { FieldValue } from "firebase-admin/firestore";
-import { NextResponse } from "next/server";
+import { jsonNoStore } from "@/lib/api/request";
 import { normalizePhone } from "@/lib/phone";
 import { isValidSlug, normalizeSlug } from "@/lib/slug";
 import { requireSuperAdmin } from "@/lib/firebase/superadmin";
@@ -81,23 +81,23 @@ const defaultScheduleConfig = {
 export async function POST(request: Request) {
   const contentLength = Number(request.headers.get("content-length") ?? "0");
   if (contentLength > 12_000) {
-    return NextResponse.json({ ok: false, error: "payload_too_large" }, { status: 413 });
+    return jsonNoStore({ ok: false, error: "payload_too_large" }, { status: 413 });
   }
 
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
-    return NextResponse.json({ ok: false, error: "invalid_content_type" }, { status: 415 });
+    return jsonNoStore({ ok: false, error: "invalid_content_type" }, { status: 415 });
   }
 
   const admin = await requireSuperAdmin(request);
   if (!admin.ok) {
     const status = admin.error === "firebase_admin_not_configured" ? 503 : admin.error === "forbidden" ? 403 : 401;
-    return NextResponse.json({ ok: false, error: admin.error }, { status });
+    return jsonNoStore({ ok: false, error: admin.error }, { status });
   }
 
   const body = await request.json().catch(() => null);
   if (!body) {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+    return jsonNoStore({ ok: false, error: "invalid_json" }, { status: 400 });
   }
   const nombre = clean(body?.nombre);
   const slug = normalizeSlug(clean(body?.slug) || nombre);
@@ -111,19 +111,19 @@ export async function POST(request: Request) {
   const rubro = clean(body?.rubro);
 
   if (!nombre || !isValidSlug(slug)) {
-    return NextResponse.json({ ok: false, error: "invalid_business" }, { status: 400 });
+    return jsonNoStore({ ok: false, error: "invalid_business" }, { status: 400 });
   }
 
   if (!["agenda_simple", "agenda_pro", "web_completa"].includes(plan)) {
-    return NextResponse.json({ ok: false, error: "invalid_plan" }, { status: 400 });
+    return jsonNoStore({ ok: false, error: "invalid_plan" }, { status: 400 });
   }
 
   if (!ownerEmail || initialPassword.length < 6) {
-    return NextResponse.json({ ok: false, error: "invalid_owner_credentials" }, { status: 400 });
+    return jsonNoStore({ ok: false, error: "invalid_owner_credentials" }, { status: 400 });
   }
 
   if (!isValidCustomDomain(customDomain)) {
-    return NextResponse.json({ ok: false, error: "invalid_custom_domain" }, { status: 400 });
+    return jsonNoStore({ ok: false, error: "invalid_custom_domain" }, { status: 400 });
   }
 
   const duplicateSnapshot = await admin.db.collection("negocios").where("slug", "==", slug).limit(1).get();
@@ -133,7 +133,7 @@ export async function POST(request: Request) {
     const canReleaseSlug = duplicateData.archived === true || duplicateData.estado === "cancelled";
 
     if (!canReleaseSlug) {
-      return NextResponse.json({ ok: false, error: "slug_already_exists" }, { status: 409 });
+      return jsonNoStore({ ok: false, error: "slug_already_exists" }, { status: 409 });
     }
 
     await duplicate.ref.update({
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
     const domainSnapshot = await admin.db.collection("negocios").where("customDomain", "==", customDomain).limit(1).get();
     const domainOwner = domainSnapshot.docs[0];
     if (domainOwner && domainOwner.data().archived !== true && domainOwner.data().estado !== "cancelled") {
-      return NextResponse.json({ ok: false, error: "custom_domain_already_exists" }, { status: 409 });
+      return jsonNoStore({ ok: false, error: "custom_domain_already_exists" }, { status: 409 });
     }
   }
 
@@ -162,7 +162,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
     if (code !== "auth/user-not-found") {
-      return NextResponse.json({ ok: false, error: "owner_lookup_failed" }, { status: 400 });
+      return jsonNoStore({ ok: false, error: "owner_lookup_failed" }, { status: 400 });
     }
 
     owner = await admin.auth.createUser({
@@ -227,7 +227,7 @@ export async function POST(request: Request) {
     updatedAt: FieldValue.serverTimestamp()
   });
 
-  return NextResponse.json({
+  return jsonNoStore({
     ok: true,
     businessId: businessRef.id,
     slug,

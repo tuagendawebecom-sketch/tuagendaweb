@@ -1,5 +1,4 @@
-import { NextResponse } from "next/server";
-import { cleanText, digitsOnly, readJsonRequest } from "@/lib/api/request";
+import { cleanText, digitsOnly, jsonNoStore, readJsonRequest } from "@/lib/api/request";
 import { findReservationsByPhone } from "@/lib/firebase/reservations";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +14,7 @@ export async function POST(request: Request) {
   const telefono = cleanText(body.telefono, 30);
 
   if (!slug || digitsOnly(telefono).length < 10) {
-    return NextResponse.json({ ok: false, error: "invalid_fields" }, { status: 400 });
+    return jsonNoStore({ ok: false, error: "invalid_fields" }, { status: 400 });
   }
 
   const result = await findReservationsByPhone({
@@ -25,8 +24,8 @@ export async function POST(request: Request) {
 
   if (!result.ok) {
     const status = result.error === "business_not_found" ? 404 : result.error === "firebase_not_configured" ? 503 : 400;
-    return NextResponse.json(result, { headers: { "Cache-Control": "no-store" }, status });
+    return jsonNoStore(result, { status });
   }
 
-  return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
+  return jsonNoStore(result);
 }

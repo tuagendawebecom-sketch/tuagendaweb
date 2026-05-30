@@ -11,17 +11,24 @@ import { WhatsAppButton } from "./WhatsAppButton";
 export function Header() {
   const [open, setOpen] = useState(false);
   const mobileMenuId = useId();
+  const solutionsMenuId = useId();
+  const demosMenuId = useId();
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
     }
+    function handleResize() {
+      if (window.matchMedia("(min-width: 1024px)").matches) setOpen(false);
+    }
 
     document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("resize", handleResize);
     document.body.style.overflow = open ? "hidden" : "";
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
     };
   }, [open]);
@@ -44,6 +51,7 @@ export function Header() {
         <nav aria-label="Principal" className="hidden items-center gap-4 xl:gap-6 lg:flex">
           <div className="group relative py-4">
             <button
+              aria-controls={solutionsMenuId}
               aria-haspopup="menu"
               className="inline-flex items-center gap-1 rounded-lg py-2 text-sm font-bold text-ink/75 transition hover:text-action focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20"
               data-testid="solutions-menu-trigger"
@@ -52,8 +60,9 @@ export function Header() {
               Soluciones <ChevronDown size={16} />
             </button>
             <div
-              className="invisible absolute left-1/2 top-[calc(100%-0.75rem)] grid w-80 -translate-x-1/2 gap-1 rounded-2xl border border-ink/10 bg-paper p-3 opacity-0 shadow-lift transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"
+              className="invisible absolute left-1/2 top-full grid w-80 -translate-x-1/2 gap-1 rounded-2xl border border-ink/10 bg-paper p-3 opacity-0 shadow-lift transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"
               data-testid="solutions-menu"
+              id={solutionsMenuId}
               role="menu"
             >
               {solutionNavigation.map((item) => (
@@ -68,6 +77,7 @@ export function Header() {
             item.label === "Demos" ? (
               <div className="group relative py-4" key={item.href}>
                 <button
+                  aria-controls={demosMenuId}
                   aria-haspopup="menu"
                   className="inline-flex items-center gap-1 rounded-lg py-2 text-sm font-bold text-ink/75 transition hover:text-action focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20"
                   data-testid="demos-menu-trigger"
@@ -76,8 +86,9 @@ export function Header() {
                   Demos <ChevronDown size={16} />
                 </button>
                 <div
-                  className="invisible absolute left-1/2 top-[calc(100%-0.75rem)] grid w-80 -translate-x-1/2 grid-cols-2 gap-1 rounded-2xl border border-ink/10 bg-paper p-3 opacity-0 shadow-lift transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"
+                  className="invisible absolute left-1/2 top-full grid w-80 -translate-x-1/2 grid-cols-2 gap-1 rounded-2xl border border-ink/10 bg-paper p-3 opacity-0 shadow-lift transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"
                   data-testid="demos-menu"
+                  id={demosMenuId}
                   role="menu"
                 >
                   {demoCategories.map((demo) => (

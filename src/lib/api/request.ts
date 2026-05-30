@@ -1,5 +1,17 @@
 import { NextResponse } from "next/server";
 
+const noStoreHeaders = { "Cache-Control": "no-store" };
+
+export function jsonNoStore(body: unknown, init?: ResponseInit) {
+  return NextResponse.json(body, {
+    ...init,
+    headers: {
+      ...noStoreHeaders,
+      ...init?.headers
+    }
+  });
+}
+
 function stripControlChars(value: string) {
   return Array.from(value)
     .filter((char) => {
@@ -33,17 +45,17 @@ export function isTime(value: string) {
 export async function readJsonRequest(request: Request, maxBytes = 4_000) {
   const contentLength = Number(request.headers.get("content-length") ?? "0");
   if (contentLength > maxBytes) {
-    return { ok: false as const, response: NextResponse.json({ ok: false, error: "payload_too_large" }, { status: 413 }) };
+    return { ok: false as const, response: jsonNoStore({ ok: false, error: "payload_too_large" }, { status: 413 }) };
   }
 
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
-    return { ok: false as const, response: NextResponse.json({ ok: false, error: "invalid_content_type" }, { status: 415 }) };
+    return { ok: false as const, response: jsonNoStore({ ok: false, error: "invalid_content_type" }, { status: 415 }) };
   }
 
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object") {
-    return { ok: false as const, response: NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 }) };
+    return { ok: false as const, response: jsonNoStore({ ok: false, error: "invalid_json" }, { status: 400 }) };
   }
 
   return { ok: true as const, body: body as Record<string, unknown> };

@@ -13,6 +13,7 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
   text-size-adjust: 100%;
 }
 
@@ -20,7 +21,9 @@ body {
   background: #f7f4ee;
   color: #1e1e1c;
   overflow-x: hidden;
+  text-rendering: optimizeLegibility;
   -webkit-tap-highlight-color: rgba(31, 138, 120, 0.18);
+  -webkit-font-smoothing: antialiased;
 }
 
 body::before {
@@ -43,6 +46,25 @@ body::before {
 button,
 a {
   touch-action: manipulation;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span {
+  overflow-wrap: anywhere;
 }
 
 :focus-visible {
@@ -72,6 +94,12 @@ img {
 @media (max-width: 1023px) {
   body {
     padding-bottom: 4.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  body::before {
+    background-size: 36px 36px;
   }
 }
 

@@ -14,7 +14,7 @@ function HeroProductMockup() {
   return (
     <div aria-label="Vista previa de agenda online y panel de administración" className="relative mx-auto w-full max-w-[680px] lg:max-w-none" role="img">
       <div className="absolute -inset-5 -z-10 rounded-[2.5rem] bg-[radial-gradient(circle_at_20%_20%,rgba(231,184,90,.24),transparent_34%),radial-gradient(circle_at_80%_10%,rgba(32,143,128,.18),transparent_36%),linear-gradient(135deg,#fbf7ef,#edf5ef)] shadow-lift" />
-      <div className="relative min-h-[440px] overflow-hidden rounded-[2rem] border border-ink/10 bg-paper/90 p-4 shadow-lift backdrop-blur sm:min-h-[470px] sm:p-5 lg:min-h-[510px] lg:p-6">
+      <div className="relative min-h-[390px] overflow-hidden rounded-[2rem] border border-ink/10 bg-paper/90 p-4 shadow-lift backdrop-blur min-[390px]:min-h-[410px] sm:min-h-[470px] sm:p-5 lg:min-h-[510px] lg:p-6">
         <div className="rounded-[1.35rem] border border-teal/10 bg-cream p-4 shadow-soft">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -51,7 +51,7 @@ function HeroProductMockup() {
           </div>
         </div>
 
-        <div className="absolute bottom-5 right-5 w-[210px] rounded-[1.8rem] border-[9px] border-teal bg-[#0d211e] shadow-lift sm:w-[240px] lg:bottom-6 lg:right-7">
+        <div className="absolute bottom-5 right-4 w-[185px] rounded-[1.8rem] border-[8px] border-teal bg-[#0d211e] shadow-lift min-[390px]:w-[205px] sm:right-5 sm:w-[240px] lg:bottom-6 lg:right-7">
           <div className="rounded-[1.35rem] bg-cream p-4">
             <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-ink/20" />
             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-action">Reserva online</p>
@@ -69,7 +69,7 @@ function HeroProductMockup() {
           </div>
         </div>
 
-        <div className="absolute bottom-6 left-5 max-w-[205px] rounded-2xl bg-teal px-4 py-3 text-cream shadow-lift">
+        <div className="absolute bottom-4 left-4 max-w-[178px] rounded-2xl bg-teal px-3 py-3 text-cream shadow-lift min-[390px]:max-w-[205px] sm:bottom-6 sm:left-5 sm:px-4">
           <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-gold">Menos ida y vuelta</p>
           <p className="mt-1 text-sm font-bold leading-5">El cliente reserva y el negocio lo ve en el panel.</p>
         </div>

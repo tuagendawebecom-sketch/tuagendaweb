@@ -91,7 +91,7 @@ export function LeadCaptureForm() {
         return;
       }
 
-      if (payload.phone.replace(/\D/g, "").length < 8) {
+      if (payload.phone.replace(/\D/g, "").length < 10) {
         setState("error");
         setError("Revisá el WhatsApp. Necesito un número válido para responderte.");
         return;
@@ -151,7 +151,7 @@ export function LeadCaptureForm() {
         </div>
 
         <form className="grid gap-4 rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft sm:p-7" onSubmit={handleSubmit}>
-          <label className="hidden">
+          <label aria-hidden="true" className="hidden">
             Empresa
             <input autoComplete="off" name="company" tabIndex={-1} type="text" />
           </label>
@@ -162,7 +162,7 @@ export function LeadCaptureForm() {
             </label>
             <label className="grid gap-2 text-sm font-bold text-ink/70">
               WhatsApp
-              <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" maxLength={40} minLength={8} name="phone" pattern="[0-9+()\\s-]{8,}" placeholder="+54 9 381..." required type="tel" />
+              <input autoComplete="tel-national" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" maxLength={30} minLength={10} name="phone" pattern="[0-9+()\\s-]{10,}" placeholder="+54 9 381..." required type="tel" />
             </label>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -190,8 +190,8 @@ export function LeadCaptureForm() {
           </label>
           <label className="grid gap-2 text-sm font-bold text-ink/70">
             Mensaje opcional
-            <textarea className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" maxLength={600} name="message" onChange={(event) => setMessageLength(event.target.value.length)} placeholder="Contame si ya tenés logo, dominio, servicios o cantidad de personas que atienden." />
-            <span className="text-right text-xs font-semibold text-ink/45">{messageLength}/600</span>
+            <textarea aria-describedby="lead-message-counter" className="min-h-28 rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" maxLength={600} name="message" onChange={(event) => setMessageLength(event.target.value.length)} placeholder="Contame si ya tenés logo, dominio, servicios o cantidad de personas que atienden." />
+            <span className="text-right text-xs font-semibold text-ink/45" id="lead-message-counter">{messageLength}/600</span>
           </label>
           <button
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream shadow-lift transition hover:bg-action disabled:cursor-wait disabled:opacity-70"

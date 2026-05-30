@@ -122,7 +122,8 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
     { label: "Datos", done: customerReady, hidden: false }
   ].filter((step) => !step.hidden);
   const progress = Math.round((steps.filter((step) => step.done).length / steps.length) * 100);
-  const businessWhatsappHref = business.whatsapp ? `https://wa.me/${business.whatsapp.replace(/\D/g, "")}` : "";
+  const businessWhatsapp = business.whatsapp?.replace(/\D/g, "") ?? "";
+  const businessWhatsappHref = businessWhatsapp.length >= 10 ? `https://wa.me/${businessWhatsapp}` : "";
   const branchStepNumber = 2;
   const staffStepNumber = needsBranch ? 3 : 2;
   const scheduleStepNumber = 2 + (needsBranch ? 1 : 0) + (needsStaff ? 1 : 0);
@@ -180,6 +181,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
 
   async function submitBooking(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (booking || confirmed) return;
     setMessage("");
     setError("");
     setConfirmed(null);
@@ -192,8 +194,8 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
     const formData = new FormData(event.currentTarget);
     const clienteNombre = String(formData.get("clienteNombre") ?? "").trim();
     const telefono = String(formData.get("telefono") ?? "").trim();
-    if (clienteNombre.length < 2 || telefono.replace(/\D/g, "").length < 8) {
-      setError("CompletÃ¡ nombre y WhatsApp para confirmar.");
+    if (clienteNombre.length < 2 || telefono.replace(/\D/g, "").length < 10) {
+      setError("Completá nombre y WhatsApp para confirmar.");
       return;
     }
     setBooking(true);
@@ -235,6 +237,12 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
     event.preventDefault();
     setLookupError("");
     setReservations([]);
+
+    if (lookupPhone.replace(/\D/g, "").length < 10) {
+      setLookupError("Ingresá el WhatsApp completo que usaste al reservar.");
+      return;
+    }
+
     setLookupLoading(true);
 
     try {
@@ -260,6 +268,11 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
 
     setLookupError("");
     try {
+      if (lookupPhone.replace(/\D/g, "").length < 10) {
+        setLookupError("Ingresá el WhatsApp completo antes de cancelar.");
+        return;
+      }
+
       const response = await fetch("/api/reservas/cancelar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -374,7 +387,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                     <button
                       aria-pressed={serviceId === service.id}
                       className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${serviceId === service.id ? "border-teal bg-mint shadow-soft" : "border-ink/10 bg-cream"}`}
-                      disabled={!canReserve}
+                      disabled={!canReserve || booking}
                       key={service.id}
                       onClick={() => {
                         setServiceId(service.id);
@@ -403,7 +416,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                     <button
                       aria-pressed={sucursalId === branch.id}
                       className={`rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${sucursalId === branch.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
-                      disabled={!canReserve}
+                      disabled={!canReserve || booking}
                       key={branch.id}
                       onClick={() => {
                         setSucursalId(branch.id);
@@ -430,7 +443,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                       <button
                         aria-pressed={personalId === person.id}
                         className={`rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${personalId === person.id ? "border-teal bg-mint" : "border-ink/10 bg-cream"}`}
-                        disabled={!canReserve}
+                        disabled={!canReserve || booking}
                         key={person.id}
                         onClick={() => setPersonalId(person.id)}
                         type="button"
@@ -454,9 +467,10 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                     const [year, month, day] = item.value.split("-");
                     return (
                       <button
+                        aria-label={`Elegir ${item.label}`}
                         aria-pressed={date === item.value}
                         className={`rounded-2xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${date === item.value ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal hover:border-teal/40"}`}
-                        disabled={!canReserve}
+                        disabled={!canReserve || booking}
                         key={item.value}
                         onClick={() => setDate(item.value)}
                         type="button"
@@ -469,12 +483,13 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                   })}
                 </div>
 
-                {!readyForTimes ? <p className="rounded-xl bg-paper p-3 text-sm font-bold text-ink/60">Completá las opciones anteriores para ver horarios.</p> : null}
+                {!bookingData.availableDates.length ? <p className="rounded-xl bg-paper p-3 text-sm font-bold text-ink/60">No hay días disponibles para reservar por ahora.</p> : null}
+                {!readyForTimes && bookingData.availableDates.length ? <p className="rounded-xl bg-paper p-3 text-sm font-bold text-ink/60">Completá las opciones anteriores para ver horarios.</p> : null}
                 {loadingTimes ? <p className="inline-flex items-center gap-2 rounded-xl bg-paper p-3 text-sm font-bold text-teal"><Loader2 className="animate-spin" size={16} /> Buscando horarios...</p> : null}
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {times.map((item) => (
-                    <button aria-pressed={time === item} className={`rounded-xl border px-4 py-3 text-sm font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${time === item ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal"}`} key={item} onClick={() => setTime(item)} type="button">
+                    <button aria-label={`Elegir horario ${item}`} aria-pressed={time === item} className={`rounded-xl border px-4 py-3 text-sm font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20 ${time === item ? "border-teal bg-teal text-cream" : "border-ink/10 bg-paper text-teal"}`} disabled={booking} key={item} onClick={() => setTime(item)} type="button">
                       {item}
                     </button>
                   ))}
@@ -483,7 +498,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
                 {readyForTimes && !loadingTimes && times.length ? (
                   <div className="flex flex-col gap-2 rounded-xl bg-paper p-3 text-sm font-bold text-ink/65 sm:flex-row sm:items-center sm:justify-between" aria-live="polite">
                     <span>{times.length} horarios disponibles {selectedDate ? `para ${selectedDate.label}` : ""}.</span>
-                    {!time ? <button className="rounded-full bg-mint px-3 py-2 text-xs font-extrabold text-teal" onClick={() => setTime(times[0])} type="button">Usar primer horario</button> : null}
+                    {!time ? <button className="rounded-full bg-mint px-3 py-2 text-xs font-extrabold text-teal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-action/20" disabled={booking} onClick={() => setTime(times[0])} type="button">Usar primer horario</button> : null}
                   </div>
                 ) : null}
                 {readyForTimes && !loadingTimes && !times.length ? <p className="rounded-xl bg-paper p-3 text-sm font-bold text-ink/60">No hay horarios libres para esa selección.</p> : null}
@@ -493,8 +508,8 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
             <div>
               <h2 className="font-display text-2xl font-extrabold text-teal">{customerStepNumber}. Confirmá tus datos</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <input autoComplete="name" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} minLength={2} name="clienteNombre" onChange={(event) => setCustomerName(event.target.value)} placeholder="Tu nombre" required value={customerName} />
-                <input autoComplete="tel" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve} inputMode="tel" minLength={10} name="telefono" onChange={(event) => setCustomerPhone(event.target.value)} placeholder="WhatsApp con característica" required value={customerPhone} />
+                <input autoComplete="name" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve || booking} maxLength={80} minLength={2} name="clienteNombre" onChange={(event) => setCustomerName(event.target.value)} placeholder="Tu nombre" required value={customerName} />
+                <input autoComplete="tel-national" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" disabled={!canReserve || booking} inputMode="tel" maxLength={30} minLength={10} name="telefono" onChange={(event) => setCustomerPhone(event.target.value)} placeholder="WhatsApp con característica" required value={customerPhone} />
               </div>
               {customerName || customerPhone ? (
                 <button className="mt-3 rounded-full bg-cream px-4 py-2 text-xs font-extrabold text-teal ring-1 ring-ink/10" onClick={clearSavedCustomer} type="button">
@@ -533,7 +548,7 @@ export function PublicBookingFlow({ business, bookingData, canReserve }: PublicB
         <h2 className="mt-3 font-display text-3xl font-extrabold text-teal">Ver o cancelar un turno</h2>
         <p className="mt-3 max-w-2xl leading-7 text-ink/65">Ingresá el WhatsApp que usaste para reservar. Vas a ver tus próximos turnos y podés cancelarlos si ya no vas a asistir.</p>
         <form className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]" onSubmit={lookupReservations}>
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" minLength={10} onChange={(event) => setLookupPhone(event.target.value)} placeholder="WhatsApp usado en la reserva" required value={lookupPhone} />
+          <input autoComplete="tel-national" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" inputMode="tel" maxLength={30} minLength={10} onChange={(event) => setLookupPhone(event.target.value)} placeholder="WhatsApp usado en la reserva" required value={lookupPhone} />
           <button aria-busy={lookupLoading} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal px-5 py-3 text-sm font-bold text-cream disabled:opacity-60" disabled={lookupLoading} type="submit">
             {lookupLoading ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />} Buscar
           </button>
