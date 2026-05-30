@@ -14,6 +14,6 @@ export function GET() {
       firebaseAdminConfigured: isFirebaseAdminConfigured(),
       timestamp: new Date().toISOString()
     },
-    { headers: { "Cache-Control": "no-store" } }
+    { headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" } }
   );
 }

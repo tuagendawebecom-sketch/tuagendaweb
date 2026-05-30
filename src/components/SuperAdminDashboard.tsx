@@ -166,6 +166,27 @@ function normalizeCustomDomainInput(value: string) {
     .replace(/\/.*$/, "");
 }
 
+function csvCell(value: unknown) {
+  const text = String(value ?? "");
+  const safeText = /^[=+\-@]/.test(text) ? `'${text}` : text;
+  return `"${safeText.replace(/"/g, '""')}"`;
+}
+
+function downloadCsv(filename: string, rows: Array<Array<unknown>>) {
+  const csv = rows.map((row) => row.map(csvCell).join(",")).join("\n");
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+
+function isValidPhoneIfPresent(value: string) {
+  return !value || normalizePhone(value).length >= 10;
+}
+
 function toBusiness(id: string, data: Record<string, unknown>): AdminBusiness {
   return {
     id,
@@ -259,6 +280,10 @@ export function SuperAdminDashboard() {
     const slug = normalizeSlug(String(formData.get("slug") || nombre));
     const ownerEmail = String(formData.get("ownerEmail") ?? "").trim().toLowerCase();
     const initialPassword = String(formData.get("initialPassword") ?? "");
+    const ownerTelefono = String(formData.get("ownerTelefono") ?? "").trim();
+    const whatsapp = String(formData.get("whatsapp") ?? "").trim();
+    const plan = String(formData.get("plan") ?? "agenda_simple") as BusinessPlan;
+    const customDomain = String(formData.get("customDomain") ?? "").trim();
 
     setError("");
     setMessage("");
@@ -268,8 +293,18 @@ export function SuperAdminDashboard() {
       return;
     }
 
-    if (!ownerEmail || initialPassword.length < 6) {
-      setError("Cargá email del dueño y una contraseña inicial de al menos 6 caracteres.");
+    if (!ownerEmail || initialPassword.length < 8) {
+      setError("Cargá email del dueño y una contraseña inicial de al menos 8 caracteres.");
+      return;
+    }
+
+    if (!isValidPhoneIfPresent(ownerTelefono) || !isValidPhoneIfPresent(whatsapp)) {
+      setError("Revisá teléfonos y WhatsApp: deben incluir característica y número.");
+      return;
+    }
+
+    if (customDomain && plan !== "web_completa") {
+      setError("El dominio propio solo se carga para negocios con plan Web Completa.");
       return;
     }
 
@@ -285,7 +320,7 @@ export function SuperAdminDashboard() {
         body: JSON.stringify({
           nombre,
           slug,
-          plan: String(formData.get("plan") ?? "agenda_simple"),
+          plan,
           signupDate: String(formData.get("signupDate") ?? ""),
           nextPaymentDue: String(formData.get("nextPaymentDue") ?? ""),
           rubro: String(formData.get("rubro") ?? "").trim(),
@@ -293,11 +328,11 @@ export function SuperAdminDashboard() {
           ownerEmail,
           initialPassword,
           updateExistingPassword: formData.get("updateExistingPassword") === "on",
-          ownerTelefono: String(formData.get("ownerTelefono") ?? "").trim(),
-          whatsapp: String(formData.get("whatsapp") ?? "").trim(),
+          ownerTelefono,
+          whatsapp,
           instagram: String(formData.get("instagram") ?? "").trim(),
           logoUrl: String(formData.get("logoUrl") ?? "").trim(),
-          customDomain: String(formData.get("customDomain") ?? "").trim()
+          customDomain
         })
       });
 
@@ -308,6 +343,7 @@ export function SuperAdminDashboard() {
           slug_already_exists: "Ese slug ya existe en un negocio activo. Archivá o cancelá el anterior para liberarlo.",
           invalid_owner_credentials: "Revisá email y contraseña inicial del dueño.",
           invalid_custom_domain: "Revisá el dominio propio. Cargalo sin https://, por ejemplo exoticlenceria.com.ar.",
+          custom_domain_requires_web_complete: "El dominio propio solo se usa para Web Completa.",
           custom_domain_already_exists: "Ese dominio propio ya está asignado a otro negocio activo.",
           forbidden: "Tu usuario no tiene permiso de superadmin.",
           owner_lookup_failed: "No se pudo revisar o crear el usuario dueño en Firebase Auth."
@@ -410,16 +446,7 @@ export function SuperAdminDashboard() {
   function exportLeadsCsv() {
     const headers = ["nombre", "telefono", "negocio", "rubro", "plan", "estado", "mensaje", "origen", "campana", "nota", "fecha"];
     const rows = filteredLeads.map((lead) => [lead.name, lead.phone, lead.businessName, lead.businessType, lead.interestedPlan, lead.status ?? "new", lead.message ?? "", lead.source ?? "", lead.utmCampaign ?? "", lead.internalNote ?? "", formatLeadDate(lead.createdAt)]);
-    const csv = [headers, ...rows]
-      .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
-      .join("\n");
-    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "tuagendaweb-leads.csv";
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadCsv(`tuagendaweb-leads-${dateKeyInArgentina()}.csv`, [headers, ...rows]);
   }
 
   async function updateBusinessBillingDate(business: AdminBusiness, field: "signupDate" | "nextPaymentDue", value: string) {
@@ -493,14 +520,7 @@ export function SuperAdminDashboard() {
       business.whatsapp ?? "",
       business.monthlyPrice ?? 0
     ]);
-    const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "tuagendaweb-negocios.csv";
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadCsv(`tuagendaweb-negocios-${dateKeyInArgentina()}.csv`, [headers, ...rows]);
   }
 
   async function copyClientAccessMessage(business: AdminBusiness) {
@@ -514,6 +534,10 @@ export function SuperAdminDashboard() {
   }
 
   async function copyPaymentReminder(business: AdminBusiness) {
+    if (!business.nextPaymentDue) {
+      setError("Este negocio no tiene próximo cobro cargado.");
+      return;
+    }
     const text = `Hola ${business.ownerNombre ?? ""}, te escribo por TuAgendaWeb para ${business.nombre}.\n\nImporte mensual: ${formatCurrency(business.monthlyPrice)}\nVencimiento: ${formatDateKey(business.nextPaymentDue)}\nAgenda: ${siteUrl}/${business.slug}\n\nCuando regularices el pago, te dejo la agenda activa.`;
     try {
       await navigator.clipboard?.writeText(text);
@@ -542,7 +566,7 @@ export function SuperAdminDashboard() {
     if (businessPlanFilter !== "all" && business.plan !== businessPlanFilter) return false;
     if (businessStatusFilter !== "all" && business.estado !== businessStatusFilter) return false;
     if (!value) return true;
-    return [business.nombre, business.slug, business.rubro, business.ownerNombre, business.ownerEmail, business.nextPaymentDue, business.signupDate]
+    return [business.nombre, business.slug, business.rubro, business.ownerNombre, business.ownerEmail, business.whatsapp, business.customDomain, business.nextPaymentDue, business.signupDate]
       .filter(Boolean)
       .some((item) => item?.toLowerCase().includes(value));
   });
@@ -550,7 +574,7 @@ export function SuperAdminDashboard() {
     if (leadFilter !== "all" && (lead.status ?? "new") !== leadFilter) return false;
     const value = leadSearch.toLowerCase().trim();
     if (!value) return true;
-    return [lead.name, lead.phone, lead.businessName, lead.businessType, lead.interestedPlan, lead.message]
+    return [lead.name, lead.phone, lead.businessName, lead.businessType, lead.interestedPlan, lead.message, lead.utmCampaign, lead.source]
       .filter(Boolean)
       .some((item) => String(item).toLowerCase().includes(value));
   });
@@ -671,31 +695,31 @@ export function SuperAdminDashboard() {
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Email dueno
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="ownerEmail" required type="email" />
+          <input autoComplete="email" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="ownerEmail" required type="email" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Contrasena inicial
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="initialPassword" required type="text" />
+          <input autoComplete="new-password" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" minLength={8} name="initialPassword" required type="text" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Telefono dueno
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={leadDraft?.phone ?? ""} name="ownerTelefono" />
+          <input autoComplete="tel-national" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={leadDraft?.phone ?? ""} inputMode="tel" maxLength={30} name="ownerTelefono" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           WhatsApp visible
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={leadDraft?.phone ?? ""} name="whatsapp" placeholder="549381..." />
+          <input autoComplete="tel-national" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" defaultValue={leadDraft?.phone ?? ""} inputMode="tel" maxLength={30} name="whatsapp" placeholder="549381..." />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Instagram
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="instagram" placeholder="https://instagram.com/..." />
+          <input autoComplete="url" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="instagram" placeholder="https://instagram.com/..." type="url" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Logo URL
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="logoUrl" placeholder="Opcional" />
+          <input autoComplete="url" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="logoUrl" placeholder="Opcional" type="url" />
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
           Dominio propio
-          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="customDomain" placeholder="exoticlenceria.com.ar" />
+          <input autoCapitalize="none" autoComplete="off" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 outline-none focus:border-action" name="customDomain" placeholder="exoticlenceria.com.ar" />
           <span className="text-xs font-semibold text-ink/50">Solo para Web Completa. Sin https:// ni barra final.</span>
         </label>
         <label className="grid gap-2 text-sm font-bold text-ink/70">
@@ -726,13 +750,13 @@ export function SuperAdminDashboard() {
           <div className="grid w-full gap-2 sm:max-w-4xl sm:grid-cols-[1fr_auto_auto_auto]">
             <label className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" size={18} />
-              <input className="w-full rounded-2xl border border-ink/10 bg-paper py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setBusinessFilter(event.target.value)} placeholder="Buscar negocio, slug o dueno" value={businessFilter} />
+              <input aria-label="Buscar negocios" className="w-full rounded-2xl border border-ink/10 bg-paper py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setBusinessFilter(event.target.value)} placeholder="Buscar negocio, slug o dueño" value={businessFilter} />
             </label>
-            <select className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setBusinessPlanFilter(event.target.value)} value={businessPlanFilter}>
+            <select aria-label="Filtrar negocios por plan" className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setBusinessPlanFilter(event.target.value)} value={businessPlanFilter}>
               <option value="all">Todos los planes</option>
               {businessPlanOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
-            <select className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setBusinessStatusFilter(event.target.value)} value={businessStatusFilter}>
+            <select aria-label="Filtrar negocios por estado" className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setBusinessStatusFilter(event.target.value)} value={businessStatusFilter}>
               <option value="all">Todos los estados</option>
               {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
@@ -805,7 +829,7 @@ export function SuperAdminDashboard() {
               <button className="inline-flex items-center gap-2 rounded-2xl bg-paper px-4 py-3 text-sm font-bold text-teal ring-1 ring-ink/10" onClick={() => copyPaymentReminder(business)} type="button">
                 Cobro
               </button>
-              <button className="inline-flex items-center gap-2 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal" onClick={() => markBusinessPaid(business)} type="button">
+              <button className="inline-flex items-center gap-2 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal disabled:opacity-50" disabled={!business.nextPaymentDue} onClick={() => markBusinessPaid(business)} type="button">
                 Pago recibido
               </button>
               <button className="inline-flex items-center gap-2 rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-teal" onClick={() => updateBusinessStatus(business, "trial")} type="button">
@@ -838,9 +862,9 @@ export function SuperAdminDashboard() {
           <div className="grid w-full gap-2 sm:max-w-3xl sm:grid-cols-[1fr_auto_auto]">
             <label className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" size={18} />
-              <input className="w-full rounded-2xl border border-ink/10 bg-paper py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setLeadSearch(event.target.value)} placeholder="Buscar lead, telefono o rubro" value={leadSearch} />
+              <input aria-label="Buscar leads" className="w-full rounded-2xl border border-ink/10 bg-paper py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setLeadSearch(event.target.value)} placeholder="Buscar lead, teléfono o rubro" value={leadSearch} />
             </label>
-            <select className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setLeadFilter(event.target.value)} value={leadFilter}>
+            <select aria-label="Filtrar leads por estado" className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setLeadFilter(event.target.value)} value={leadFilter}>
               <option value="all">Todos</option>
               <option value="new">Nuevos</option>
               <option value="contacted">Contactados</option>
@@ -880,7 +904,7 @@ export function SuperAdminDashboard() {
                 {[formatLeadDate(lead.createdAt), lead.source, lead.utmCampaign ? `campana: ${lead.utmCampaign}` : "", lead.path].filter(Boolean).join(" | ")}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                {lead.phone ? (
+                {lead.phone && normalizePhone(String(lead.phone)).length >= 10 ? (
                   <Link className="inline-flex items-center gap-2 rounded-xl bg-teal px-3 py-2 text-xs font-bold text-cream" href={`https://wa.me/${normalizePhone(String(lead.phone))}?text=${encodeURIComponent(`Hola ${lead.name ?? ""}, vi tu consulta por TuAgendaWeb para ${lead.businessName ?? "tu negocio"}. Te escribo para ayudarte a elegir el plan.`)}`} rel="noopener noreferrer" target="_blank">
                     <MessageCircle size={14} /> WhatsApp
                   </Link>

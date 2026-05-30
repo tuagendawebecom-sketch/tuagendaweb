@@ -351,6 +351,26 @@ function xmlCell(value: string | number) {
   return `<Cell><Data ss:Type="${isNumber ? "Number" : "String"}">${text}</Data></Cell>`;
 }
 
+function csvCell(value: unknown) {
+  const text = String(value ?? "");
+  const safeText = /^[=+\-@]/.test(text) ? `'${text}` : text;
+  return `"${safeText.replace(/"/g, '""')}"`;
+}
+
+function downloadTextFile(filename: string, content: string, type: string) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+
+function isValidColor(value: string) {
+  return /^#[0-9a-f]{6}$/i.test(value);
+}
+
 function xmlSheet(name: string, headers: string[], rows: Array<Array<string | number>>) {
   const safeName = name.replace(/[\\/?*[\]:]/g, " ").slice(0, 31);
   const headerRow = `<Row ss:StyleID="Header">${headers.map(xmlCell).join("")}</Row>`;
@@ -403,6 +423,11 @@ function setupWarnings(business: PanelBusiness, servicesCount: number, staffCoun
   if (!branchesCount) warnings.push("Agregar sucursal");
   if (!Object.values(schedule.horariosPorDia).some((day) => day.activo && day.rangos.length)) warnings.push("Configurar horarios");
   return warnings;
+}
+
+function assertPhoneIfPresent(value: string, label: string) {
+  if (value && normalizePhone(value).length < 10) return `${label} necesita característica y número.`;
+  return "";
 }
 
 function PanelMetricCard({
@@ -708,11 +733,13 @@ export function PanelDashboard() {
   function showSuccess(text: string) {
     setError("");
     setMessage(text);
+    window.setTimeout(() => setMessage((current) => (current === text ? "" : current)), 4500);
   }
 
   function showError(text: string) {
     setMessage("");
     setError(text);
+    window.setTimeout(() => setError((current) => (current === text ? "" : current)), 6500);
   }
 
   async function copyPublicLink() {
@@ -737,6 +764,7 @@ export function PanelDashboard() {
 
   function reservationWhatsAppHref(reservation: ReservationItem) {
     const phone = normalizePhone(reservation.telefono ?? "");
+    if (phone.length < 10) return "";
     const text = `Hola ${reservation.clienteNombre ?? ""}, te escribo por tu turno de ${reservation.servicioNombre ?? "servicio"} para el ${reservation.fecha ?? ""} a las ${reservation.hora ?? ""} en ${business?.nombre ?? "el negocio"}.`;
     return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
   }
@@ -751,9 +779,22 @@ export function PanelDashboard() {
     const formData = new FormData(event.currentTarget);
     const nombre = String(formData.get("nombre") ?? "").trim();
     const initials = String(formData.get("initials") ?? "").trim().toUpperCase() || initialsFromName(nombre);
+    const whatsapp = String(formData.get("whatsapp") ?? "").trim();
+    const ownerTelefono = String(formData.get("ownerTelefono") ?? "").trim();
+    const colorPrimario = String(formData.get("colorPrimario") ?? "#123D3A");
+    const colorSecundario = String(formData.get("colorSecundario") ?? "#E7B85A");
 
     if (nombre.length < 2) {
       setError("El nombre del negocio es obligatorio.");
+      return;
+    }
+    const phoneError = assertPhoneIfPresent(whatsapp, "El WhatsApp visible") || assertPhoneIfPresent(ownerTelefono, "El teléfono de contacto");
+    if (phoneError) {
+      showError(phoneError);
+      return;
+    }
+    if (!isValidColor(colorPrimario) || !isValidColor(colorSecundario)) {
+      showError("Revisá los colores del negocio antes de guardar.");
       return;
     }
 
@@ -763,13 +804,13 @@ export function PanelDashboard() {
       await updateDoc(doc(activeDb, "negocios", businessId), {
         nombre,
         rubro: String(formData.get("rubro") ?? "").trim(),
-        whatsapp: normalizePhone(String(formData.get("whatsapp") ?? "")),
+        whatsapp: normalizePhone(whatsapp),
         instagram: String(formData.get("instagram") ?? "").trim(),
         initials: initials.slice(0, 3),
-        colorPrimario: String(formData.get("colorPrimario") ?? "#123D3A"),
-        colorSecundario: String(formData.get("colorSecundario") ?? "#E7B85A"),
+        colorPrimario,
+        colorSecundario,
         ownerNombre: String(formData.get("ownerNombre") ?? "").trim(),
-        ownerTelefono: normalizePhone(String(formData.get("ownerTelefono") ?? "")),
+        ownerTelefono: normalizePhone(ownerTelefono),
         updatedAt: serverTimestamp()
       });
       showSuccess("Datos públicos actualizados correctamente.");
@@ -793,15 +834,9 @@ export function PanelDashboard() {
       reservation.estado ?? "confirmada",
       reservation.precio ?? 0
     ])]
-      .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
+      .map((row) => row.map(csvCell).join(","))
       .join("\n");
-    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${business?.slug ?? "tuagendaweb"}-turnos-${dateKeyInArgentina()}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadTextFile(`${business?.slug ?? "tuagendaweb"}-turnos-${dateKeyInArgentina()}.csv`, `\uFEFF${csv}`, "text/csv;charset=utf-8");
   }
 
   function exportBusinessReportXlsx() {
@@ -839,7 +874,11 @@ export function PanelDashboard() {
           ["Ausentes", activeReportReservations.filter((reservation) => reservation.estado === "ausente").length],
           ["Facturacion estimada", revenue],
           ["Ticket promedio", activeReportReservations.length ? Math.round(revenue / activeReportReservations.length) : 0],
-          ["Clientes unicos", uniqueClientReport(activeReportReservations).length]
+          ["Clientes unicos", uniqueClientReport(activeReportReservations).length],
+          ["Servicios activos", activeServices.length],
+          ["Personal activo", activeStaff.length],
+          ["Sucursales activas", activeBranches.length],
+          ["Generado", new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle: "short" }).format(new Date())]
         ]
         ),
         xmlSheet(
@@ -874,13 +913,7 @@ export function PanelDashboard() {
  </Styles>
  ${sheets.join("")}
 </Workbook>`;
-      const blob = new Blob([workbook], { type: "application/vnd.ms-excel;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${business?.slug ?? "tuagendaweb"}-reporte-${reportStart || "inicio"}-${reportEnd || dateKeyInArgentina()}.xls`;
-      link.click();
-      URL.revokeObjectURL(url);
+      downloadTextFile(`${business?.slug ?? "tuagendaweb"}-reporte-${reportStart || "inicio"}-${reportEnd || dateKeyInArgentina()}.xls`, workbook, "application/vnd.ms-excel;charset=utf-8");
       showSuccess("Reporte Excel generado correctamente.");
     } catch {
       showError("No se pudo generar el reporte Excel.");
@@ -967,14 +1000,24 @@ export function PanelDashboard() {
       setError("El servicio necesita un nombre.");
       return;
     }
+    const duracionMin = Math.max(5, toNumber(formData.get("duracionMin"), 60));
+    const precio = Math.max(0, toNumber(formData.get("precio"), 0));
+    if (duracionMin > 720) {
+      showError("La duración máxima permitida para un servicio es de 12 horas.");
+      return;
+    }
+    if (precio > 9_999_999) {
+      showError("Revisá el precio del servicio antes de guardarlo.");
+      return;
+    }
 
     setSaving("service");
     setError("");
     try {
       await addDoc(collection(activeDb, "negocios", businessId, "servicios"), {
         nombre,
-        duracionMin: Math.max(5, toNumber(formData.get("duracionMin"), 60)),
-        precio: Math.max(0, toNumber(formData.get("precio"), 0)),
+        duracionMin,
+        precio,
         personalIds: formData.getAll("personalIds").map(String),
         sucursalIds: formData.getAll("sucursalIds").map(String),
         activo: true,
@@ -1018,7 +1061,10 @@ export function PanelDashboard() {
     const form = event.currentTarget;
     const formData = new FormData(form);
     const nombre = String(formData.get("nombre") ?? "").trim();
-    if (nombre.length < 2) return;
+    if (nombre.length < 2) {
+      showError("El personal necesita un nombre.");
+      return;
+    }
 
     setSaving("staff");
     setError("");
@@ -1067,7 +1113,10 @@ export function PanelDashboard() {
     const form = event.currentTarget;
     const formData = new FormData(form);
     const nombre = String(formData.get("nombre") ?? "").trim();
-    if (nombre.length < 2) return;
+    if (nombre.length < 2) {
+      showError("La sucursal necesita un nombre.");
+      return;
+    }
 
     setSaving("branch");
     setError("");
@@ -1105,15 +1154,19 @@ export function PanelDashboard() {
     setSaving("schedule");
     setError("");
     try {
+      const intervaloMin = Math.min(240, Math.max(5, toNumber(formData.get("intervaloMin"), 30)));
+      const diasReservaMax = Math.min(90, Math.max(1, toNumber(formData.get("diasReservaMax"), 21)));
+      const anticipacionHoras = Math.min(168, Math.max(0, toNumber(formData.get("anticipacionHoras"), 1)));
+
       await setDoc(
         doc(activeDb, "negocios", businessId, "configuracion", "general"),
         {
           diasAtencion: weekDays.filter((day) => horariosPorDia[day].activo),
           horarioInicio: "09:00",
           horarioFin: "18:00",
-          intervaloMin: Math.max(5, toNumber(formData.get("intervaloMin"), 30)),
-          diasReservaMax: Math.max(1, toNumber(formData.get("diasReservaMax"), 21)),
-          anticipacionHoras: Math.max(0, toNumber(formData.get("anticipacionHoras"), 1)),
+          intervaloMin,
+          diasReservaMax,
+          anticipacionHoras,
           horariosPorDia,
           updatedAt: serverTimestamp()
         },
@@ -1251,7 +1304,7 @@ export function PanelDashboard() {
               <h2 className="font-display text-2xl font-extrabold text-teal">Dashboard del negocio</h2>
               <p className="mt-1 text-sm font-semibold text-ink/55">Resumen para entender qué se está reservando y qué falta configurar.</p>
             </div>
-            <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setDashboardRange(event.target.value as typeof dashboardRange)} value={dashboardRange}>
+            <select aria-label="Rango del dashboard" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setDashboardRange(event.target.value as typeof dashboardRange)} value={dashboardRange}>
               <option value="today">Hoy</option>
               <option value="7d">Últimos 7 días</option>
               <option value="30d">Últimos 30 días</option>
@@ -1401,8 +1454,8 @@ export function PanelDashboard() {
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-[150px_150px_auto]">
-                <input aria-label="Desde" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold outline-none focus:border-action" onChange={(event) => setReportStart(event.target.value)} type="date" value={reportStart} />
-                <input aria-label="Hasta" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold outline-none focus:border-action" onChange={(event) => setReportEnd(event.target.value)} type="date" value={reportEnd} />
+                <input aria-label="Reporte desde" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold outline-none focus:border-action" max={reportEnd || undefined} onChange={(event) => setReportStart(event.target.value)} type="date" value={reportStart} />
+                <input aria-label="Reporte hasta" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold outline-none focus:border-action" min={reportStart || undefined} onChange={(event) => setReportEnd(event.target.value)} type="date" value={reportEnd} />
                 <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal px-4 py-3 text-sm font-bold text-cream disabled:opacity-60" disabled={saving === "report"} onClick={exportBusinessReportXlsx} type="button">
                   <Download size={16} /> {saving === "report" ? "Generando..." : "Exportar reporte"}
                 </button>
@@ -1445,9 +1498,9 @@ export function PanelDashboard() {
         <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto]">
           <label className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" size={18} />
-            <input className="w-full rounded-2xl border border-ink/10 bg-cream py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setTurnSearch(event.target.value)} placeholder="Buscar cliente, telefono, servicio o fecha" value={turnSearch} />
+            <input aria-label="Buscar turnos" className="w-full rounded-2xl border border-ink/10 bg-cream py-3 pl-11 pr-4 text-sm font-semibold outline-none focus:border-action" onChange={(event) => setTurnSearch(event.target.value)} placeholder="Buscar cliente, telefono, servicio o fecha" value={turnSearch} />
           </label>
-          <select className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setTurnStatusFilter(event.target.value as typeof turnStatusFilter)} value={turnStatusFilter}>
+          <select aria-label="Filtrar turnos por estado" className="rounded-2xl border border-ink/10 bg-cream px-4 py-3 text-sm font-bold text-teal outline-none" onChange={(event) => setTurnStatusFilter(event.target.value as typeof turnStatusFilter)} value={turnStatusFilter}>
             <option value="today">Hoy</option>
             <option value="upcoming">Proximos</option>
             <option value="all">Todos</option>
@@ -1470,7 +1523,7 @@ export function PanelDashboard() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 sm:justify-end">
-                {reservation.telefono ? (
+                {reservationWhatsAppHref(reservation) ? (
                   <Link className="inline-flex items-center gap-2 rounded-full bg-teal px-4 py-2 text-xs font-extrabold text-cream" href={reservationWhatsAppHref(reservation)} rel="noopener noreferrer" target="_blank">
                     <MessageCircle size={14} /> WhatsApp
                   </Link>
@@ -1727,6 +1780,7 @@ export function PanelDashboard() {
           <label className="grid gap-2 text-sm font-bold text-ink/70">
             Logo del negocio
             <input accept="image/*" className="rounded-2xl border border-ink/10 bg-paper px-4 py-3 outline-none focus:border-action" disabled={!canEdit || saving === "logo"} onChange={handleLogoUpload} type="file" />
+            <p className="mt-2 text-xs font-semibold text-ink/50">Formatos recomendados: PNG, JPG o WebP cuadrado. El panel lo optimiza a 512x512.</p>
             <span className="text-xs font-semibold text-ink/50">Se optimiza a 512x512 y queda guardado en el negocio.</span>
           </label>
         </div>
@@ -1962,18 +2016,18 @@ export function PanelDashboard() {
         </div>
         <p className="mt-2 leading-7 text-ink/62">Definí rangos por día. Por ejemplo, sábado solo por la mañana.</p>
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <label className="grid gap-2 text-sm font-bold text-ink/70">
-            Intervalo
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue={schedule.intervaloMin} name="intervaloMin" type="number" />
-          </label>
-          <label className="grid gap-2 text-sm font-bold text-ink/70">
-            Días para reservar
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue={schedule.diasReservaMax} name="diasReservaMax" type="number" />
-          </label>
-          <label className="grid gap-2 text-sm font-bold text-ink/70">
-            Anticipación mínima en horas
-            <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue={schedule.anticipacionHoras} name="anticipacionHoras" type="number" />
-          </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Intervalo
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue={schedule.intervaloMin} max={240} min={5} name="intervaloMin" step={5} type="number" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Días para reservar
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue={schedule.diasReservaMax} max={90} min={1} name="diasReservaMax" type="number" />
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-ink/70">
+          Anticipación mínima en horas
+          <input className="rounded-2xl border border-ink/10 bg-cream px-4 py-3" defaultValue={schedule.anticipacionHoras} max={168} min={0} name="anticipacionHoras" type="number" />
+        </label>
         </div>
         <div className="mt-5 grid gap-3">
           {weekDays.map((day) => {

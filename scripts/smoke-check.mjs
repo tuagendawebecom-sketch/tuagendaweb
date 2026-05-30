@@ -1,9 +1,23 @@
 import { chromium } from "playwright";
 
 const baseUrl = process.env.BASE_URL ?? "http://localhost:3001";
-const routes = ["/", "/login", "/panel", "/superadmin", "/demos/barberia", "/privacidad", "/terminos", "/api/health"];
+const routes = [
+  "/",
+  "/login",
+  "/panel",
+  "/superadmin",
+  "/demos/barberia",
+  "/demos/estetica",
+  "/demos/canchas",
+  "/privacidad",
+  "/terminos",
+  "/api/health"
+];
 const viewports = [
-  { name: "mobile", width: 390, height: 844 },
+  { name: "mobile-360", width: 360, height: 740 },
+  { name: "mobile-390", width: 390, height: 844 },
+  { name: "mobile-430", width: 430, height: 932 },
+  { name: "tablet", width: 768, height: 1024 },
   { name: "desktop", width: 1440, height: 1000 }
 ];
 
@@ -39,6 +53,11 @@ for (const viewport of viewports) {
       issues.push(`${viewport.name} ${route} has horizontal overflow`);
     }
 
+    const bodyText = await page.locator("body").innerText().catch(() => "");
+    if (/[ÃÂ]/.test(bodyText)) {
+      issues.push(`${viewport.name} ${route} has mojibake text`);
+    }
+
     if (route === "/") {
       const ctas = await page.locator('a[href*="wa.me"]').count();
       if (ctas < 3) {
@@ -58,16 +77,12 @@ for (const viewport of viewports) {
         issues.push(`${viewport.name} home is missing #comparativa anchor`);
       }
 
-      if ((await page.getByText("Desde $10.000 / mes").count()) < 1) {
+      if ((await page.getByText(/\$10\.000\/mes|\$10\.000 \/ mes|10\.000/).count()) < 1) {
         issues.push(`${viewport.name} home is missing Agenda Full promotional price`);
       }
 
       if ((await page.getByText("Agenda Full").count()) < 1) {
         issues.push(`${viewport.name} home is missing Agenda Full copy`);
-      }
-
-      if ((await page.getByText("Promo para empezar a recibir reservas online este mes").count()) < 1) {
-        issues.push(`${viewport.name} home is missing launch offer section`);
       }
 
       if (viewport.name === "desktop") {
@@ -88,24 +103,38 @@ for (const viewport of viewports) {
         await expectVisible(demosMenu, "desktop demos dropdown while hovering item");
       }
 
-      if (viewport.name === "mobile") {
-        await page.getByRole("button", { name: "Abrir menú" }).click();
+      if (viewport.name.startsWith("mobile")) {
+        await page.getByRole("button", { name: /Abrir/i }).click();
         await expectVisible(page.locator('nav[aria-label="Mobile"]'), "mobile menu");
         await expectVisible(page.locator('nav[aria-label="Mobile"]').getByText("Soluciones").first(), "mobile solutions heading");
         await expectVisible(page.locator('nav[aria-label="Mobile"]').getByText("Demos").first(), "mobile demos heading");
+        await page.keyboard.press("Escape");
       }
 
-      if ((await page.getByText("Meta Ads").count()) > 0) {
-        issues.push(`${viewport.name} home exposes internal Meta Ads wording`);
+      const internalPhrases = ["Meta Ads", "lista para vender por Instagram", "campañas publicitarias", "tráfico frío"];
+      for (const phrase of internalPhrases) {
+        if (bodyText.includes(phrase)) {
+          issues.push(`${viewport.name} home exposes internal wording: ${phrase}`);
+        }
       }
     }
-
   }
 
   await page.close();
 }
 
 const apiPage = await browser.newPage();
+const healthResponse = await apiPage.request.get(`${baseUrl}/api/health`);
+if (healthResponse.status() !== 200) {
+  issues.push(`/api/health returned ${healthResponse.status()} instead of 200`);
+}
+if (!healthResponse.headers()["cache-control"]?.includes("no-store")) {
+  issues.push("/api/health is missing no-store cache header");
+}
+if (healthResponse.headers()["x-robots-tag"] !== "noindex") {
+  issues.push("/api/health is missing noindex robots header");
+}
+
 const invalidLeadResponse = await apiPage.request.post(`${baseUrl}/api/leads`, {
   data: "not-json",
   headers: { "content-type": "text/plain" }

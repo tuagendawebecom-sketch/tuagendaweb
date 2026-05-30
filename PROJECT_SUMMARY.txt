@@ -1451,6 +1451,76 @@ Validacion:
 - npm run lint: OK.
 - npm run build: OK.
 - npm run test:smoke en localhost:3001: OK.
+Tanda adicional de 50 mejoras - 2026-05-30
+
+Objetivo:
+- Mejorar operacion diaria, validaciones, exportaciones, seguridad, accesibilidad y pruebas sin tocar el posicionamiento comercial.
+- Mantener Agenda Full desde $10.000/mes y Web Completa a $100.000 pago unico.
+- Evitar cambios grandes de arquitectura antes de la proxima mejora mayor.
+
+Mejoras aplicadas:
+1. El panel cliente ahora limpia mensajes de exito automaticamente.
+2. El panel cliente ahora limpia errores automaticamente.
+3. El WhatsApp por turno no se muestra si el telefono no tiene longitud valida.
+4. Datos publicos validan WhatsApp visible antes de guardar.
+5. Datos publicos validan telefono de contacto antes de guardar.
+6. Datos publicos validan color principal en formato hexadecimal.
+7. Datos publicos validan color secundario en formato hexadecimal.
+8. Datos publicos guardan telefonos ya normalizados.
+9. Exportacion CSV de turnos protege contra formulas maliciosas en Excel.
+10. Exportacion CSV de turnos reutiliza un helper de descarga mas seguro.
+11. Exportacion CSV retrasa revokeObjectURL para evitar descargas cortadas.
+12. Reporte Excel agrega conteo de servicios activos.
+13. Reporte Excel agrega conteo de personal activo.
+14. Reporte Excel agrega conteo de sucursales activas.
+15. Reporte Excel agrega fecha/hora de generacion.
+16. Reporte Excel usa helper unico de descarga.
+17. Alta de servicio limita duracion maxima a 12 horas.
+18. Alta de servicio limita precios absurdamente altos.
+19. Alta de servicio usa valores calculados antes de guardar.
+20. Alta de personal ahora muestra error si falta nombre.
+21. Alta de sucursal ahora muestra error si falta nombre.
+22. Horarios limitan intervalo maximo a 240 minutos.
+23. Horarios limitan reserva futura maxima a 90 dias.
+24. Horarios limitan anticipacion maxima a 168 horas.
+25. Guardado de horarios aplica los mismos limites server/client antes de persistir.
+26. Selector de rango del dashboard tiene aria-label.
+27. Busqueda de turnos tiene aria-label.
+28. Filtro de turnos por estado tiene aria-label.
+29. Fechas del reporte tienen etiquetas mas claras.
+30. Fecha "desde" del reporte no puede superar la fecha "hasta".
+31. Fecha "hasta" del reporte no puede ser anterior a la fecha "desde".
+32. Carga de logo muestra recomendacion de formatos.
+33. Super Admin protege exportacion de leads contra formulas maliciosas.
+34. Super Admin protege exportacion de negocios contra formulas maliciosas.
+35. Super Admin usa nombres de CSV con fecha.
+36. Super Admin valida contrasena inicial minima de 8 caracteres.
+37. API de alta de negocio exige la misma contrasena minima de 8 caracteres.
+38. Super Admin valida telefono del dueno si se carga.
+39. Super Admin valida WhatsApp visible si se carga.
+40. Super Admin bloquea dominio propio cuando el plan no es Web Completa.
+41. API de alta bloquea dominio propio cuando el plan no es Web Completa.
+42. Super Admin muestra error especifico para dominio propio fuera de Web Completa.
+43. Busqueda de negocios ahora encuentra por WhatsApp.
+44. Busqueda de negocios ahora encuentra por dominio propio.
+45. Busqueda de leads ahora encuentra por campana UTM.
+46. Busqueda de leads ahora encuentra por origen.
+47. Boton de cobro se bloquea si no hay proximo vencimiento cargado.
+48. Boton WhatsApp de lead se oculta si el telefono no es usable.
+49. Headers globales suman Cross-Origin-Opener-Policy.
+50. Healthcheck suma X-Robots-Tag noindex y el smoke test lo verifica.
+
+Pruebas y validacion:
+- npm run lint: OK.
+- npm run build: OK.
+- npm run test:smoke en localhost:3001: OK.
+- Smoke test ampliado a 10 rutas y 5 viewports: 360x740, 390x844, 430x932, 768x1024 y 1440x1000.
+- El smoke test revisa overflow horizontal, menu mobile, dropdowns desktop, anchors de precios, textos internos no deseados, healthcheck no-store/noindex y /api/leads con content-type invalido.
+
+Nota sobre warnings de Vercel:
+- Los avisos de `uuid`, `source-map` y `node-domexception` vienen de dependencias transitivas de Firebase Admin, Google SDKs y Remotion, no de codigo directo del proyecto.
+- No se forzo un override riesgoso porque podria romper SDKs oficiales. Se mantiene monitoreo al actualizar Firebase/Remotion.
+
 Tanda de 50 mejoras - 2026-05-29
 
 Objetivo:

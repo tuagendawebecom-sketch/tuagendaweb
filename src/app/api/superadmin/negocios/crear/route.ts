@@ -118,8 +118,12 @@ export async function POST(request: Request) {
     return jsonNoStore({ ok: false, error: "invalid_plan" }, { status: 400 });
   }
 
-  if (!ownerEmail || initialPassword.length < 6) {
+  if (!ownerEmail || initialPassword.length < 8) {
     return jsonNoStore({ ok: false, error: "invalid_owner_credentials" }, { status: 400 });
+  }
+
+  if (customDomain && plan !== "web_completa") {
+    return jsonNoStore({ ok: false, error: "custom_domain_requires_web_complete" }, { status: 400 });
   }
 
   if (!isValidCustomDomain(customDomain)) {
