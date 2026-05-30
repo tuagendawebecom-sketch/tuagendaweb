@@ -3,6 +3,7 @@ import {
   CalendarCheck,
   CalendarClock,
   CheckCircle2,
+  Clock3,
   CreditCard,
   Database,
   Globe2,
@@ -15,6 +16,8 @@ import {
   ShieldCheck,
   Smartphone,
   Sparkles,
+  TrendingUp,
+  Trophy,
   Users,
   WandSparkles
 } from "lucide-react";
@@ -141,10 +144,34 @@ export const leadFormBenefits = [
 
 export const agendaFullHighlights = [
   ["Reserva completa", "Servicio, profesional, sucursal, calendario y horarios disponibles."],
-  ["Panel para el dueño", "Dashboard, próximos turnos, configuración, servicios, personal y sucursales."],
+  ["Panel para el dueño", "Dashboard comercial, próximos turnos, configuración, servicios, personal y sucursales."],
   ["Cliente con control", "Puede consultar o cancelar su turno desde el mismo link."],
   ["Activación manual", "Si hay deuda o pausa, la agenda se suspende sin borrar datos."]
 ] as const;
+
+export const commercialDashboard = {
+  eyebrow: "Dashboard comercial",
+  title: "No solo recibís turnos: entendé qué está pasando en tu negocio.",
+  text: "El panel muestra datos simples para decidir mejor: servicios más reservados, horarios fuertes, clientes frecuentes, facturación estimada y reportes por fechas.",
+  metrics: [
+    ["Turnos del mes", "128"],
+    ["Facturación estimada", "$ 1.240.000"],
+    ["Ocupación", "74%"],
+    ["Clientes recurrentes", "36"]
+  ],
+  highlights: [
+    ["Servicio ganador", "Detectá qué servicio conviene destacar o promocionar.", Trophy],
+    ["Horarios pico", "Sabé qué días y horas tienen más demanda.", Clock3],
+    ["Clientes frecuentes", "Identificá quiénes vuelven y contactalos más fácil.", Users],
+    ["Reporte Excel", "Exportá resumen, turnos, servicios, personal, sucursales y clientes.", Database]
+  ],
+  insights: [
+    "Tu servicio más reservado este mes fue Corte + Barba.",
+    "Los sábados concentran la mayor cantidad de reservas.",
+    "El horario con más movimiento es 18:00.",
+    "Tenés clientes recurrentes listos para seguimiento."
+  ]
+} as const;
 
 export const reassuranceItems = [
   "No hace falta dejar WhatsApp: el link ordena la reserva y la conversación sigue ahí.",
@@ -476,11 +503,12 @@ export const extras = {
     ["Secciones visuales extra", Sparkles],
     ["Configuración editable", Settings2],
     ["Gestión de servicios", CalendarClock],
-    ["Personal y sucursales", Users]
+    ["Personal y sucursales", Users],
+    ["Dashboard comercial", TrendingUp],
+    ["Reportes avanzados", BarChart3]
   ],
   upcoming: [
     ["Recordatorios por WhatsApp", MessageCircle],
-    ["Reportes avanzados", BarChart3],
     ["Seguimiento de clientes", HeartHandshake],
     ["Agenda avanzada por profesional", Users]
   ],
@@ -501,7 +529,7 @@ export const includedFeatures = [
   ["Gestión de turnos", CalendarCheck],
   ["Gestión de servicios", Settings2],
   ["Gestión de personal", Users],
-  ["Dashboard básico", BarChart3],
+  ["Dashboard comercial", BarChart3],
   ["WhatsApp, maps y redes", MapPin],
   ["Imágenes iniciales", Sparkles],
   ["Reunión final de revisión", HeartHandshake]

@@ -85,6 +85,10 @@ for (const viewport of viewports) {
         issues.push(`${viewport.name} home is missing Agenda Full copy`);
       }
 
+      if ((await page.getByText("Dashboard comercial").count()) < 1) {
+        issues.push(`${viewport.name} home is missing commercial dashboard section`);
+      }
+
       if (viewport.name === "desktop") {
         const solutionsTrigger = page.getByTestId("solutions-menu-trigger");
         const solutionsMenu = page.getByTestId("solutions-menu");

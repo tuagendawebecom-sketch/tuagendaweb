@@ -8,11 +8,11 @@ import { StickyMobileCTA } from "@/components/StickyMobileCTA";
 import { LeadCaptureForm } from "@/components/LeadCaptureForm";
 import { headers } from "next/headers";
 import {
-  Benefits,
   AgendaFullDetailSection,
   AgendaSimpleSection,
   AudienceFitSection,
   CampaignReadinessStrip,
+  CommercialDashboardSection,
   Comparison,
   ConversionProofSection,
   CredibilityNotesSection,
@@ -155,7 +155,7 @@ export default async function Home() {
         <Comparison />
         <HowItWorks />
         <StartRequirementsSection />
-        <Benefits />
+        <CommercialDashboardSection />
         <CredibilityNotesSection />
         <IncludedFeatures />
         <Improvements />

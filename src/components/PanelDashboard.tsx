@@ -15,7 +15,7 @@ import {
   setDoc,
   updateDoc
 } from "firebase/firestore";
-import { AlertTriangle, BarChart3, Building2, CalendarCheck, CheckCircle2, ChevronDown, Clock3, Copy, Download, ExternalLink, Eye, FileSpreadsheet, Loader2, MapPin, MessageCircle, PlusCircle, Save, Search, Settings2, ShieldAlert, Trash2, TrendingUp, Trophy, Users } from "lucide-react";
+import { AlertTriangle, BarChart3, Building2, CalendarCheck, CheckCircle2, ChevronDown, Clock3, Copy, Download, ExternalLink, Eye, FileSpreadsheet, Gauge, Lightbulb, Loader2, MapPin, MessageCircle, PlusCircle, Save, Search, Settings2, ShieldAlert, Trash2, TrendingUp, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { siteUrl } from "@/data/site";
@@ -89,6 +89,7 @@ type ReservationItem = {
   personalNombre?: string;
   sucursalNombre?: string;
   horarioOcupadoIds?: string[];
+  source?: string;
 };
 
 type DaySchedule = {
@@ -277,6 +278,17 @@ function reservationDateTimeValue(reservation: ReservationItem) {
   return new Date(`${reservation.fecha ?? "1970-01-01"}T${reservation.hora ?? "00:00"}:00`).getTime();
 }
 
+function minutesFromTime(value?: string) {
+  const [hours, minutes] = String(value ?? "").split(":").map(Number);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return 0;
+  return hours * 60 + minutes;
+}
+
+function reservationDuration(reservation: ReservationItem, services: ServiceItem[], fallback: number) {
+  const service = services.find((item) => item.nombre === reservation.servicioNombre);
+  return Math.max(5, service?.duracionMin ?? fallback);
+}
+
 function topBy(reservations: ReservationItem[], key: keyof ReservationItem) {
   const counts = new Map<string, number>();
   reservations.forEach((reservation) => {
@@ -288,11 +300,35 @@ function topBy(reservations: ReservationItem[], key: keyof ReservationItem) {
   return { name, count };
 }
 
+function topByComputed(reservations: ReservationItem[], getValue: (reservation: ReservationItem) => string) {
+  const counts = new Map<string, number>();
+  reservations.forEach((reservation) => {
+    const value = getValue(reservation).trim();
+    if (!value) return;
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  });
+  const [name, count] = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0] ?? ["Sin datos", 0];
+  return { name, count };
+}
+
 function topListBy(reservations: ReservationItem[], key: keyof ReservationItem, limit = 5) {
   const counts = new Map<string, number>();
   reservations.forEach((reservation) => {
     const value = reservation[key];
     if (typeof value !== "string" || !value.trim()) return;
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  });
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([name, count]) => ({ name, count }));
+}
+
+function topListByComputed(reservations: ReservationItem[], getValue: (reservation: ReservationItem) => string, limit = 5) {
+  const counts = new Map<string, number>();
+  reservations.forEach((reservation) => {
+    const value = getValue(reservation).trim();
+    if (!value) return;
     counts.set(value, (counts.get(value) ?? 0) + 1);
   });
   return Array.from(counts.entries())
@@ -313,11 +349,61 @@ function groupReservationsByDate(reservations: ReservationItem[], limit = 7) {
     .map(([name, count]) => ({ name, count }));
 }
 
+function dayKeyFromDateKey(value?: string) {
+  if (!value) return "";
+  const date = new Date(`${value}T12:00:00.000Z`);
+  const indexByDay = [6, 0, 1, 2, 3, 4, 5];
+  return weekDays[indexByDay[date.getUTCDay()]] ?? "";
+}
+
+function hourLabelFromReservation(reservation: ReservationItem) {
+  const hour = String(reservation.hora ?? "").slice(0, 2);
+  return hour ? `${hour}:00` : "";
+}
+
+function dateKeysBetween(start: string, end: string, maxDays = 95) {
+  if (!start || !end || start > end) return [];
+  const dates: string[] = [];
+  const current = new Date(`${start}T12:00:00.000Z`);
+  const last = new Date(`${end}T12:00:00.000Z`);
+  while (current <= last && dates.length < maxDays) {
+    dates.push(dateKeyInArgentina(current));
+    current.setUTCDate(current.getUTCDate() + 1);
+  }
+  return dates;
+}
+
+function estimateAvailableMinutes(schedule: ScheduleConfig, start: string, end: string) {
+  return dateKeysBetween(start, end).reduce((total, dateKey) => {
+    const day = schedule.horariosPorDia[dayKeyFromDateKey(dateKey)];
+    if (!day?.activo) return total;
+    const dayMinutes = day.rangos.reduce((rangeTotal, range) => {
+      const minutes = minutesFromTime(range.fin) - minutesFromTime(range.inicio);
+      return rangeTotal + Math.max(0, minutes);
+    }, 0);
+    return total + dayMinutes;
+  }, 0);
+}
+
 function groupReport(reservations: ReservationItem[], key: keyof ReservationItem) {
   const grouped = new Map<string, { count: number; revenue: number }>();
   reservations.forEach((reservation) => {
     const raw = reservation[key];
     const name = typeof raw === "string" && raw.trim() ? raw : "Sin datos";
+    const current = grouped.get(name) ?? { count: 0, revenue: 0 };
+    current.count += 1;
+    current.revenue += typeof reservation.precio === "number" ? reservation.precio : 0;
+    grouped.set(name, current);
+  });
+  return Array.from(grouped.entries())
+    .map(([name, data]) => ({ name, ...data }))
+    .sort((a, b) => b.count - a.count || b.revenue - a.revenue);
+}
+
+function groupReportComputed(reservations: ReservationItem[], getName: (reservation: ReservationItem) => string) {
+  const grouped = new Map<string, { count: number; revenue: number }>();
+  reservations.forEach((reservation) => {
+    const name = getName(reservation).trim() || "Sin datos";
     const current = grouped.get(name) ?? { count: 0, revenue: 0 };
     current.count += 1;
     current.revenue += typeof reservation.precio === "number" ? reservation.precio : 0;
@@ -689,9 +775,16 @@ export function PanelDashboard() {
   const topStaff = topBy(rangeReservations, "personalNombre");
   const topBranch = topBy(rangeReservations, "sucursalNombre");
   const topServices = topListBy(rangeReservations, "servicioNombre");
+  const topClients = uniqueClientReport(rangeReservations).slice(0, 5);
+  const topHours = topListByComputed(rangeReservations, hourLabelFromReservation, 5);
+  const topWeekDays = topListByComputed(rangeReservations, (reservation) => dayKeyFromDateKey(reservation.fecha), 5);
+  const topHour = topByComputed(rangeReservations, hourLabelFromReservation);
+  const topWeekDay = topByComputed(rangeReservations, (reservation) => dayKeyFromDateKey(reservation.fecha));
   const dailyReservations = groupReservationsByDate(rangeReservations);
   const maxDailyReservations = Math.max(1, ...dailyReservations.map((item) => item.count));
   const uniqueClients = new Set(confirmedReservations.map((reservation) => normalizePhone(reservation.telefono ?? "")).filter(Boolean)).size;
+  const rangeUniqueClients = uniqueClientReport(rangeReservations);
+  const recurringClients = rangeUniqueClients.filter((client) => client.count > 1);
   const completedTotal = attendedReservations.length + noShowReservations.length;
   const attendanceRate = completedTotal ? Math.round((attendedReservations.length / completedTotal) * 100) : 0;
   const nextReservation = upcomingReservations[0];
@@ -719,6 +812,27 @@ export function PanelDashboard() {
   ];
   const setupProgress = Math.round((setupChecklist.filter((item) => item.done).length / setupChecklist.length) * 100);
   const rangeLabel = dashboardRange === "today" ? "hoy" : dashboardRange === "7d" ? "ultimos 7 dias" : dashboardRange === "30d" ? "ultimos 30 dias" : "todo el historial";
+  const rangeDates = rangeReservations.map((reservation) => reservation.fecha ?? "").filter(Boolean).sort();
+  const dashboardStartKey = rangeStartKey || rangeDates[0] || todayKey;
+  const dashboardEndKey = rangeDates.at(-1) && rangeDates.at(-1)! > todayKey ? rangeDates.at(-1)! : todayKey;
+  const bookedMinutes = rangeReservations.reduce((total, reservation) => total + reservationDuration(reservation, activeServices, schedule.intervaloMin), 0);
+  const availableMinutes = estimateAvailableMinutes(schedule, dashboardStartKey, dashboardEndKey);
+  const occupancyRate = availableMinutes ? Math.min(100, Math.round((bookedMinutes / availableMinutes) * 100)) : 0;
+  const cancellationRate = reservations.length ? Math.round((cancelledReservations.length / reservations.length) * 100) : 0;
+  const noShowRate = completedTotal ? Math.round((noShowReservations.length / completedTotal) * 100) : 0;
+  const clientFirstDate = new Map<string, string>();
+  confirmedReservations.forEach((reservation) => {
+    const phone = normalizePhone(reservation.telefono ?? "");
+    if (!phone || !reservation.fecha) return;
+    const current = clientFirstDate.get(phone);
+    if (!current || reservation.fecha < current) clientFirstDate.set(phone, reservation.fecha);
+  });
+  const rangeClientPhones = Array.from(new Set(rangeReservations.map((reservation) => normalizePhone(reservation.telefono ?? "")).filter(Boolean)));
+  const newClients = rangeClientPhones.filter((phone) => {
+    const firstDate = clientFirstDate.get(phone);
+    return firstDate && firstDate >= dashboardStartKey;
+  }).length;
+  const returningClients = Math.max(0, rangeClientPhones.length - newClients);
   const dashboardHealth = pendingSetup.length
     ? { label: "Necesita configuracion", text: `${pendingSetup.length} pendiente${pendingSetup.length === 1 ? "" : "s"} antes de vender con tranquilidad.`, tone: "warning" as const }
     : nextReservation
@@ -729,6 +843,23 @@ export function PanelDashboard() {
     : upcomingReservations.length
       ? "Proximo paso: revisar y confirmar los turnos cercanos."
       : "Proximo paso: compartir el link publico y generar las primeras reservas.";
+  const commercialInsights = [
+    rangeReservations.length
+      ? `Tu servicio mas reservado en ${rangeLabel} fue ${topService.name}.`
+      : "Todavia no hay reservas en este rango para detectar servicios ganadores.",
+    topHour.count
+      ? `El horario con mas demanda es ${topHour.name}, con ${topHour.count} turno${topHour.count === 1 ? "" : "s"}.`
+      : "Cuando entren reservas, aca vas a ver tus horarios mas fuertes.",
+    topWeekDay.count
+      ? `${topWeekDay.name} concentra la mayor actividad del rango.`
+      : "Los dias fuertes se calculan automaticamente con las reservas.",
+    returningClients
+      ? `${returningClients} cliente${returningClients === 1 ? "" : "s"} del rango ya tenia historial previo.`
+      : "Todavia no aparecen clientes recurrentes en este rango.",
+    cancellationRate > 20
+      ? `La tasa de cancelacion esta en ${cancellationRate}%. Conviene revisar recordatorios o confirmacion previa.`
+      : `La cancelacion general esta en ${cancellationRate}%.`
+  ];
 
   function showSuccess(text: string) {
     setError("");
@@ -855,6 +986,14 @@ export function PanelDashboard() {
     const activeReportReservations = reportReservations.filter((reservation) => reservation.estado !== "cancelada");
     const cancelledReportReservations = reportReservations.filter((reservation) => reservation.estado === "cancelada");
     const revenue = activeReportReservations.reduce((total, reservation) => total + (typeof reservation.precio === "number" ? reservation.precio : 0), 0);
+    const reportTopService = topBy(activeReportReservations, "servicioNombre");
+    const reportTopStaff = topBy(activeReportReservations, "personalNombre");
+    const reportTopBranch = topBy(activeReportReservations, "sucursalNombre");
+    const reportTopHour = topByComputed(activeReportReservations, hourLabelFromReservation);
+    const reportTopDay = topByComputed(activeReportReservations, (reservation) => dayKeyFromDateKey(reservation.fecha));
+    const reportClients = uniqueClientReport(activeReportReservations);
+    const reportCompletedTotal = activeReportReservations.filter((reservation) => reservation.estado === "atendida" || reservation.estado === "ausente").length;
+    const reportNoShows = activeReportReservations.filter((reservation) => reservation.estado === "ausente").length;
 
     setSaving("report");
     setError("");
@@ -875,6 +1014,13 @@ export function PanelDashboard() {
           ["Facturacion estimada", revenue],
           ["Ticket promedio", activeReportReservations.length ? Math.round(revenue / activeReportReservations.length) : 0],
           ["Clientes unicos", uniqueClientReport(activeReportReservations).length],
+          ["Clientes recurrentes", reportClients.filter((client) => client.count > 1).length],
+          ["Servicio ganador", reportTopService.name],
+          ["Profesional ganador", reportTopStaff.name],
+          ["Sucursal ganadora", reportTopBranch.name],
+          ["Horario pico", reportTopHour.name],
+          ["Dia fuerte", reportTopDay.name],
+          ["Tasa de ausentes", reportCompletedTotal ? `${Math.round((reportNoShows / reportCompletedTotal) * 100)}%` : "Sin datos"],
           ["Servicios activos", activeServices.length],
           ["Personal activo", activeStaff.length],
           ["Sucursales activas", activeBranches.length],
@@ -900,7 +1046,17 @@ export function PanelDashboard() {
         xmlSheet("Personal ganador", ["Nombre", "Turnos", "Facturacion"], groupReport(activeReportReservations, "personalNombre").map((item) => [item.name, item.count, item.revenue])),
         xmlSheet("Sucursales ganadoras", ["Nombre", "Turnos", "Facturacion"], groupReport(activeReportReservations, "sucursalNombre").map((item) => [item.name, item.count, item.revenue])),
         xmlSheet("Clientes", ["Cliente", "Telefono", "Turnos", "Facturacion", "Ultimo turno"], uniqueClientReport(activeReportReservations).map((item) => [item.name, item.phone, item.count, item.revenue, item.lastDate])),
-        xmlSheet("Turnos por dia", ["Fecha", "Turnos"], groupReservationsByDate(activeReportReservations, 999).map((item) => [item.name, item.count]))
+        xmlSheet("Clientes recurrentes", ["Cliente", "Telefono", "Turnos", "Facturacion", "Ultimo turno"], reportClients.filter((item) => item.count > 1).map((item) => [item.name, item.phone, item.count, item.revenue, item.lastDate])),
+        xmlSheet("Horarios pico", ["Horario", "Turnos", "Facturacion"], groupReportComputed(activeReportReservations, hourLabelFromReservation).map((item) => [item.name, item.count, item.revenue])),
+        xmlSheet("Dias fuertes", ["Dia", "Turnos", "Facturacion"], groupReportComputed(activeReportReservations, (reservation) => dayKeyFromDateKey(reservation.fecha)).map((item) => [item.name, item.count, item.revenue])),
+        xmlSheet("Turnos por dia", ["Fecha", "Turnos"], groupReservationsByDate(activeReportReservations, 999).map((item) => [item.name, item.count])),
+        xmlSheet("Insights", ["Lectura", "Valor"], [
+          ["Servicio mas reservado", `${reportTopService.name} (${reportTopService.count})`],
+          ["Profesional con mas turnos", `${reportTopStaff.name} (${reportTopStaff.count})`],
+          ["Sucursal con mas reservas", `${reportTopBranch.name} (${reportTopBranch.count})`],
+          ["Horario con mas demanda", `${reportTopHour.name} (${reportTopHour.count})`],
+          ["Dia con mas demanda", `${reportTopDay.name} (${reportTopDay.count})`]
+        ])
       ];
       const workbook = `<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
@@ -1340,11 +1496,95 @@ export function PanelDashboard() {
             <PanelMetricCard helper={`Reservas no canceladas en ${rangeLabel}.`} icon={<CalendarCheck size={19} />} label="Turnos del rango" tone="strong" value={rangeReservations.length} />
             <PanelMetricCard helper="Estimado por precio de los servicios reservados." icon={<TrendingUp size={19} />} label="Facturacion estimada" value={formatCurrency(rangeRevenue)} />
             <PanelMetricCard helper="Promedio por turno dentro del rango elegido." icon={<FileSpreadsheet size={19} />} label="Ticket promedio" value={formatCurrency(averageTicket)} />
+            <PanelMetricCard helper="Horas reservadas contra horas disponibles configuradas." icon={<Gauge size={19} />} label="Ocupacion estimada" tone={occupancyRate >= 70 ? "strong" : "default"} value={availableMinutes ? `${occupancyRate}%` : "Sin datos"} />
             <PanelMetricCard helper={completedTotal ? "Calculado con turnos atendidos o ausentes." : "Marca turnos como atendidos/ausentes para medir."} icon={<CheckCircle2 size={19} />} label="Asistencia" value={completedTotal ? `${attendanceRate}%` : "Sin datos"} />
+            <PanelMetricCard helper="Clientes del rango con mas de una reserva registrada." icon={<Users size={19} />} label="Clientes recurrentes" value={recurringClients.length} />
+            <PanelMetricCard helper="Clientes que aparecen por primera vez en el rango elegido." icon={<Users size={19} />} label="Clientes nuevos" value={newClients} />
+            <PanelMetricCard helper="Clientes del rango con historial previo." icon={<Users size={19} />} label="Clientes que vuelven" value={returningClients} />
+            <PanelMetricCard helper="Cancelados sobre el total de turnos cargados." icon={<AlertTriangle size={19} />} label="Cancelacion" tone={cancellationRate > 20 ? "warning" : "default"} value={`${cancellationRate}%`} />
+            <PanelMetricCard helper="Ausentes sobre turnos marcados como atendidos o ausentes." icon={<Clock3 size={19} />} label="Ausentes" tone={noShowRate > 15 ? "warning" : "default"} value={completedTotal ? `${noShowRate}%` : "Sin datos"} />
             <PanelMetricCard helper="Turnos confirmados para el dia actual." icon={<Clock3 size={19} />} label="Turnos de hoy" value={todayReservations.length} />
             <PanelMetricCard helper="Turnos confirmados entre hoy y los proximos 7 dias." icon={<CalendarCheck size={19} />} label="Proximos 7 dias" value={nextSevenDaysReservations.length} />
             <PanelMetricCard helper="Telefonos unicos en reservas no canceladas." icon={<Users size={19} />} label="Clientes unicos" value={uniqueClients} />
             <PanelMetricCard helper={billingDaysLeft === null ? "Cargalo desde Super Admin." : billingDaysLeft < 0 ? "Vencido, revisar cobro." : `${billingDaysLeft} dias restantes.`} icon={<Clock3 size={19} />} label="Proximo cobro" tone={billingDaysLeft !== null && billingDaysLeft <= 3 ? "warning" : "default"} value={formatDateKey(business.nextPaymentDue)} />
+          </div>
+
+          <section className="rounded-[1.5rem] border border-teal/10 bg-teal p-5 text-cream shadow-soft sm:p-6">
+            <div className="flex items-start gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold text-teal">
+                <Lightbulb size={21} />
+              </span>
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-gold">Lecturas accionables</p>
+                <h2 className="mt-1 font-display text-2xl font-extrabold">Lo importante sin abrir una planilla</h2>
+                <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-cream/72">Estas lecturas se actualizan con los turnos del rango elegido y ayudan a decidir que promocionar, que horario reforzar y que clientes cuidar.</p>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-3 lg:grid-cols-5">
+              {commercialInsights.map((insight) => (
+                <p className="rounded-2xl bg-cream/10 p-4 text-sm font-bold leading-6 text-cream/86" key={insight}>
+                  {insight}
+                </p>
+              ))}
+            </div>
+          </section>
+
+          <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
+            <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+              <h2 className="font-display text-2xl font-extrabold text-teal">Horarios y dias fuertes</h2>
+              <p className="mt-2 text-sm font-semibold text-ink/55">Para saber cuando se llena mas la agenda y cuando conviene mover promociones.</p>
+              <div className="mt-5 grid gap-5 md:grid-cols-2">
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-ink/45">Horarios pico</p>
+                  <div className="mt-3 grid gap-3">
+                    {topHours.length ? topHours.map((item) => (
+                      <div className="grid gap-2" key={item.name}>
+                        <div className="flex items-center justify-between text-sm font-bold text-ink/62">
+                          <span>{item.name}</span>
+                          <span>{item.count}</span>
+                        </div>
+                        <div className="h-3 overflow-hidden rounded-full bg-cream">
+                          <div className="h-full rounded-full bg-action" style={{ width: `${Math.max(8, (item.count / Math.max(1, topHours[0]?.count ?? 1)) * 100)}%` }} />
+                        </div>
+                      </div>
+                    )) : <p className="rounded-2xl bg-cream p-4 text-sm font-semibold text-ink/65">Todavia no hay horarios suficientes para comparar.</p>}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-ink/45">Dias con mas movimiento</p>
+                  <div className="mt-3 grid gap-3">
+                    {topWeekDays.length ? topWeekDays.map((item) => (
+                      <div className="grid gap-2" key={item.name}>
+                        <div className="flex items-center justify-between text-sm font-bold text-ink/62">
+                          <span>{item.name}</span>
+                          <span>{item.count}</span>
+                        </div>
+                        <div className="h-3 overflow-hidden rounded-full bg-cream">
+                          <div className="h-full rounded-full bg-teal" style={{ width: `${Math.max(8, (item.count / Math.max(1, topWeekDays[0]?.count ?? 1)) * 100)}%` }} />
+                        </div>
+                      </div>
+                    )) : <p className="rounded-2xl bg-cream p-4 text-sm font-semibold text-ink/65">Todavia no hay dias fuertes detectados.</p>}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-soft">
+              <h2 className="font-display text-2xl font-extrabold text-teal">Clientes frecuentes</h2>
+              <p className="mt-2 text-sm font-semibold text-ink/55">Ranking para detectar a quienes vuelven y tenerlos mas presentes.</p>
+              <div className="mt-5 grid gap-3">
+                {topClients.length ? topClients.map((client, index) => (
+                  <article className="grid gap-2 rounded-2xl bg-cream p-4 sm:grid-cols-[auto_1fr_auto] sm:items-center" key={client.phone}>
+                    <span className="grid h-9 w-9 place-items-center rounded-full bg-mint text-sm font-extrabold text-teal">{index + 1}</span>
+                    <div>
+                      <p className="font-extrabold text-teal">{client.name}</p>
+                      <p className="text-sm font-semibold text-ink/55">{client.phone || "Sin telefono"} - ultimo {formatDateKey(client.lastDate)}</p>
+                    </div>
+                    <span className="rounded-full bg-paper px-3 py-2 text-xs font-extrabold text-teal">{client.count} turnos</span>
+                  </article>
+                )) : <p className="rounded-2xl bg-cream p-4 font-semibold text-ink/65">Todavia no hay clientes frecuentes en este rango.</p>}
+              </div>
+            </section>
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
@@ -1450,7 +1690,7 @@ export function PanelDashboard() {
               <div>
                 <h2 className="font-display text-2xl font-extrabold text-teal">Reporte profesional</h2>
                 <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-ink/60">
-                  Exporta un Excel con resumen economico, turnos, servicios ganadores, personal, sucursales, clientes y turnos por dia.
+                  Exporta un Excel con resumen economico, turnos, rankings, clientes recurrentes, horarios pico, dias fuertes e insights comerciales.
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-[150px_150px_auto]">

@@ -8,6 +8,7 @@ import {
   agendaSimpleFeatures,
   agendaFullHighlights,
   benefits,
+  commercialDashboard,
   comparisonRows,
   conversionProof,
   credibilityNotes,
@@ -499,6 +500,55 @@ export function Benefits() {
             <p className="mt-4 font-display text-xl font-extrabold text-teal">{label}</p>
           </motion.div>
         ))}
+      </div>
+      <div className="mt-8">
+        <VideoDemo />
+      </div>
+    </Section>
+  );
+}
+
+export function CommercialDashboardSection() {
+  return (
+    <Section eyebrow={commercialDashboard.eyebrow} text={commercialDashboard.text} title={commercialDashboard.title} tone="mint">
+      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+        <motion.div className="rounded-[1.75rem] border border-ink/10 bg-teal p-5 text-cream shadow-soft sm:p-7" {...reveal}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-gold">Panel del negocio</p>
+              <h3 className="mt-2 font-display text-3xl font-extrabold">Vista comercial</h3>
+            </div>
+            <span className="rounded-full bg-cream/10 px-3 py-2 text-xs font-extrabold text-cream/75">Ejemplo</span>
+          </div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {commercialDashboard.metrics.map(([label, value]) => (
+              <article className="rounded-2xl bg-cream p-4 text-teal" key={label}>
+                <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-teal/55">{label}</p>
+                <p className="mt-2 font-display text-3xl font-extrabold">{value}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-5 rounded-2xl bg-cream/10 p-4">
+            <p className="text-sm font-extrabold text-gold">Lecturas accionables</p>
+            <div className="mt-3 grid gap-2">
+              {commercialDashboard.insights.map((insight) => (
+                <p className="rounded-xl bg-cream/10 px-3 py-2 text-sm font-semibold leading-6 text-cream/82" key={insight}>
+                  {insight}
+                </p>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {commercialDashboard.highlights.map(([title, text, Icon]) => (
+            <motion.article className="rounded-[1.5rem] border border-ink/10 bg-paper p-6 shadow-soft" key={title} {...reveal}>
+              <Icon className="text-action" size={28} />
+              <h3 className="mt-4 font-display text-2xl font-extrabold text-teal">{title}</h3>
+              <p className="mt-3 text-sm font-semibold leading-6 text-ink/64">{text}</p>
+            </motion.article>
+          ))}
+        </div>
       </div>
       <div className="mt-8">
         <VideoDemo />

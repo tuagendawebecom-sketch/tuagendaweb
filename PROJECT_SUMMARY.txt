@@ -1521,6 +1521,58 @@ Nota sobre warnings de Vercel:
 - Los avisos de `uuid`, `source-map` y `node-domexception` vienen de dependencias transitivas de Firebase Admin, Google SDKs y Remotion, no de codigo directo del proyecto.
 - No se forzo un override riesgoso porque podria romper SDKs oficiales. Se mantiene monitoreo al actualizar Firebase/Remotion.
 
+Dashboard comercial avanzado - 2026-05-30
+
+Objetivo:
+- Convertir el panel del cliente en un diferencial vendible, no solo en una lista de turnos.
+- Mostrar datos simples que un negocio local pueda entender desde el celular.
+- Reflejar esta mejora tambien en la home publica de TuAgendaWeb sin agregar otra seccion redundante.
+
+Que se implemento:
+1. La home reemplaza la seccion generica de beneficios por una seccion de "Dashboard comercial".
+2. La nueva seccion publica muestra una vista tipo panel con turnos, facturacion estimada, ocupacion y clientes recurrentes.
+3. La home comunica que TuAgendaWeb tambien ayuda a entender el negocio, no solo a recibir reservas.
+4. Agenda Full ahora se describe como agenda con dashboard comercial.
+5. "Reportes avanzados" pasa de proximamente a disponible dentro de extras.
+6. "Dashboard basico" pasa a "Dashboard comercial" en lo incluido.
+7. El panel cliente agrega ocupacion estimada.
+8. El panel cliente agrega clientes nuevos.
+9. El panel cliente agrega clientes que vuelven.
+10. El panel cliente agrega clientes recurrentes del rango.
+11. El panel cliente agrega tasa de cancelacion.
+12. El panel cliente agrega tasa de ausentes.
+13. El panel cliente muestra lecturas accionables en texto simple.
+14. Las lecturas detectan servicio mas reservado.
+15. Las lecturas detectan horario con mas demanda.
+16. Las lecturas detectan dia fuerte.
+17. Las lecturas detectan clientes con historial previo.
+18. Las lecturas advierten si la cancelacion es alta.
+19. El panel agrega bloque de horarios pico con barras visuales.
+20. El panel agrega bloque de dias con mas movimiento.
+21. El panel agrega ranking de clientes frecuentes.
+22. El reporte Excel agrega clientes recurrentes.
+23. El reporte Excel agrega horarios pico.
+24. El reporte Excel agrega dias fuertes.
+25. El reporte Excel agrega una hoja de insights.
+26. El resumen del Excel agrega servicio ganador.
+27. El resumen del Excel agrega profesional ganador.
+28. El resumen del Excel agrega sucursal ganadora.
+29. El resumen del Excel agrega horario pico.
+30. El resumen del Excel agrega dia fuerte.
+31. El resumen del Excel agrega tasa de ausentes.
+32. El smoke test verifica que la home muestre "Dashboard comercial".
+
+Como vender esta mejora:
+- "No solo recibis turnos online: tambien ves que servicio se reserva mas, que horarios se llenan, que clientes vuelven y cuanto esta generando tu agenda."
+- "El panel te ayuda a tomar decisiones sin depender de planillas."
+- "Podes exportar reportes por fechas para revisar servicios, profesionales, sucursales, clientes y horarios pico."
+
+Validacion:
+- npm run lint: OK.
+- npm run build: OK.
+- npm run test:smoke en localhost:3001: OK.
+- Smoke check OK: 10 rutas x 5 viewports.
+
 Tanda de 50 mejoras - 2026-05-29
 
 Objetivo:
